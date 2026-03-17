@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge &mdash; ge 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge/__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge/analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge/context.html">ge.context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge/github.html">ge.github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge/media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../module_docs/ge/util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ge</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ge</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;ge: GitHub Engineering tools for AI agents.</span>
+
+<span class="sd">Reduces boilerplate when working on GitHub issues and PRs with AI coding agents.</span>
+<span class="sd">Fetches context, downloads media, checks freshness, and assembles everything</span>
+<span class="sd">into a structured document the agent can consume.</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    import ge</span>
+
+<span class="sd">    # Prepare full context for an issue</span>
+<span class="sd">    ctx = ge.prepare_issue(&#39;owner/repo&#39;, 42)</span>
+
+<span class="sd">    # Prepare full context for a PR</span>
+<span class="sd">    ctx = ge.prepare_pr(&#39;owner/repo&#39;, 7)</span>
+
+<span class="sd">    # Or from a full URL</span>
+<span class="sd">    ctx = ge.prepare(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">_Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_issue</span><span class="p">,</span> <span class="n">prepare_pr</span><span class="p">,</span> <span class="n">prepare_discussion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">analyze_issue</span><span class="p">,</span> <span class="n">analyze_pr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.github</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_issue</span><span class="p">,</span>
+    <span class="n">get_pr</span><span class="p">,</span>
+    <span class="n">get_comments</span><span class="p">,</span>
+    <span class="n">get_pr_diff</span><span class="p">,</span>
+    <span class="n">get_discussion</span><span class="p">,</span>
+    <span class="n">find_related_prs</span><span class="p">,</span>
+    <span class="n">find_related_commits</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_all_media</span><span class="p">,</span> <span class="n">extract_video_frames</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_github_url</span>
+
+
+<div class="viewcode-block" id="prepare">
+<a class="viewcode-back" href="../module_docs/ge.html#ge.prepare">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="n">url_or_spec</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s1">&#39;.ge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare context from a GitHub URL or repo+number.</span>
+
+<span class="sd">    Automatically detects whether it&#39;s an issue, PR, or discussion.</span>
+
+<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare(&#39;owner/repo&#39;, 42)</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare(&#39;https://github.com/owner/repo/discussions/5&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Parse from URL</span>
+        <span class="n">owner</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">kind</span> <span class="o">=</span> <span class="n">parse_github_url</span><span class="p">(</span><span class="n">url_or_spec</span><span class="p">)</span>
+        <span class="n">repo_spec</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">repo_spec</span> <span class="o">=</span> <span class="n">url_or_spec</span>
+        <span class="c1"># Probe whether it&#39;s a PR or issue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">get_pr</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;pr&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;issue&#39;</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;pr&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">prepare_pr</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;discussion&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">prepare_discussion</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">prepare_issue</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="n">_SKILLS_DIR</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;skills&#39;</span>
+
+
+<div class="viewcode-block" id="install_skills">
+<a class="viewcode-back" href="../module_docs/ge.html#ge.install_skills">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Symlink ge skills into ~/.claude/skills/ for global discovery.</span>
+
+<span class="sd">    Creates symlinks from ``target_dir/&lt;skill&gt;`` to the skill folders bundled</span>
+<span class="sd">    with the ge package.  Existing correct symlinks are left alone; a warning</span>
+<span class="sd">    is printed if a symlink points elsewhere.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        target_dir: Destination directory.  Defaults to ``~/.claude/skills/``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">target_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;.claude&#39;</span> <span class="o">/</span> <span class="s1">&#39;skills&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="n">target_dir</span><span class="p">)</span>
+
+    <span class="n">target_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_SKILLS_DIR</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (already installed)&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;  ⚠ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: symlink exists but points to &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">, expected </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">. Skipping.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;  ⚠ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s2"> already exists and is not a &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;symlink. Skipping.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">link</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Skills installed to </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="uninstall_skills">
+<a class="viewcode-back" href="../module_docs/ge.html#ge.uninstall_skills">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">uninstall_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove ge skill symlinks from ~/.claude/skills/.</span>
+
+<span class="sd">    Only removes symlinks that point back into the ge package&#39;s skill</span>
+<span class="sd">    directory.  Non-symlinks and symlinks owned by other packages are</span>
+<span class="sd">    left untouched.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        target_dir: Directory to remove from.  Defaults to ``~/.claude/skills/``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">target_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;.claude&#39;</span> <span class="o">/</span> <span class="s1">&#39;skills&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="n">target_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing to uninstall (target directory does not exist).&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">removed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_SKILLS_DIR</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">and</span> <span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">():</span>
+            <span class="n">link</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ Removed </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">removed</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;  · Skipped </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (symlink points to &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">, not owned by ge)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  · Skipped </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (not a symlink, not owned by ge)&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">removed</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">removed</span><span class="si">}</span><span class="s2"> skill(s) uninstalled from </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No ge skills found to uninstall.&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;prepare&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;prepare_issue&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;prepare_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;prepare_discussion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;analyze_issue&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;analyze_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_issue&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_comments&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_pr_diff&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_discussion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;find_related_prs&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;find_related_commits&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;process_all_media&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;extract_video_frames&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;install_skills&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;uninstall_skills&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

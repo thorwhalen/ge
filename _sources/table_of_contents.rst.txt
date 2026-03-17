@@ -1,0 +1,11 @@
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   module_docs/ge
+   module_docs/ge/__main__
+   module_docs/ge/analysis
+   module_docs/ge/context
+   module_docs/ge/github
+   module_docs/ge/media
+   module_docs/ge/util

@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge.github &mdash; ge 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ge.media" href="media.html" />
+    <link rel="prev" title="ge.context" href="context.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">ge.context</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ge.github</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.find_related_commits"><code class="docutils literal notranslate"><span class="pre">find_related_commits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.find_related_prs"><code class="docutils literal notranslate"><span class="pre">find_related_prs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_comments"><code class="docutils literal notranslate"><span class="pre">get_comments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_commit_status"><code class="docutils literal notranslate"><span class="pre">get_commit_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_default_branch"><code class="docutils literal notranslate"><span class="pre">get_default_branch()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_discussion"><code class="docutils literal notranslate"><span class="pre">get_discussion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_file_at_ref"><code class="docutils literal notranslate"><span class="pre">get_file_at_ref()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_issue"><code class="docutils literal notranslate"><span class="pre">get_issue()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_pr"><code class="docutils literal notranslate"><span class="pre">get_pr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_pr_diff"><code class="docutils literal notranslate"><span class="pre">get_pr_diff()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_pr_files"><code class="docutils literal notranslate"><span class="pre">get_pr_files()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_review_comments"><code class="docutils literal notranslate"><span class="pre">get_review_comments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_reviews"><code class="docutils literal notranslate"><span class="pre">get_reviews()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.github.get_timeline"><code class="docutils literal notranslate"><span class="pre">get_timeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ge.github</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/ge/github.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ge.github">
+<span id="ge-github"></span><h1>ge.github<a class="headerlink" href="#module-ge.github" title="Link to this heading"></a></h1>
+<p>GitHub data fetching via gh CLI.</p>
+<p>Provides functions to retrieve issues, PRs, comments, timeline events,
+related commits, and referenced code – all through the gh CLI so that
+private repo access is handled by the user’s existing gh auth.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.find_related_commits">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">find_related_commits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#find_related_commits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.find_related_commits" title="Link to this definition"></a></dt>
+<dd><p>Find recent commits that reference this issue number.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># commits = find_related_commits(&#39;owner/repo&#39;, 42)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.find_related_prs">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">find_related_prs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#find_related_prs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.find_related_prs" title="Link to this definition"></a></dt>
+<dd><p>Find PRs that reference or close this issue.</p>
+<p>Uses the timeline API to find cross-referenced PRs, and also searches
+for PRs mentioning the issue number.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># prs = find_related_prs(&#39;owner/repo&#39;, 42)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_comments">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_comments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_comments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_comments" title="Link to this definition"></a></dt>
+<dd><p>Fetch all comments on an issue or PR.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># comments = get_comments(&#39;owner/repo&#39;, 42)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_commit_status">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_commit_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_commit_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_commit_status" title="Link to this definition"></a></dt>
+<dd><p>Fetch the combined commit status (CI checks) for a git ref.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># status = get_commit_status(&#39;owner/repo&#39;, &#39;abc123&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_default_branch">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_default_branch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_default_branch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_default_branch" title="Link to this definition"></a></dt>
+<dd><p>Get the default branch name for a repo.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># branch = get_default_branch(&#39;owner/repo&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_discussion">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_discussion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_discussion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_discussion" title="Link to this definition"></a></dt>
+<dd><p>Fetch a GitHub Discussion via GraphQL (discussions aren’t in REST API).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># disc = get_discussion(&#39;owner/repo&#39;, 5)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_file_at_ref">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_file_at_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HEAD'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_file_at_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_file_at_ref" title="Link to this definition"></a></dt>
+<dd><p>Fetch a file’s content at a specific git ref (branch, tag, sha).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># content = get_file_at_ref(&#39;owner/repo&#39;, &#39;src/main.py&#39;, ref=&#39;main&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_issue">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_issue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_issue" title="Link to this definition"></a></dt>
+<dd><p>Fetch a GitHub issue with body, labels, assignees, state, etc.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># issue = get_issue(&#39;owner/repo&#39;, 42)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_pr">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_pr" title="Link to this definition"></a></dt>
+<dd><p>Fetch a GitHub pull request with body, diff stats, merge state, etc.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># pr = get_pr(&#39;owner/repo&#39;, 7)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_pr_diff">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_pr_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_pr_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_pr_diff" title="Link to this definition"></a></dt>
+<dd><p>Fetch the raw diff of a PR.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># diff = get_pr_diff(&#39;owner/repo&#39;, 7)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_pr_files">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_pr_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_pr_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_pr_files" title="Link to this definition"></a></dt>
+<dd><p>Fetch the list of files changed in a PR.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># files = get_pr_files(&#39;owner/repo&#39;, 7)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_review_comments">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_review_comments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_review_comments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_review_comments" title="Link to this definition"></a></dt>
+<dd><p>Fetch inline review comments on a PR (code-level comments).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># review_comments = get_review_comments(&#39;owner/repo&#39;, 7)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_reviews">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_reviews</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_reviews"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_reviews" title="Link to this definition"></a></dt>
+<dd><p>Fetch PR reviews (approved, changes requested, etc.).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># reviews = get_reviews(&#39;owner/repo&#39;, 7)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.github.get_timeline">
+<span class="sig-prename descclassname"><span class="pre">ge.github.</span></span><span class="sig-name descname"><span class="pre">get_timeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/github.html#get_timeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.github.get_timeline" title="Link to this definition"></a></dt>
+<dd><p>Fetch the issue/PR timeline (events: referenced, closed, labeled, …).</p>
+<p>This gives us cross-references, commits that mention the issue, etc.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># events = get_timeline(&#39;owner/repo&#39;, 42)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="context.html" class="btn btn-neutral float-left" title="ge.context" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="media.html" class="btn btn-neutral float-right" title="ge.media" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

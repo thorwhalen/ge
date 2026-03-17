@@ -1,0 +1,390 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge.media &mdash; ge 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/context.html">ge.context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/github.html">ge.github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../ge.html">ge</a></li>
+      <li class="breadcrumb-item active">ge.media</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ge.media</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Media download and video frame extraction.</span>
+
+<span class="sd">Downloads images and videos from GitHub issues/PRs, handling private repo</span>
+<span class="sd">auth via gh token. Extracts representative frames from videos using ffmpeg.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">extract_media_urls</span><span class="p">,</span>
+    <span class="n">rewrite_media_refs</span><span class="p">,</span>
+    <span class="n">gh_auth_token</span><span class="p">,</span>
+    <span class="n">ensure_dir</span><span class="p">,</span>
+    <span class="n">check_ffmpeg</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sanitize_filename</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a safe filename from a URL, preserving extension.</span>
+
+<span class="sd">    &gt;&gt;&gt; _sanitize_filename(&#39;https://github.com/user/repo/assets/123/screenshot.png&#39;)</span>
+<span class="sd">    &#39;screenshot.png&#39;</span>
+<span class="sd">    &gt;&gt;&gt; _sanitize_filename(&#39;https://example.com/img?v=2&#39;)</span>
+<span class="sd">    &#39;img&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Strip query params</span>
+    <span class="n">clean</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">clean</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Remove unsafe chars</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^\w.\-]&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;unnamed&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download a file, using gh auth token for GitHub URLs.</span>
+
+<span class="sd">    Returns True on success, False on failure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;github&#39;</span> <span class="ow">in</span> <span class="n">url</span> <span class="ow">or</span> <span class="s1">&#39;githubusercontent&#39;</span> <span class="ow">in</span> <span class="n">url</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">gh_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-H&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Authorization: token </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># Try without auth</span>
+
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;curl&#39;</span><span class="p">,</span> <span class="s1">&#39;-sL&#39;</span><span class="p">,</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest_path</span><span class="p">),</span> <span class="s1">&#39;--max-time&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">headers</span> <span class="o">+</span> <span class="p">[</span><span class="n">url</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Verify we got something real (not an HTML error page for small files)</span>
+    <span class="k">if</span> <span class="n">dest_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dest_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="download_media">
+<a class="viewcode-back" href="../../module_docs/ge/media.html#ge.download_media">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_media</span><span class="p">(</span>
+    <span class="n">markdown</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s1">&#39;.ge/media&#39;</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">download_images</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">download_videos</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download all media referenced in markdown to a local directory.</span>
+
+<span class="sd">    Returns a dict with:</span>
+<span class="sd">      - url_map: {original_url: local_path} for successful downloads</span>
+<span class="sd">      - manifest: list of dicts with url, local_path, kind, alt, status</span>
+<span class="sd">      - rewritten_markdown: markdown with URLs replaced by local paths</span>
+
+<span class="sd">    &gt;&gt;&gt; # result = download_media(&#39;![img](https://example.com/a.png)&#39;, &#39;/tmp/media&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="n">extract_media_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+
+    <span class="n">url_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Deduplicate filenames</span>
+    <span class="n">used_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">media</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;image&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">download_images</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;video&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">download_videos</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_sanitize_filename</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="c1"># Ensure unique filename</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">used_names</span><span class="p">:</span>
+            <span class="n">stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">counter</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">used_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">dest</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">_download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+            <span class="s1">&#39;local_path&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;alt&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;alt&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;ok&#39;</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="s1">&#39;failed&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">manifest</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="n">url_map</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+
+    <span class="n">rewritten</span> <span class="o">=</span> <span class="n">rewrite_media_refs</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">url_map</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;url_map&#39;</span><span class="p">:</span> <span class="n">url_map</span><span class="p">,</span>
+        <span class="s1">&#39;manifest&#39;</span><span class="p">:</span> <span class="n">manifest</span><span class="p">,</span>
+        <span class="s1">&#39;rewritten_markdown&#39;</span><span class="p">:</span> <span class="n">rewritten</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="extract_video_frames">
+<a class="viewcode-back" href="../../module_docs/ge/media.html#ge.extract_video_frames">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_video_frames</span><span class="p">(</span>
+    <span class="n">video_path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">n_frames</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;scene&#39;</span><span class="p">,</span>
+    <span class="n">scene_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract representative frames from a video file using ffmpeg.</span>
+
+<span class="sd">    Two modes are available:</span>
+
+<span class="sd">    - ``mode=&#39;scene&#39;`` (default): Uses ffmpeg&#39;s scene change detection filter</span>
+<span class="sd">      to extract frames where visual content actually changes. Better for bug</span>
+<span class="sd">      reproduction videos where you want one frame per distinct UI state.</span>
+<span class="sd">      ``scene_threshold`` controls sensitivity (0.0–1.0, lower = more frames).</span>
+<span class="sd">      Falls back to &#39;uniform&#39; if scene detection yields no frames.</span>
+
+<span class="sd">    - ``mode=&#39;uniform&#39;``: Extracts ``n_frames`` evenly-spaced frames.</span>
+
+<span class="sd">    Returns list of paths to extracted frame images (JPEG).</span>
+
+<span class="sd">    &gt;&gt;&gt; # frames = extract_video_frames(&#39;.ge/media/demo.mp4&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; # frames = extract_video_frames(&#39;.ge/media/demo.mp4&#39;, mode=&#39;uniform&#39;, n_frames=5)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_ffmpeg</span><span class="p">()</span>
+    <span class="n">video_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">video_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Video not found: </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">video_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">video_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s1">_frames&#39;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;scene&#39;</span><span class="p">:</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="n">_extract_scene_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">scene_threshold</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">frames</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">frames</span>
+        <span class="c1"># Fall back to uniform if scene detection found nothing</span>
+
+    <span class="k">return</span> <span class="n">_extract_uniform_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_scene_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract frames at scene changes using ffmpeg&#39;s scene filter.</span>
+
+<span class="sd">    Uses ``-vf &quot;select=gt(scene\\,THRESHOLD)&quot;`` to pick frames where the</span>
+<span class="sd">    visual content changes significantly. This is zero extra dependency</span>
+<span class="sd">    beyond ffmpeg itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;scene_</span><span class="si">%03d</span><span class="s1">.jpg&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s1">&#39;ffmpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;-y&#39;</span><span class="p">,</span> <span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">video_path</span><span class="p">),</span>
+            <span class="s1">&#39;-vf&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;select=gt(scene</span><span class="se">\\</span><span class="s2">,</span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;-vsync&#39;</span><span class="p">,</span> <span class="s1">&#39;vfr&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;-q:v&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>
+            <span class="n">pattern</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># Collect generated frames</span>
+    <span class="n">frame_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;scene_*.jpg&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">frame_paths</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_uniform_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">n_frames</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract n evenly-spaced frames from a video.&quot;&quot;&quot;</span>
+    <span class="c1"># Get video duration</span>
+    <span class="n">probe</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;ffprobe&#39;</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;-show_entries&#39;</span><span class="p">,</span> <span class="s1">&#39;format=duration&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;-of&#39;</span><span class="p">,</span> <span class="s1">&#39;csv=p=0&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">video_path</span><span class="p">)],</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">probe</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="mf">10.0</span>  <span class="c1"># fallback</span>
+
+    <span class="k">if</span> <span class="n">n_frames</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">duration</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">duration</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_frames</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_frames</span><span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="n">frame_paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+        <span class="n">frame_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;frame_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">ts</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s.jpg&quot;</span>
+        <span class="n">frame_path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">frame_name</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="s1">&#39;ffmpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;-y&#39;</span><span class="p">,</span> <span class="s1">&#39;-ss&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">video_path</span><span class="p">),</span>
+             <span class="s1">&#39;-frames:v&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;-q:v&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">frame_path</span><span class="p">)],</span>
+            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">frame_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">frame_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">frame_path</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">frame_paths</span>
+
+
+<div class="viewcode-block" id="process_all_media">
+<a class="viewcode-back" href="../../module_docs/ge/media.html#ge.process_all_media">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_all_media</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s1">&#39;.ge/media&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download all media and extract video frames.</span>
+
+<span class="sd">    Returns a dict with:</span>
+<span class="sd">      - url_map, manifest, rewritten_markdown (from download_media)</span>
+<span class="sd">      - video_frames: {video_local_path: [frame_paths]}</span>
+<span class="sd">      - images: list of local image paths (for user to paste into agent)</span>
+<span class="sd">      - all_visual_files: combined list of images + video frames</span>
+
+<span class="sd">    &gt;&gt;&gt; # result = process_all_media(issue_body)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dl</span> <span class="o">=</span> <span class="n">download_media</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">video_frames</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">all_images</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">dl</span><span class="p">[</span><span class="s1">&#39;manifest&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;ok&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;local_path&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;video&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">frames</span> <span class="o">=</span> <span class="n">extract_video_frames</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
+                <span class="n">video_frames</span><span class="p">[</span><span class="n">local</span><span class="p">]</span> <span class="o">=</span> <span class="n">frames</span>
+                <span class="n">all_images</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">video_frames</span><span class="p">[</span><span class="n">local</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;frame_extraction_error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="o">**</span><span class="n">dl</span><span class="p">,</span>
+        <span class="s1">&#39;video_frames&#39;</span><span class="p">:</span> <span class="n">video_frames</span><span class="p">,</span>
+        <span class="s1">&#39;images&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_images</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;.gif&#39;</span><span class="p">,</span> <span class="s1">&#39;.webp&#39;</span><span class="p">))],</span>
+        <span class="s1">&#39;all_visual_files&#39;</span><span class="p">:</span> <span class="n">all_images</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

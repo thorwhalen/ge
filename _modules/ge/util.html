@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge.util &mdash; ge 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/context.html">ge.context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/github.html">ge.github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../ge.html">ge</a></li>
+      <li class="breadcrumb-item active">ge.util</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ge.util</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Internal utilities: gh CLI wrapper, subprocess helpers, URL parsing.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">_gh_checked</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_gh</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify gh CLI is installed and authenticated (cached after first call).&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_gh_checked</span>
+    <span class="k">if</span> <span class="n">_gh_checked</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s1">&#39;gh&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
+            <span class="s2">&quot;gh CLI not found. Install it:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  brew install gh          # macOS</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  sudo apt install gh      # Debian/Ubuntu</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  https://cli.github.com   # other platforms</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Then run: gh auth login&quot;</span>
+        <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;gh&#39;</span><span class="p">,</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
+            <span class="s2">&quot;gh CLI not authenticated. Run:</span><span class="se">\n</span><span class="s2">  gh auth login&quot;</span>
+        <span class="p">)</span>
+    <span class="n">_gh_checked</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="gh_api">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.gh_api">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gh_api</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paginate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Call the GitHub REST API via gh CLI.</span>
+
+<span class="sd">    &gt;&gt;&gt; # gh_api(&#39;repos/octocat/Hello-World/issues/1&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_gh</span><span class="p">()</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gh&#39;</span><span class="p">,</span> <span class="s1">&#39;api&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-X&#39;</span><span class="p">,</span> <span class="n">method</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">paginate</span><span class="p">:</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--paginate&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="n">params</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gh api </span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="c1"># gh may return HTML on rate limiting or auth errors</span>
+        <span class="n">preview</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">[:</span><span class="mi">200</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;gh api </span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2"> returned non-JSON response &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(possible rate limit or auth issue): </span><span class="si">{</span><span class="n">preview</span><span class="si">!r}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="gh_auth_token">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.gh_auth_token">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gh_auth_token</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the current gh auth token for authenticated downloads.</span>
+
+<span class="sd">    &gt;&gt;&gt; # token = gh_auth_token()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_gh</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;gh&#39;</span><span class="p">,</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="s1">&#39;token&#39;</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get gh auth token: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="parse_repo_spec">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.parse_repo_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_repo_spec</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse &#39;owner/repo&#39; or full GitHub URL into (owner, repo).</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_repo_spec(&#39;thorwhalen/dol&#39;)</span>
+<span class="sd">    (&#39;thorwhalen&#39;, &#39;dol&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; parse_repo_spec(&#39;https://github.com/thorwhalen/dol&#39;)</span>
+<span class="sd">    (&#39;thorwhalen&#39;, &#39;dol&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; parse_repo_spec(&#39;https://github.com/thorwhalen/dol/issues/42&#39;)</span>
+<span class="sd">    (&#39;thorwhalen&#39;, &#39;dol&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">repo_spec</span> <span class="o">=</span> <span class="n">repo_spec</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="c1"># Full URL</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;https?://github\.com/([^/]+)/([^/]+)&#39;</span><span class="p">,</span> <span class="n">repo_spec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># owner/repo</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">repo_spec</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Cannot parse repo spec: </span><span class="si">{</span><span class="n">repo_spec</span><span class="si">!r}</span><span class="s2">. &quot;</span>
+        <span class="s2">&quot;Expected &#39;owner/repo&#39; or a GitHub URL.&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="parse_github_url">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.parse_github_url">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_github_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a full GitHub issue/PR/discussion URL into (owner, repo, number, kind).</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_github_url(&#39;https://github.com/thorwhalen/dol/issues/42&#39;)</span>
+<span class="sd">    (&#39;thorwhalen&#39;, &#39;dol&#39;, 42, &#39;issue&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; parse_github_url(&#39;https://github.com/thorwhalen/dol/pull/7&#39;)</span>
+<span class="sd">    (&#39;thorwhalen&#39;, &#39;dol&#39;, 7, &#39;pr&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; parse_github_url(&#39;https://github.com/thorwhalen/dol/discussions/5&#39;)</span>
+<span class="sd">    (&#39;thorwhalen&#39;, &#39;dol&#39;, 5, &#39;discussion&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;https?://github\.com/([^/]+)/([^/]+)/(issues|pull|discussions)/(\d+)&#39;</span><span class="p">,</span> <span class="n">url</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot parse GitHub URL: </span><span class="si">{</span><span class="n">url</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">kind_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;issues&#39;</span><span class="p">:</span> <span class="s1">&#39;issue&#39;</span><span class="p">,</span> <span class="s1">&#39;pull&#39;</span><span class="p">:</span> <span class="s1">&#39;pr&#39;</span><span class="p">,</span> <span class="s1">&#39;discussions&#39;</span><span class="p">:</span> <span class="s1">&#39;discussion&#39;</span><span class="p">}</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">kind_map</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="n">kind</span></div>
+
+
+
+<span class="c1"># Backward compatibility alias</span>
+<span class="n">parse_issue_url</span> <span class="o">=</span> <span class="n">parse_github_url</span>
+
+
+<div class="viewcode-block" id="extract_media_urls">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.extract_media_urls">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_media_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract image and video URLs from GitHub-flavored markdown.</span>
+
+<span class="sd">    Returns list of dicts with keys: url, alt, kind (&#39;image&#39; or &#39;video&#39;).</span>
+
+<span class="sd">    &gt;&gt;&gt; urls = extract_media_urls(&#39;![screenshot](https://example.com/img.png)&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; urls[0][&#39;kind&#39;]</span>
+<span class="sd">    &#39;image&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># Markdown images: ![alt](url)</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;!\[([^\]]*)\]\(([^)]+)\)&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;alt&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;image&#39;</span><span class="p">})</span>
+
+    <span class="c1"># HTML img tags: &lt;img src=&quot;url&quot; ...&gt;</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;img[^&gt;]+src=[&quot;</span><span class="se">\&#39;</span><span class="s1">]([^&quot;</span><span class="se">\&#39;</span><span class="s1">]+)[&quot;</span><span class="se">\&#39;</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;alt&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;image&#39;</span><span class="p">})</span>
+
+    <span class="c1"># HTML video tags and GitHub video attachments</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;video[^&gt;]+src=[&quot;</span><span class="se">\&#39;</span><span class="s1">]([^&quot;</span><span class="se">\&#39;</span><span class="s1">]+)[&quot;</span><span class="se">\&#39;</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;alt&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;video&#39;</span><span class="p">})</span>
+
+    <span class="c1"># GitHub user-attached videos often appear as plain URLs ending in .mp4/.mov/.webm</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;https?://[^\s)&lt;]+\.(?:mp4|mov|webm|avi)&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span>
+    <span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;alt&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;video&#39;</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="rewrite_media_refs">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.rewrite_media_refs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rewrite_media_refs</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">url_to_local</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace media URLs in markdown with local file paths.</span>
+
+<span class="sd">    &gt;&gt;&gt; md = &#39;![bug](https://example.com/bug.png)&#39;</span>
+<span class="sd">    &gt;&gt;&gt; rewrite_media_refs(md, {&#39;https://example.com/bug.png&#39;: &#39;.ge/media/bug.png&#39;})</span>
+<span class="sd">    &#39;![bug](.ge/media/bug.png)&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">url</span><span class="p">,</span> <span class="n">local</span> <span class="ow">in</span> <span class="n">url_to_local</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">markdown</span></div>
+
+
+
+<div class="viewcode-block" id="ensure_dir">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.ensure_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ensure_dir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create directory if it doesn&#39;t exist, return Path.&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span></div>
+
+
+
+<div class="viewcode-block" id="check_ffmpeg">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.check_ffmpeg">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_ffmpeg</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if ffmpeg is available.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s1">&#39;ffmpeg&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
+            <span class="s2">&quot;ffmpeg not found (needed for video frame extraction). Install it:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  brew install ffmpeg       # macOS</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  sudo apt install ffmpeg   # Debian/Ubuntu</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  https://ffmpeg.org        # other platforms&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

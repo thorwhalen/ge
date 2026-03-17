@@ -23,7 +23,7 @@ def _parse_iso(datestr):
     """Parse ISO 8601 date string to datetime."""
     if not datestr:
         return None
-    return datetime.fromisoformat(datestr.replace('Z', '+00:00'))
+    return datetime.fromisoformat(datestr.replace("Z", "+00:00"))
 
 
 def _days_ago(datestr):
@@ -44,13 +44,13 @@ def _extract_file_refs(markdown):
     """
     paths = set()
     # Backtick-wrapped paths
-    for m in re.finditer(r'`([^`]+\.\w{1,10})`', markdown):
+    for m in re.finditer(r"`([^`]+\.\w{1,10})`", markdown):
         candidate = m.group(1).strip()
         # Heuristic: looks like a file path (has extension, no spaces usually)
-        if '/' in candidate or '.' in candidate:
+        if "/" in candidate or "." in candidate:
             paths.add(candidate)
     # Bare paths in text (conservative)
-    for m in re.finditer(r'(?:^|\s)((?:[\w.-]+/)+[\w.-]+\.\w{1,10})', markdown, re.M):
+    for m in re.finditer(r"(?:^|\s)((?:[\w.-]+/)+[\w.-]+\.\w{1,10})", markdown, re.M):
         paths.add(m.group(1))
     return list(paths)
 
@@ -79,21 +79,21 @@ def analyze_issue(repo, number):
     signals = []
 
     # Basic state
-    state = issue.get('state', 'unknown')
-    age_days = _days_ago(issue.get('created_at'))
-    labels = [l['name'] for l in issue.get('labels', [])]
+    state = issue.get("state", "unknown")
+    age_days = _days_ago(issue.get("created_at"))
+    labels = [l["name"] for l in issue.get("labels", [])]
 
     # Last activity
-    activity_dates = [issue.get('created_at')]
+    activity_dates = [issue.get("created_at")]
     for c in comments:
-        activity_dates.append(c.get('created_at'))
-    if issue.get('updated_at'):
-        activity_dates.append(issue['updated_at'])
+        activity_dates.append(c.get("created_at"))
+    if issue.get("updated_at"):
+        activity_dates.append(issue["updated_at"])
     last_activity = max((d for d in activity_dates if d), default=None)
     last_activity_days = _days_ago(last_activity)
 
     # Closed?
-    if state == 'closed':
+    if state == "closed":
         signals.append(
             f"Issue is CLOSED (closed {_days_ago(issue.get('closed_at', '')) or '?'} days ago)"
         )
@@ -105,36 +105,34 @@ def analyze_issue(repo, number):
         signals.append(f"Last activity was {last_activity_days} days ago")
 
     # Related PRs that may have fixed it
-    merged_prs = [p for p in related_prs if p.get('state') == 'closed']
-    open_prs = [p for p in related_prs if p.get('state') == 'open']
+    merged_prs = [p for p in related_prs if p.get("state") == "closed"]
+    open_prs = [p for p in related_prs if p.get("state") == "open"]
     if merged_prs:
-        titles = ', '.join(f"#{p['number']}" for p in merged_prs)
+        titles = ", ".join(f"#{p['number']}" for p in merged_prs)
         signals.append(f"Related merged/closed PRs: {titles} — may already be fixed")
     if open_prs:
-        titles = ', '.join(f"#{p['number']}" for p in open_prs)
+        titles = ", ".join(f"#{p['number']}" for p in open_prs)
         signals.append(f"Related open PRs: {titles} — someone may be working on this")
 
     # Related commits
     if related_commits:
-        signals.append(
-            f"{len(related_commits)} commit(s) reference this issue"
-        )
+        signals.append(f"{len(related_commits)} commit(s) reference this issue")
 
     # Labels hinting at status
-    status_labels = {'wontfix', 'duplicate', 'invalid', 'stale', 'resolved'}
+    status_labels = {"wontfix", "duplicate", "invalid", "stale", "resolved"}
     found_status = [l for l in labels if l.lower() in status_labels]
     if found_status:
         signals.append(f"Status labels: {', '.join(found_status)}")
 
     # Labels that inform priority and type
     priority_labels = {
-        'good first issue': 'Good first issue — likely well-scoped and approachable',
-        'help wanted': 'Help wanted — maintainers welcome contributions',
-        'priority:high': 'High priority',
-        'priority:critical': 'Critical priority',
-        'bug': 'Labeled as bug',
-        'enhancement': 'Labeled as enhancement/feature request',
-        'documentation': 'Labeled as documentation',
+        "good first issue": "Good first issue — likely well-scoped and approachable",
+        "help wanted": "Help wanted — maintainers welcome contributions",
+        "priority:high": "High priority",
+        "priority:critical": "Critical priority",
+        "bug": "Labeled as bug",
+        "enhancement": "Labeled as enhancement/feature request",
+        "documentation": "Labeled as documentation",
     }
     for label in labels:
         desc = priority_labels.get(label.lower())
@@ -142,10 +140,16 @@ def analyze_issue(repo, number):
             signals.append(desc)
 
     # Check for closing keywords in comments
-    closing_phrases = ['fixed in', 'resolved by', 'this has been', 'closing as',
-                       'no longer', 'already been']
+    closing_phrases = [
+        "fixed in",
+        "resolved by",
+        "this has been",
+        "closing as",
+        "no longer",
+        "already been",
+    ]
     for c in comments:
-        body = (c.get('body') or '').lower()
+        body = (c.get("body") or "").lower()
         for phrase in closing_phrases:
             if phrase in body:
                 signals.append(
@@ -155,30 +159,30 @@ def analyze_issue(repo, number):
                 break
 
     # Referenced files
-    body = issue.get('body') or ''
-    all_text = body + '\n'.join(c.get('body', '') for c in comments)
+    body = issue.get("body") or ""
+    all_text = body + "\n".join(c.get("body", "") for c in comments)
     referenced_files = _extract_file_refs(all_text)
 
     # Recommendation
-    if state == 'closed':
-        recommendation = 'likely_resolved'
+    if state == "closed":
+        recommendation = "likely_resolved"
     elif merged_prs or found_status:
-        recommendation = 'investigate'
+        recommendation = "investigate"
     elif last_activity_days and last_activity_days > 365:
-        recommendation = 'investigate'
+        recommendation = "investigate"
     else:
-        recommendation = 'proceed'
+        recommendation = "proceed"
 
     return {
-        'state': state,
-        'age_days': age_days,
-        'last_activity_days': last_activity_days,
-        'labels': labels,
-        'related_prs': related_prs,
-        'related_commits': related_commits,
-        'referenced_files': referenced_files,
-        'signals': signals,
-        'recommendation': recommendation,
+        "state": state,
+        "age_days": age_days,
+        "last_activity_days": last_activity_days,
+        "labels": labels,
+        "related_prs": related_prs,
+        "related_commits": related_commits,
+        "referenced_files": referenced_files,
+        "signals": signals,
+        "recommendation": recommendation,
     }
 
 
@@ -198,15 +202,15 @@ def analyze_pr(repo, number):
 
     signals = []
 
-    state = pr.get('state', 'unknown')
-    merged = pr.get('merged', False)
-    mergeable = pr.get('mergeable')
-    mergeable_state = pr.get('mergeable_state', 'unknown')
-    draft = pr.get('draft', False)
+    state = pr.get("state", "unknown")
+    merged = pr.get("merged", False)
+    mergeable = pr.get("mergeable")
+    mergeable_state = pr.get("mergeable_state", "unknown")
+    draft = pr.get("draft", False)
 
     if merged:
         signals.append("PR is already MERGED")
-    elif state == 'closed':
+    elif state == "closed":
         signals.append("PR is CLOSED without merge")
     if draft:
         signals.append("PR is a DRAFT")
@@ -214,11 +218,13 @@ def analyze_pr(repo, number):
     # Review states
     review_states = {}
     for r in reviews:
-        user = r.get('user', {}).get('login', '?')
-        rstate = r.get('state', '?')
+        user = r.get("user", {}).get("login", "?")
+        rstate = r.get("state", "?")
         review_states[user] = rstate
-    approved = [u for u, s in review_states.items() if s == 'APPROVED']
-    changes_requested = [u for u, s in review_states.items() if s == 'CHANGES_REQUESTED']
+    approved = [u for u, s in review_states.items() if s == "APPROVED"]
+    changes_requested = [
+        u for u, s in review_states.items() if s == "CHANGES_REQUESTED"
+    ]
     if approved:
         signals.append(f"Approved by: {', '.join(approved)}")
     if changes_requested:
@@ -227,73 +233,73 @@ def analyze_pr(repo, number):
     # Merge conflicts
     if mergeable is False:
         signals.append("PR has MERGE CONFLICTS")
-    elif mergeable_state == 'dirty':
+    elif mergeable_state == "dirty":
         signals.append("PR may have merge conflicts (mergeable_state=dirty)")
 
     # Files changed
     n_files = len(files)
-    n_additions = sum(f.get('additions', 0) for f in files)
-    n_deletions = sum(f.get('deletions', 0) for f in files)
+    n_additions = sum(f.get("additions", 0) for f in files)
+    n_deletions = sum(f.get("deletions", 0) for f in files)
     signals.append(f"Changes: {n_files} files, +{n_additions}/-{n_deletions}")
 
     # CI status
     ci_state = None
-    head_sha = pr.get('head', {}).get('sha')
+    head_sha = pr.get("head", {}).get("sha")
     if head_sha:
         try:
             status = get_commit_status(repo, head_sha)
-            ci_state = status.get('state')  # success, failure, pending, error
-            total = status.get('total_count', 0)
-            if ci_state == 'success':
+            ci_state = status.get("state")  # success, failure, pending, error
+            total = status.get("total_count", 0)
+            if ci_state == "success":
                 signals.append(f"CI checks PASSED ({total} check(s))")
-            elif ci_state == 'failure':
+            elif ci_state == "failure":
                 signals.append(f"CI checks FAILED ({total} check(s))")
-            elif ci_state == 'pending':
+            elif ci_state == "pending":
                 signals.append(f"CI checks PENDING ({total} check(s))")
-            elif ci_state == 'error':
+            elif ci_state == "error":
                 signals.append(f"CI checks ERROR ({total} check(s))")
         except Exception:
             pass  # CI status not available
 
     # Referenced issues (from PR body)
-    body = pr.get('body') or ''
+    body = pr.get("body") or ""
     issue_refs = re.findall(
-        r'(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)', body, re.I
+        r"(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)", body, re.I
     )
     linked_issues = list(set(int(n) for n in issue_refs))
 
-    age_days = _days_ago(pr.get('created_at'))
-    last_activity_days = _days_ago(pr.get('updated_at'))
+    age_days = _days_ago(pr.get("created_at"))
+    last_activity_days = _days_ago(pr.get("updated_at"))
 
     # Recommendation
     if merged:
-        recommendation = 'already_merged'
-    elif state == 'closed':
-        recommendation = 'closed_unmerged'
+        recommendation = "already_merged"
+    elif state == "closed":
+        recommendation = "closed_unmerged"
     elif changes_requested:
-        recommendation = 'needs_changes'
+        recommendation = "needs_changes"
     elif mergeable is False:
-        recommendation = 'resolve_conflicts'
+        recommendation = "resolve_conflicts"
     elif draft:
-        recommendation = 'draft_wip'
+        recommendation = "draft_wip"
     else:
-        recommendation = 'proceed'
+        recommendation = "proceed"
 
     return {
-        'state': state,
-        'merged': merged,
-        'draft': draft,
-        'mergeable': mergeable,
-        'ci_state': ci_state,
-        'age_days': age_days,
-        'last_activity_days': last_activity_days,
-        'review_states': review_states,
-        'linked_issues': linked_issues,
-        'files_changed': [f.get('filename') for f in files],
-        'n_additions': n_additions,
-        'n_deletions': n_deletions,
-        'signals': signals,
-        'recommendation': recommendation,
+        "state": state,
+        "merged": merged,
+        "draft": draft,
+        "mergeable": mergeable,
+        "ci_state": ci_state,
+        "age_days": age_days,
+        "last_activity_days": last_activity_days,
+        "review_states": review_states,
+        "linked_issues": linked_issues,
+        "files_changed": [f.get("filename") for f in files],
+        "n_additions": n_additions,
+        "n_deletions": n_deletions,
+        "signals": signals,
+        "recommendation": recommendation,
     }
 
 
@@ -311,8 +317,8 @@ def check_referenced_files(repo, file_paths, *, ref=None):
         try:
             content = get_file_at_ref(repo, path, ref=ref)
             # Return first 30 lines as snippet
-            lines = content.split('\n')[:30]
-            result[path] = {'exists': True, 'snippet': '\n'.join(lines)}
+            lines = content.split("\n")[:30]
+            result[path] = {"exists": True, "snippet": "\n".join(lines)}
         except Exception:
-            result[path] = {'exists': False, 'snippet': None}
+            result[path] = {"exists": False, "snippet": None}
     return result

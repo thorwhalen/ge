@@ -26,11 +26,11 @@ def _sanitize_filename(url):
     'img'
     """
     # Strip query params
-    clean = url.split('?')[0].split('#')[0]
-    name = clean.rstrip('/').split('/')[-1]
+    clean = url.split("?")[0].split("#")[0]
+    name = clean.rstrip("/").split("/")[-1]
     # Remove unsafe chars
-    name = re.sub(r'[^\w.\-]', '_', name)
-    return name or 'unnamed'
+    name = re.sub(r"[^\w.\-]", "_", name)
+    return name or "unnamed"
 
 
 def _download_file(url, dest_path):
@@ -39,14 +39,14 @@ def _download_file(url, dest_path):
     Returns True on success, False on failure.
     """
     headers = []
-    if 'github' in url or 'githubusercontent' in url:
+    if "github" in url or "githubusercontent" in url:
         try:
             token = gh_auth_token()
-            headers = ['-H', f'Authorization: token {token}']
+            headers = ["-H", f"Authorization: token {token}"]
         except Exception:
             pass  # Try without auth
 
-    cmd = ['curl', '-sL', '-o', str(dest_path), '--max-time', '30'] + headers + [url]
+    cmd = ["curl", "-sL", "-o", str(dest_path), "--max-time", "30"] + headers + [url]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return False
@@ -60,7 +60,7 @@ def _download_file(url, dest_path):
 
 def download_media(
     markdown,
-    output_dir='.ge/media',
+    output_dir=".ge/media",
     *,
     download_images=True,
     download_videos=True,
@@ -84,12 +84,12 @@ def download_media(
     used_names = set()
 
     for item in media:
-        if item['kind'] == 'image' and not download_images:
+        if item["kind"] == "image" and not download_images:
             continue
-        if item['kind'] == 'video' and not download_videos:
+        if item["kind"] == "video" and not download_videos:
             continue
 
-        url = item['url']
+        url = item["url"]
         name = _sanitize_filename(url)
 
         # Ensure unique filename
@@ -106,11 +106,11 @@ def download_media(
         ok = _download_file(url, dest)
 
         entry = {
-            'url': url,
-            'local_path': str(dest) if ok else None,
-            'kind': item['kind'],
-            'alt': item['alt'],
-            'status': 'ok' if ok else 'failed',
+            "url": url,
+            "local_path": str(dest) if ok else None,
+            "kind": item["kind"],
+            "alt": item["alt"],
+            "status": "ok" if ok else "failed",
         }
         manifest.append(entry)
         if ok:
@@ -118,9 +118,9 @@ def download_media(
 
     rewritten = rewrite_media_refs(markdown, url_map)
     return {
-        'url_map': url_map,
-        'manifest': manifest,
-        'rewritten_markdown': rewritten,
+        "url_map": url_map,
+        "manifest": manifest,
+        "rewritten_markdown": rewritten,
     }
 
 
@@ -129,7 +129,7 @@ def extract_video_frames(
     *,
     n_frames=5,
     output_dir=None,
-    mode='scene',
+    mode="scene",
     scene_threshold=0.3,
 ):
     """Extract representative frames from a video file using ffmpeg.
@@ -155,10 +155,10 @@ def extract_video_frames(
         raise FileNotFoundError(f"Video not found: {video_path}")
 
     if output_dir is None:
-        output_dir = video_path.parent / f'{video_path.stem}_frames'
+        output_dir = video_path.parent / f"{video_path.stem}_frames"
     out = ensure_dir(output_dir)
 
-    if mode == 'scene':
+    if mode == "scene":
         frames = _extract_scene_frames(video_path, out, scene_threshold)
         if frames:
             return frames
@@ -174,23 +174,30 @@ def _extract_scene_frames(video_path, output_dir, threshold=0.3):
     visual content changes significantly. This is zero extra dependency
     beyond ffmpeg itself.
     """
-    pattern = str(output_dir / 'scene_%03d.jpg')
+    pattern = str(output_dir / "scene_%03d.jpg")
     result = subprocess.run(
         [
-            'ffmpeg', '-y', '-i', str(video_path),
-            '-vf', f"select=gt(scene\\,{threshold})",
-            '-vsync', 'vfr',
-            '-q:v', '2',
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(video_path),
+            "-vf",
+            f"select=gt(scene\\,{threshold})",
+            "-vsync",
+            "vfr",
+            "-q:v",
+            "2",
             pattern,
         ],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         return []
 
     # Collect generated frames
     frame_paths = sorted(
-        str(p) for p in output_dir.glob('scene_*.jpg') if p.stat().st_size > 0
+        str(p) for p in output_dir.glob("scene_*.jpg") if p.stat().st_size > 0
     )
     return frame_paths
 
@@ -199,9 +206,18 @@ def _extract_uniform_frames(video_path, output_dir, n_frames=5):
     """Extract n evenly-spaced frames from a video."""
     # Get video duration
     probe = subprocess.run(
-        ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
-         '-of', 'csv=p=0', str(video_path)],
-        capture_output=True, text=True,
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "csv=p=0",
+            str(video_path),
+        ],
+        capture_output=True,
+        text=True,
     )
     try:
         duration = float(probe.stdout.strip())
@@ -211,18 +227,28 @@ def _extract_uniform_frames(video_path, output_dir, n_frames=5):
     if n_frames == 1:
         timestamps = [duration / 2]
     else:
-        timestamps = [
-            duration * i / (n_frames - 1) for i in range(n_frames)
-        ]
+        timestamps = [duration * i / (n_frames - 1) for i in range(n_frames)]
 
     frame_paths = []
     for i, ts in enumerate(timestamps):
         frame_name = f"frame_{i:03d}_{ts:.1f}s.jpg"
         frame_path = output_dir / frame_name
         subprocess.run(
-            ['ffmpeg', '-y', '-ss', str(ts), '-i', str(video_path),
-             '-frames:v', '1', '-q:v', '2', str(frame_path)],
-            capture_output=True, text=True,
+            [
+                "ffmpeg",
+                "-y",
+                "-ss",
+                str(ts),
+                "-i",
+                str(video_path),
+                "-frames:v",
+                "1",
+                "-q:v",
+                "2",
+                str(frame_path),
+            ],
+            capture_output=True,
+            text=True,
         )
         if frame_path.exists():
             frame_paths.append(str(frame_path))
@@ -230,7 +256,7 @@ def _extract_uniform_frames(video_path, output_dir, n_frames=5):
     return frame_paths
 
 
-def process_all_media(markdown, output_dir='.ge/media'):
+def process_all_media(markdown, output_dir=".ge/media"):
     """Download all media and extract video frames.
 
     Returns a dict with:
@@ -245,24 +271,28 @@ def process_all_media(markdown, output_dir='.ge/media'):
     video_frames = {}
     all_images = []
 
-    for entry in dl['manifest']:
-        if entry['status'] != 'ok':
+    for entry in dl["manifest"]:
+        if entry["status"] != "ok":
             continue
-        local = entry['local_path']
-        if entry['kind'] == 'video':
+        local = entry["local_path"]
+        if entry["kind"] == "video":
             try:
                 frames = extract_video_frames(local)
                 video_frames[local] = frames
                 all_images.extend(frames)
             except Exception as e:
                 video_frames[local] = []
-                entry['frame_extraction_error'] = str(e)
+                entry["frame_extraction_error"] = str(e)
         else:
             all_images.append(local)
 
     return {
         **dl,
-        'video_frames': video_frames,
-        'images': [p for p in all_images if p.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp'))],
-        'all_visual_files': all_images,
+        "video_frames": video_frames,
+        "images": [
+            p
+            for p in all_images
+            if p.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp"))
+        ],
+        "all_visual_files": all_images,
     }

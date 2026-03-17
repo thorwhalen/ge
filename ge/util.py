@@ -14,7 +14,7 @@ def _check_gh():
     global _gh_checked
     if _gh_checked:
         return
-    if not shutil.which('gh'):
+    if not shutil.which("gh"):
         raise EnvironmentError(
             "gh CLI not found. Install it:\n"
             "  brew install gh          # macOS\n"
@@ -23,28 +23,28 @@ def _check_gh():
             "Then run: gh auth login"
         )
     result = subprocess.run(
-        ['gh', 'auth', 'status'], capture_output=True, text=True,
+        ["gh", "auth", "status"],
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
-        raise EnvironmentError(
-            "gh CLI not authenticated. Run:\n  gh auth login"
-        )
+        raise EnvironmentError("gh CLI not authenticated. Run:\n  gh auth login")
     _gh_checked = True
 
 
-def gh_api(endpoint, *, method='GET', params=None, paginate=False, raw=False):
+def gh_api(endpoint, *, method="GET", params=None, paginate=False, raw=False):
     """Call the GitHub REST API via gh CLI.
 
     >>> # gh_api('repos/octocat/Hello-World/issues/1')
     """
     _check_gh()
-    cmd = ['gh', 'api', endpoint]
-    if method != 'GET':
-        cmd.extend(['-X', method])
+    cmd = ["gh", "api", endpoint]
+    if method != "GET":
+        cmd.extend(["-X", method])
     if paginate:
-        cmd.append('--paginate')
+        cmd.append("--paginate")
     for k, v in (params or {}).items():
-        cmd.extend(['-f', f'{k}={v}'])
+        cmd.extend(["-f", f"{k}={v}"])
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"gh api {endpoint} failed: {result.stderr.strip()}")
@@ -68,7 +68,9 @@ def gh_auth_token():
     """
     _check_gh()
     result = subprocess.run(
-        ['gh', 'auth', 'token'], capture_output=True, text=True,
+        ["gh", "auth", "token"],
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         raise RuntimeError(f"Failed to get gh auth token: {result.stderr.strip()}")
@@ -85,18 +87,17 @@ def parse_repo_spec(repo_spec):
     >>> parse_repo_spec('https://github.com/thorwhalen/dol/issues/42')
     ('thorwhalen', 'dol')
     """
-    repo_spec = repo_spec.strip().rstrip('/')
+    repo_spec = repo_spec.strip().rstrip("/")
     # Full URL
-    m = re.match(r'https?://github\.com/([^/]+)/([^/]+)', repo_spec)
+    m = re.match(r"https?://github\.com/([^/]+)/([^/]+)", repo_spec)
     if m:
         return m.group(1), m.group(2)
     # owner/repo
-    parts = repo_spec.split('/')
+    parts = repo_spec.split("/")
     if len(parts) == 2:
         return parts[0], parts[1]
     raise ValueError(
-        f"Cannot parse repo spec: {repo_spec!r}. "
-        "Expected 'owner/repo' or a GitHub URL."
+        f"Cannot parse repo spec: {repo_spec!r}. Expected 'owner/repo' or a GitHub URL."
     )
 
 
@@ -111,11 +112,11 @@ def parse_github_url(url):
     ('thorwhalen', 'dol', 5, 'discussion')
     """
     m = re.match(
-        r'https?://github\.com/([^/]+)/([^/]+)/(issues|pull|discussions)/(\d+)', url
+        r"https?://github\.com/([^/]+)/([^/]+)/(issues|pull|discussions)/(\d+)", url
     )
     if not m:
         raise ValueError(f"Cannot parse GitHub URL: {url!r}")
-    kind_map = {'issues': 'issue', 'pull': 'pr', 'discussions': 'discussion'}
+    kind_map = {"issues": "issue", "pull": "pr", "discussions": "discussion"}
     kind = kind_map[m.group(3)]
     return m.group(1), m.group(2), int(m.group(4)), kind
 
@@ -137,34 +138,32 @@ def extract_media_urls(markdown):
     seen = set()
 
     # Markdown images: ![alt](url)
-    for m in re.finditer(r'!\[([^\]]*)\]\(([^)]+)\)', markdown):
+    for m in re.finditer(r"!\[([^\]]*)\]\(([^)]+)\)", markdown):
         url = m.group(2)
         if url not in seen:
             seen.add(url)
-            results.append({'url': url, 'alt': m.group(1), 'kind': 'image'})
+            results.append({"url": url, "alt": m.group(1), "kind": "image"})
 
     # HTML img tags: <img src="url" ...>
     for m in re.finditer(r'<img[^>]+src=["\']([^"\']+)["\']', markdown, re.I):
         url = m.group(1)
         if url not in seen:
             seen.add(url)
-            results.append({'url': url, 'alt': '', 'kind': 'image'})
+            results.append({"url": url, "alt": "", "kind": "image"})
 
     # HTML video tags and GitHub video attachments
     for m in re.finditer(r'<video[^>]+src=["\']([^"\']+)["\']', markdown, re.I):
         url = m.group(1)
         if url not in seen:
             seen.add(url)
-            results.append({'url': url, 'alt': '', 'kind': 'video'})
+            results.append({"url": url, "alt": "", "kind": "video"})
 
     # GitHub user-attached videos often appear as plain URLs ending in .mp4/.mov/.webm
-    for m in re.finditer(
-        r'https?://[^\s)<]+\.(?:mp4|mov|webm|avi)', markdown, re.I
-    ):
+    for m in re.finditer(r"https?://[^\s)<]+\.(?:mp4|mov|webm|avi)", markdown, re.I):
         url = m.group(0)
         if url not in seen:
             seen.add(url)
-            results.append({'url': url, 'alt': '', 'kind': 'video'})
+            results.append({"url": url, "alt": "", "kind": "video"})
 
     return results
 
@@ -190,7 +189,7 @@ def ensure_dir(path):
 
 def check_ffmpeg():
     """Check if ffmpeg is available."""
-    if not shutil.which('ffmpeg'):
+    if not shutil.which("ffmpeg"):
         raise EnvironmentError(
             "ffmpeg not found (needed for video frame extraction). Install it:\n"
             "  brew install ffmpeg       # macOS\n"

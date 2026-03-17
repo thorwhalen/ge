@@ -13,7 +13,7 @@ import json
 import argh
 
 
-def prepare(url_or_spec: str, number: int = None, *, output_dir: str = '.ge'):
+def prepare(url_or_spec: str, number: int = None, *, output_dir: str = ".ge"):
     """Prepare full context for a GitHub issue or PR.
 
     Fetches all data, downloads media, runs freshness analysis,
@@ -24,29 +24,30 @@ def prepare(url_or_spec: str, number: int = None, *, output_dir: str = '.ge'):
         ge prepare https://github.com/owner/repo/pull/7
     """
     from ge import prepare as _prepare
+
     ctx = _prepare(url_or_spec, number, output_dir=output_dir)
-    kind = ctx['kind']
-    num = ctx['number']
+    kind = ctx["kind"]
+    num = ctx["number"]
 
     # Summary output
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Prepared {kind} #{num}: {ctx['title']}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
-    analysis = ctx.get('analysis', {})
-    rec = analysis.get('recommendation', '?')
+    analysis = ctx.get("analysis", {})
+    rec = analysis.get("recommendation", "?")
     print(f"\nRecommendation: {rec}")
-    for sig in analysis.get('signals', []):
+    for sig in analysis.get("signals", []):
         print(f"  • {sig}")
 
-    media = ctx.get('media', {})
-    n_images = len(media.get('images', []))
-    n_videos = len(media.get('video_frames', {}))
+    media = ctx.get("media", {})
+    n_images = len(media.get("images", []))
+    n_videos = len(media.get("video_frames", {}))
     if n_images or n_videos:
         print(f"\nMedia: {n_images} image(s), {n_videos} video(s)")
-        if media.get('all_visual_files'):
+        if media.get("all_visual_files"):
             print("Visual files (paste these into your agent for visual context):")
-            for f in media['all_visual_files']:
+            for f in media["all_visual_files"]:
                 print(f"  {f}")
 
     md_file = f"{output_dir}/{kind}_{num}_context.md"
@@ -60,6 +61,7 @@ def prepare(url_or_spec: str, number: int = None, *, output_dir: str = '.ge'):
 def analyze_issue(repo: str, number: int):
     """Analyze a GitHub issue for staleness and relevance (no media download)."""
     from ge.analysis import analyze_issue as _analyze
+
     result = _analyze(repo, number)
     print(json.dumps(result, indent=2, default=str))
 
@@ -67,6 +69,7 @@ def analyze_issue(repo: str, number: int):
 def analyze_pr(repo: str, number: int):
     """Analyze a GitHub PR for review state and merge readiness."""
     from ge.analysis import analyze_pr as _analyze
+
     result = _analyze(repo, number)
     print(json.dumps(result, indent=2, default=str))
 
@@ -74,23 +77,26 @@ def analyze_pr(repo: str, number: int):
 def fetch_issue(repo: str, number: int):
     """Fetch and display raw issue data (JSON)."""
     from ge.github import get_issue
+
     print(json.dumps(get_issue(repo, number), indent=2))
 
 
 def fetch_pr(repo: str, number: int):
     """Fetch and display raw PR data (JSON)."""
     from ge.github import get_pr
+
     print(json.dumps(get_pr(repo, number), indent=2))
 
 
 def fetch_discussion(repo: str, number: int):
     """Fetch and display a GitHub Discussion (JSON)."""
     from ge.github import get_discussion
+
     result = get_discussion(repo, number)
     print(json.dumps(result, indent=2))
 
 
-def prepare_discussion(repo: str, number: int, *, output_dir: str = '.ge'):
+def prepare_discussion(repo: str, number: int, *, output_dir: str = ".ge"):
     """Prepare full context for a GitHub Discussion.
 
     Fetches the discussion, comments, downloads media, and writes
@@ -100,15 +106,16 @@ def prepare_discussion(repo: str, number: int, *, output_dir: str = '.ge'):
         ge prepare-discussion owner/repo 5
     """
     from ge.context import prepare_discussion as _prepare
+
     ctx = _prepare(repo, number, output_dir=output_dir)
-    num = ctx['number']
+    num = ctx["number"]
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Prepared discussion #{num}: {ctx['title']}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
-    media = ctx.get('media', {})
-    n_images = len(media.get('images', []))
+    media = ctx.get("media", {})
+    n_images = len(media.get("images", []))
     if n_images:
         print(f"\nMedia: {n_images} image(s)")
 
@@ -120,17 +127,18 @@ def prepare_discussion(repo: str, number: int, *, output_dir: str = '.ge'):
     print()
 
 
-def media(markdown_file: str, *, output_dir: str = '.ge/media'):
+def media(markdown_file: str, *, output_dir: str = ".ge/media"):
     """Download media from a markdown file (for standalone use)."""
     from pathlib import Path
     from ge.media import process_all_media
+
     text = Path(markdown_file).read_text()
     result = process_all_media(text, output_dir)
     print(f"Downloaded {len(result['images'])} image(s)")
-    for entry in result['manifest']:
-        status = '✓' if entry['status'] == 'ok' else '✗'
+    for entry in result["manifest"]:
+        status = "✓" if entry["status"] == "ok" else "✗"
         print(f"  {status} {entry['kind']}: {entry['url']}")
-        if entry['local_path']:
+        if entry["local_path"]:
             print(f"    → {entry['local_path']}")
 
 
@@ -139,7 +147,7 @@ def video_frames(
     *,
     n_frames: int = 5,
     output_dir: str = None,
-    mode: str = 'scene',
+    mode: str = "scene",
     scene_threshold: float = 0.3,
 ):
     """Extract frames from a video file.
@@ -147,9 +155,13 @@ def video_frames(
     Modes: 'scene' (default) detects visual changes; 'uniform' extracts evenly-spaced frames.
     """
     from ge.media import extract_video_frames
+
     frames = extract_video_frames(
-        video_path, n_frames=n_frames, output_dir=output_dir,
-        mode=mode, scene_threshold=scene_threshold,
+        video_path,
+        n_frames=n_frames,
+        output_dir=output_dir,
+        mode=mode,
+        scene_threshold=scene_threshold,
     )
     print(f"Extracted {len(frames)} frames:")
     for f in frames:
@@ -167,6 +179,7 @@ def install_skills(*, target_dir: str = None):
         ge install-skills --target-dir ~/.claude/skills
     """
     from ge import install_skills as _install
+
     _install(target_dir=target_dir)
 
 
@@ -179,6 +192,7 @@ def uninstall_skills(*, target_dir: str = None):
         ge uninstall-skills
     """
     from ge import uninstall_skills as _uninstall
+
     _uninstall(target_dir=target_dir)
 
 
@@ -203,5 +217,5 @@ def main():
     argh.dispatch_commands(_cli_commands)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

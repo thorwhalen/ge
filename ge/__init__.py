@@ -35,7 +35,7 @@ from ge.media import process_all_media, extract_video_frames
 from ge.util import parse_github_url
 
 
-def prepare(url_or_spec, number=None, *, output_dir='.ge', **kwargs):
+def prepare(url_or_spec, number=None, *, output_dir=".ge", **kwargs):
     """Prepare context from a GitHub URL or repo+number.
 
     Automatically detects whether it's an issue, PR, or discussion.
@@ -47,25 +47,25 @@ def prepare(url_or_spec, number=None, *, output_dir='.ge', **kwargs):
     if number is None:
         # Parse from URL
         owner, repo, number, kind = parse_github_url(url_or_spec)
-        repo_spec = f'{owner}/{repo}'
+        repo_spec = f"{owner}/{repo}"
     else:
         repo_spec = url_or_spec
         # Probe whether it's a PR or issue
         try:
             data = get_pr(repo_spec, number)
-            kind = 'pr'
+            kind = "pr"
         except Exception:
-            kind = 'issue'
+            kind = "issue"
 
-    if kind == 'pr':
+    if kind == "pr":
         return prepare_pr(repo_spec, number, output_dir=output_dir, **kwargs)
-    elif kind == 'discussion':
+    elif kind == "discussion":
         return prepare_discussion(repo_spec, number, output_dir=output_dir, **kwargs)
     else:
         return prepare_issue(repo_spec, number, output_dir=output_dir, **kwargs)
 
 
-_SKILLS_DIR = _Path(__file__).parent / 'data' / 'skills'
+_SKILLS_DIR = _Path(__file__).parent / "data" / "skills"
 
 
 def install_skills(*, target_dir=None):
@@ -79,7 +79,7 @@ def install_skills(*, target_dir=None):
         target_dir: Destination directory.  Defaults to ``~/.claude/skills/``.
     """
     if target_dir is None:
-        target_dir = _Path.home() / '.claude' / 'skills'
+        target_dir = _Path.home() / ".claude" / "skills"
     else:
         target_dir = _Path(target_dir)
 
@@ -122,7 +122,7 @@ def uninstall_skills(*, target_dir=None):
         target_dir: Directory to remove from.  Defaults to ``~/.claude/skills/``.
     """
     if target_dir is None:
-        target_dir = _Path.home() / '.claude' / 'skills'
+        target_dir = _Path.home() / ".claude" / "skills"
     else:
         target_dir = _Path(target_dir)
 
@@ -154,21 +154,21 @@ def uninstall_skills(*, target_dir=None):
 
 
 __all__ = [
-    'prepare',
-    'prepare_issue',
-    'prepare_pr',
-    'prepare_discussion',
-    'analyze_issue',
-    'analyze_pr',
-    'get_issue',
-    'get_pr',
-    'get_comments',
-    'get_pr_diff',
-    'get_discussion',
-    'find_related_prs',
-    'find_related_commits',
-    'process_all_media',
-    'extract_video_frames',
-    'install_skills',
-    'uninstall_skills',
+    "prepare",
+    "prepare_issue",
+    "prepare_pr",
+    "prepare_discussion",
+    "analyze_issue",
+    "analyze_pr",
+    "get_issue",
+    "get_pr",
+    "get_comments",
+    "get_pr_diff",
+    "get_discussion",
+    "find_related_prs",
+    "find_related_commits",
+    "process_all_media",
+    "extract_video_frames",
+    "install_skills",
+    "uninstall_skills",
 ]

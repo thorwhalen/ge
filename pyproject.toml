@@ -1,7 +1,5 @@
 [build-system]
-requires = [
-    "hatchling",
-]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -11,10 +9,8 @@ description = "Github Expert - Agentic tools for github"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = []
-authors = [
-    { name = "Thor Whalen" },
-]
-dependencies = []
+authors = [{ name = "Thor Whalen" }]
+dependencies = ["argh"]
 
 [project.license]
 text = "mit"
@@ -24,64 +20,34 @@ Homepage = "https://github.com/thorwhalen/ge"
 Repository = "https://github.com/thorwhalen/ge"
 Documentation = "https://thorwhalen.github.io/ge"
 
+[project.scripts]
+ge = "ge.__main__:main"
+
 [project.optional-dependencies]
-dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "ruff>=0.1.0",
-]
-docs = [
-    "sphinx>=6.0",
-    "sphinx-rtd-theme>=1.0",
-]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0"]
+docs = ["sphinx>=6.0", "sphinx-rtd-theme>=1.0"]
 
 [tool.ruff]
 line-length = 88
 target-version = "py310"
-exclude = [
-    "**/*.ipynb",
-    ".git",
-    ".venv",
-    "build",
-    "dist",
-    "tests",
-    "examples",
-    "scrap",
-]
+exclude = ["**/*.ipynb", ".git", ".venv", "build", "dist", "tests", "examples", "scrap"]
 
 [tool.ruff.lint]
-select = [
-    "D100",
-]
-ignore = [
-    "D203",
-    "E501",
-    "B905",
-]
+select = ["D100"]
+ignore = ["D203", "E501", "B905"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"**/tests/*" = [
-    "D",
-]
-"**/examples/*" = [
-    "D",
-]
-"**/scrap/*" = [
-    "D",
-]
+"**/tests/*" = ["D"]
+"**/examples/*" = ["D"]
+"**/scrap/*" = ["D"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = [
-    "tests",
-]
-doctest_optionflags = [
-    "NORMALIZE_WHITESPACE",
-    "ELLIPSIS",
-]
+testpaths = ["tests"]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "ELLIPSIS"]
 
 [tool.wads.ci]
 project_name = ""
@@ -110,24 +76,12 @@ enabled = false
 enabled = false
 
 [tool.wads.ci.testing]
-python_versions = [
-    "3.10",
-    "3.12",
-]
-pytest_args = [
-    "-v",
-    "--tb=short",
-]
+python_versions = ["3.10", "3.12"]
+pytest_args = ["-v", "--tb=short"]
 coverage_enabled = true
 coverage_threshold = 0
-coverage_report_format = [
-    "term",
-    "xml",
-]
-exclude_paths = [
-    "examples",
-    "scrap",
-]
+coverage_report_format = ["term", "xml"]
+exclude_paths = ["examples", "scrap"]
 test_on_windows = true
 
 [tool.wads.ci.metrics]
@@ -147,8 +101,4 @@ enabled = true
 [tool.wads.ci.docs]
 enabled = true
 builder = "epythet"
-ignore_paths = [
-    "tests/",
-    "scrap/",
-    "examples/",
-]
+ignore_paths = ["tests/", "scrap/", "examples/"]

@@ -156,6 +156,32 @@ def video_frames(
         print(f"  {f}")
 
 
+def install_skills(*, target_dir: str = None):
+    """Install ge skills as symlinks in ~/.claude/skills/.
+
+    Creates symlinks so Claude Code can discover ge skills globally.
+    Run without arguments to install to the default location.
+
+    Examples:
+        ge install-skills
+        ge install-skills --target-dir ~/.claude/skills
+    """
+    from ge import install_skills as _install
+    _install(target_dir=target_dir)
+
+
+def uninstall_skills(*, target_dir: str = None):
+    """Remove ge skill symlinks from ~/.claude/skills/.
+
+    Only removes symlinks that point back into ge's own skill directory.
+
+    Examples:
+        ge uninstall-skills
+    """
+    from ge import uninstall_skills as _uninstall
+    _uninstall(target_dir=target_dir)
+
+
 # SSOT: all CLI commands
 _cli_commands = [
     prepare,
@@ -167,6 +193,8 @@ _cli_commands = [
     fetch_discussion,
     media,
     video_frames,
+    install_skills,
+    uninstall_skills,
 ]
 
 

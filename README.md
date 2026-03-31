@@ -55,7 +55,7 @@ All via `gh` CLI, so private repos just work.
 pip install ge
 
 # Prepare context for an issue
-ge prepare owner/repo 42
+ge prepare owner/repo --number 42
 
 # Or from a URL
 ge prepare https://github.com/owner/repo/pull/7
@@ -73,13 +73,14 @@ ge analyze-issue owner/repo 42
 ## Commands
 
 ```
-ge prepare <repo> <N>              Full context (auto-detects issue/PR/discussion)
-ge prepare-discussion <repo> <N>   Full context for a GitHub Discussion
-ge analyze-issue <repo> <N>        Freshness analysis (JSON, no download)
-ge analyze-pr <repo> <N>           PR review analysis with CI status (JSON)
-ge fetch-issue <repo> <N>          Raw issue JSON
-ge fetch-pr <repo> <N>             Raw PR JSON
-ge fetch-discussion <repo> <N>     GitHub Discussion JSON
+ge prepare <repo> --number <N>              Full context (auto-detects issue/PR/discussion)
+ge prepare <url>                           Full context from a GitHub URL
+ge prepare-discussion <repo> --number <N>  Full context for a GitHub Discussion
+ge analyze-issue <repo> <N>                Freshness analysis (JSON, no download)
+ge analyze-pr <repo> <N>                   PR review analysis with CI status (JSON)
+ge fetch-issue <repo> <N>                  Raw issue JSON
+ge fetch-pr <repo> <N>                     Raw PR JSON
+ge fetch-discussion <repo> <N>             GitHub Discussion JSON
 ge media <file.md>                 Download media from markdown
 ge video-frames <video>            Extract frames (scene detection by default)
 ge install-skills                  Register skills with Claude Code (~/.claude/skills/)

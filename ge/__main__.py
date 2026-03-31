@@ -2,7 +2,7 @@
 
 Usage::
 
-    python -m ge prepare owner/repo 42
+    python -m ge prepare owner/repo --number 42
     python -m ge prepare https://github.com/owner/repo/issues/42
     python -m ge analyze-issue owner/repo 42
     python -m ge analyze-pr owner/repo 7
@@ -22,7 +22,7 @@ def prepare(url_or_spec: str, number: int = None, *, output_dir: str = None):
     By default, context is written to ~/.cache/ge/<owner>/<repo>/<kind>_<number>/.
 
     Examples:
-        ge prepare owner/repo 42
+        ge prepare owner/repo --number 42
         ge prepare https://github.com/owner/repo/pull/7
     """
     from ge import prepare as _prepare
@@ -111,7 +111,7 @@ def prepare_discussion(repo: str, number: int, *, output_dir: str = None):
     By default, context is written to ~/.cache/ge/<owner>/<repo>/discussion_<number>/.
 
     Examples:
-        ge prepare-discussion owner/repo 5
+        ge prepare-discussion owner/repo --number 5
     """
     from ge.context import prepare_discussion as _prepare
 

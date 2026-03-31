@@ -38,7 +38,7 @@ misc/docs/
 ## Current State: Working core
 
 The core workflow works:
-1. `ge prepare owner/repo 42` → fetches issue, comments, downloads media, runs analysis, writes context doc
+1. `ge prepare owner/repo --number 42` → fetches issue, comments, downloads media, runs analysis, writes context doc
 2. `ge analyze-issue` / `ge analyze-pr` → quick freshness check without media download
 3. SKILL.md teaches Claude Code the workflow
 

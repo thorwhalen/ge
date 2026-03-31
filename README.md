@@ -7,7 +7,14 @@ pip install ge
 ge install-skills   # register skills with Claude Code
 ```
 
-Now, from any project, tell your AI agent "work on issue #42" — it will prepare full context, check freshness, download media, and proceed with informed decisions.
+Now, from any project, tell your AI agent "work on THIS" — where THIS can be:
+
+- **A GitHub URL:** `work on https://github.com/owner/repo/issues/42`
+- **A bare number:** `work on issue #42` (assumes the current repo)
+- **A repo+number:** `work on owner/repo#42`
+- **A pre-prepared context folder:** `work on ~/.cache/ge/owner/repo/issue_42`
+
+The agent resolves whatever you give it, **confirms** what it understood before proceeding, loads or prepares full context (body, comments, media, freshness analysis, AI image descriptions), and works on the issue.
 
 ## Install skills for Claude Code
 
@@ -19,11 +26,12 @@ ge install-skills
 
 This creates symlinks in `~/.claude/skills/` pointing to the skills bundled with `ge`. From then on, when you ask Claude Code to work on a GitHub issue in any project, it will automatically:
 
-1. Verify the issue belongs to the current project
-2. Fetch the full issue context (body, comments, media, cross-references)
-3. Analyze freshness — is it stale? already fixed? has related merged PRs?
-4. Ask you before working on ambiguous or likely-resolved issues
-5. Describe images automatically via the Claude API (or ask you to paste them as fallback)
+1. **Resolve** your input — URL, number, folder path, `owner/repo#N` — into a target
+2. **Confirm** with you what it resolved before doing any work
+3. **Load or prepare** full context (body, comments, media, cross-references)
+4. **Analyze freshness** — is it stale? already fixed? has related merged PRs?
+5. **Describe images** via the Claude API (or ask you to paste them as fallback)
+6. **Ask you** before working on ambiguous or likely-resolved issues
 
 Three skills are installed:
 

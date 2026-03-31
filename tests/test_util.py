@@ -188,6 +188,38 @@ class TestExtractMediaUrls:
         kinds = {u['kind'] for u in urls}
         assert kinds == {'image', 'video'}
 
+    def test_bare_github_asset_url(self):
+        """Bare GitHub user-attachment URLs (no extension) are detected."""
+        md = (
+            'Bug demo:\n'
+            'https://github.com/user-attachments/assets/4959e593-3dcd-4a5d-88ab-25794a499f36\n'
+            'See above.'
+        )
+        urls = extract_media_urls(md)
+        assert len(urls) == 1
+        assert urls[0]['kind'] == 'unknown'
+        assert '4959e593' in urls[0]['url']
+
+    def test_github_asset_url_dedup_with_img_tag(self):
+        """A GitHub asset URL in an <img> tag is not duplicated by the bare URL pattern."""
+        uuid = 'aaaa-bbbb-cccc-dddd'
+        url = f'https://github.com/user-attachments/assets/{uuid}'
+        md = f'<img src="{url}" />\n{url}'
+        urls = extract_media_urls(md)
+        assert len(urls) == 1
+        assert urls[0]['kind'] == 'image'  # img tag wins (matched first)
+
+    def test_github_asset_mixed_images_and_videos(self):
+        """Mixed <img> tags and bare asset URLs in same markdown."""
+        md = (
+            '<img src="https://github.com/user-attachments/assets/img-uuid-1" />\n'
+            'https://github.com/user-attachments/assets/vid-uuid-1\n'
+        )
+        urls = extract_media_urls(md)
+        assert len(urls) == 2
+        kinds = {u['kind'] for u in urls}
+        assert kinds == {'image', 'unknown'}
+
     def test_empty_markdown(self):
         assert extract_media_urls('') == []
 

@@ -50,7 +50,18 @@ After calling `prepare_*`, two files are written to the output directory (return
 | `issue_42_context.md` | Markdown | Human/agent-readable context document |
 | `issue_42_context.json` | JSON | Structured data for programmatic access |
 
-The naming pattern is `{kind}_{number}_context.{ext}` where kind is `issue`, `pr`, or `discussion`. Media files are saved to a `media/` subdirectory within the same output directory.
+The naming pattern is `{kind}_{number}_context.{ext}` where kind is `issue`, `pr`, or `discussion`.
+
+Media files are saved to a `media/` subdirectory. File types are auto-detected from content (magic bytes), and correct extensions are added (`.png`, `.jpg`, `.mp4`, etc.). Videos get a directory named after their UUID for extracted frames:
+
+```
+media/
+├── <uuid>.png              ← image (with correct extension)
+├── <uuid>.mp4              ← video source
+└── <uuid>/                 ← video frames directory
+    ├── scene_001.jpg
+    └── scene_002.jpg
+```
 
 ## Context Document Structure
 

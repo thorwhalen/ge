@@ -84,7 +84,7 @@ If the issue contains important screenshots, error captures, or UI mockups:
 3. If the user pastes images, incorporate what you see into your understanding.
 4. If the user declines, work from the textual context.
 
-For **videos**: frames are extracted to `_frames/` subdirectories. Suggest the user paste key frames.
+For **videos**: frames are extracted into a directory named after the video's UUID (e.g., `media/<uuid>/scene_001.jpg`). The source video is also saved (e.g., `media/<uuid>.mp4`). Suggest the user paste key frames.
 
 ### Step 5: Check referenced code
 

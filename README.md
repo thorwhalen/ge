@@ -40,8 +40,8 @@ To remove the skills: `ge uninstall-skills`
 `ge` fetches an issue or PR and assembles **everything** an agent needs:
 
 - **Issue/PR body and all comments** — with media URLs rewritten to local paths
-- **Images downloaded** — screenshots, mockups, error captures
-- **Video frames extracted** — via ffmpeg scene detection, capturing actual visual changes
+- **Images downloaded** — screenshots, mockups, error captures (with auto-detected extensions)
+- **Video frames extracted** — via ffmpeg scene detection; bare GitHub asset URLs are auto-detected as video/image from content
 - **Freshness analysis** — is this issue stale? already fixed? has related merged PRs?
 - **Cross-references** — commits and PRs that mention this issue
 - **Code file checks** — do the files mentioned in the issue still exist?

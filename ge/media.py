@@ -17,6 +17,42 @@ from ge.util import (
 )
 
 
+def _detect_media_type(filepath):
+    """Detect media type from file magic bytes.
+
+    Returns (kind, extension) where kind is 'image' or 'video',
+    or (None, None) if unrecognized.
+
+    >>> import tempfile, os
+    >>> f = os.path.join(tempfile.mkdtemp(), 'test')
+    >>> _ = open(f, 'wb').write(b'\\x89PNG\\r\\n\\x1a\\n' + b'\\x00' * 20)
+    >>> _detect_media_type(f)
+    ('image', '.png')
+    """
+    try:
+        with open(filepath, "rb") as f:
+            header = f.read(12)
+    except OSError:
+        return None, None
+    if len(header) < 4:
+        return None, None
+    if header[:8] == b"\x89PNG\r\n\x1a\n":
+        return "image", ".png"
+    if header[:3] == b"\xff\xd8\xff":
+        return "image", ".jpg"
+    if header[:4] == b"GIF8":
+        return "image", ".gif"
+    if header[:4] == b"RIFF" and len(header) >= 12 and header[8:12] == b"WEBP":
+        return "image", ".webp"
+    if len(header) >= 8 and header[4:8] == b"ftyp":
+        return "video", ".mp4"
+    if header[:4] == b"\x1a\x45\xdf\xa3":
+        return "video", ".webm"
+    if header[:4] == b"RIFF" and len(header) >= 12 and header[8:12] == b"AVI ":
+        return "video", ".avi"
+    return None, None
+
+
 def _sanitize_filename(url):
     """Derive a safe filename from a URL, preserving extension.
 
@@ -86,9 +122,10 @@ def download_media(
     used_names = set()
 
     for item in media:
-        if item["kind"] == "image" and not download_images:
+        kind = item["kind"]
+        if kind == "image" and not download_images:
             continue
-        if item["kind"] == "video" and not download_videos:
+        if kind == "video" and not download_videos:
             continue
 
         url = item["url"]
@@ -107,10 +144,20 @@ def download_media(
         dest = out / name
         ok = _download_file(url, dest)
 
+        # Detect actual content type and add extension if missing
+        if ok:
+            detected_kind, ext = _detect_media_type(dest)
+            if detected_kind:
+                kind = detected_kind
+            if ext and not dest.suffix:
+                new_dest = dest.with_name(dest.name + ext)
+                dest.rename(new_dest)
+                dest = new_dest
+
         entry = {
             "url": url,
             "local_path": str(dest) if ok else None,
-            "kind": item["kind"],
+            "kind": kind,
             "alt": item["alt"],
             "status": "ok" if ok else "failed",
         }
@@ -279,7 +326,10 @@ def process_all_media(markdown, output_dir=None):
         local = entry["local_path"]
         if entry["kind"] == "video":
             try:
-                frames = extract_video_frames(local)
+                video_path = Path(local)
+                # Frames go into a directory named after the video's stem (UUID)
+                frame_dir = video_path.parent / video_path.stem
+                frames = extract_video_frames(local, output_dir=str(frame_dir))
                 video_frames[local] = frames
                 all_images.extend(frames)
             except Exception as e:

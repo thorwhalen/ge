@@ -6,10 +6,61 @@ from unittest.mock import patch, MagicMock
 
 from ge.media import (
     _sanitize_filename,
+    _detect_media_type,
     download_media,
     extract_video_frames,
     process_all_media,
 )
+
+
+# ---------------------------------------------------------------------------
+# _detect_media_type
+# ---------------------------------------------------------------------------
+
+
+class TestDetectMediaType:
+    def test_png(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 20)
+        assert _detect_media_type(f) == ("image", ".png")
+
+    def test_jpeg(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"\xff\xd8\xff\xe0" + b"\x00" * 20)
+        assert _detect_media_type(f) == ("image", ".jpg")
+
+    def test_gif(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"GIF89a" + b"\x00" * 20)
+        assert _detect_media_type(f) == ("image", ".gif")
+
+    def test_webp(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"RIFF\x00\x00\x00\x00WEBP" + b"\x00" * 20)
+        assert _detect_media_type(f) == ("image", ".webp")
+
+    def test_mp4(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"\x00\x00\x00\x1cftypisom" + b"\x00" * 20)
+        assert _detect_media_type(f) == ("video", ".mp4")
+
+    def test_webm(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"\x1a\x45\xdf\xa3" + b"\x00" * 20)
+        assert _detect_media_type(f) == ("video", ".webm")
+
+    def test_unknown_content(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"not a known format at all")
+        assert _detect_media_type(f) == (None, None)
+
+    def test_empty_file(self, tmp_path):
+        f = tmp_path / "file"
+        f.write_bytes(b"")
+        assert _detect_media_type(f) == (None, None)
+
+    def test_nonexistent_file(self, tmp_path):
+        assert _detect_media_type(tmp_path / "nope") == (None, None)
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +176,63 @@ class TestDownloadMedia:
             assert entry['status'] == 'failed'
             assert entry['local_path'] is None
         assert result['url_map'] == {}
+
+    def test_extension_added_from_content_detection(self, tmp_path):
+        """Files without extension get one based on magic byte detection."""
+        uuid = 'abcd1234-5678-9abc-def0-111111111111'
+        md = f'<img src="https://github.com/user-attachments/assets/{uuid}" />'
+        media_dir = tmp_path / 'media'
+
+        def fake_download(url, dest_path):
+            # Write a real PNG header so detection works
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            dest_path.write_bytes(b'\x89PNG\r\n\x1a\n' + b'\x00' * 20)
+            return True
+
+        with patch('ge.media._download_file', side_effect=fake_download):
+            result = download_media(md, str(media_dir))
+
+        entry = result['manifest'][0]
+        assert entry['status'] == 'ok'
+        assert entry['local_path'].endswith('.png')
+        assert entry['kind'] == 'image'
+
+    def test_github_asset_video_detected(self, tmp_path):
+        """Bare GitHub asset URL detected as video gets correct kind and extension."""
+        uuid = 'aaaa-bbbb-cccc-dddd'
+        md = f'https://github.com/user-attachments/assets/{uuid}'
+        media_dir = tmp_path / 'media'
+
+        def fake_download(url, dest_path):
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            # MP4 magic: ftyp at offset 4
+            dest_path.write_bytes(b'\x00\x00\x00\x1cftypisom' + b'\x00' * 20)
+            return True
+
+        with patch('ge.media._download_file', side_effect=fake_download):
+            result = download_media(md, str(media_dir))
+
+        entry = result['manifest'][0]
+        assert entry['kind'] == 'video'
+        assert entry['local_path'].endswith('.mp4')
+
+    def test_existing_extension_not_doubled(self, tmp_path):
+        """Files that already have an extension don't get a second one."""
+        md = '![img](https://example.com/photo.png)'
+        media_dir = tmp_path / 'media'
+
+        def fake_download(url, dest_path):
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            dest_path.write_bytes(b'\x89PNG\r\n\x1a\n' + b'\x00' * 20)
+            return True
+
+        with patch('ge.media._download_file', side_effect=fake_download):
+            result = download_media(md, str(media_dir))
+
+        entry = result['manifest'][0]
+        # Should be photo.png, NOT photo.png.png
+        assert entry['local_path'].endswith('photo.png')
+        assert not entry['local_path'].endswith('.png.png')
 
 
 # ---------------------------------------------------------------------------

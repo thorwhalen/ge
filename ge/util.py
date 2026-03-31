@@ -128,7 +128,7 @@ parse_issue_url = parse_github_url
 def extract_media_urls(markdown):
     """Extract image and video URLs from GitHub-flavored markdown.
 
-    Returns list of dicts with keys: url, alt, kind ('image' or 'video').
+    Returns list of dicts with keys: url, alt, kind ('image', 'video', or 'unknown').
 
     >>> urls = extract_media_urls('![screenshot](https://example.com/img.png)')
     >>> urls[0]['kind']
@@ -164,6 +164,16 @@ def extract_media_urls(markdown):
         if url not in seen:
             seen.add(url)
             results.append({"url": url, "alt": "", "kind": "video"})
+
+    # Bare GitHub user-attachment URLs (no extension — could be image or video,
+    # resolved after download via content-type detection)
+    for m in re.finditer(
+        r"https://github\.com/user-attachments/assets/[\w-]+", markdown
+    ):
+        url = m.group(0)
+        if url not in seen:
+            seen.add(url)
+            results.append({"url": url, "alt": "", "kind": "unknown"})
 
     return results
 

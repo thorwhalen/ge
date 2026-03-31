@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.util &mdash; ge 0.1.0 documentation</title>
+  <title>ge.util &mdash; ge 0.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/documentation_options.js?v=a58bc63e"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="media.html">ge.media</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ge.util</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ge.util.check_ffmpeg"><code class="docutils literal notranslate"><span class="pre">check_ffmpeg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.util.default_output_dir"><code class="docutils literal notranslate"><span class="pre">default_output_dir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.util.ensure_dir"><code class="docutils literal notranslate"><span class="pre">ensure_dir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.util.extract_media_urls"><code class="docutils literal notranslate"><span class="pre">extract_media_urls()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.util.gh_api"><code class="docutils literal notranslate"><span class="pre">gh_api()</span></code></a></li>
@@ -99,6 +100,20 @@
 <dt class="sig sig-object py" id="ge.util.check_ffmpeg">
 <span class="sig-prename descclassname"><span class="pre">ge.util.</span></span><span class="sig-name descname"><span class="pre">check_ffmpeg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/util.html#check_ffmpeg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.util.check_ffmpeg" title="Link to this definition"></a></dt>
 <dd><p>Check if ffmpeg is available.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.util.default_output_dir">
+<span class="sig-prename descclassname"><span class="pre">ge.util.</span></span><span class="sig-name descname"><span class="pre">default_output_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'issue'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/util.html#default_output_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.util.default_output_dir" title="Link to this definition"></a></dt>
+<dd><p>Compute the default output directory under the user’s cache.</p>
+<p>Returns <code class="docutils literal notranslate"><span class="pre">~/.cache/ge/&lt;owner&gt;/&lt;repo&gt;/&lt;kind&gt;_&lt;number&gt;</span></code>, e.g.
+<code class="docutils literal notranslate"><span class="pre">~/.cache/ge/thorwhalen/dol/issue_42</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="p">;</span> <span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="s1">&#39;thorwhalen/dol&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="s1">&#39;issue&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="s1">&#39;.cache&#39;</span><span class="p">,</span> <span class="s1">&#39;ge&#39;</span><span class="p">,</span> <span class="s1">&#39;thorwhalen&#39;</span><span class="p">,</span> <span class="s1">&#39;dol&#39;</span><span class="p">,</span> <span class="s1">&#39;issue_42&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -184,8 +199,8 @@
 <span class="sig-prename descclassname"><span class="pre">ge.util.</span></span><span class="sig-name descname"><span class="pre">rewrite_media_refs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_to_local</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/util.html#rewrite_media_refs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.util.rewrite_media_refs" title="Link to this definition"></a></dt>
 <dd><p>Replace media URLs in markdown with local file paths.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="s1">&#39;![bug](https://example.com/bug.png)&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rewrite_media_refs</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;https://example.com/bug.png&#39;</span><span class="p">:</span> <span class="s1">&#39;.ge/media/bug.png&#39;</span><span class="p">})</span>
-<span class="go">&#39;![bug](.ge/media/bug.png)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rewrite_media_refs</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;https://example.com/bug.png&#39;</span><span class="p">:</span> <span class="s1">&#39;media/bug.png&#39;</span><span class="p">})</span>
+<span class="go">&#39;![bug](media/bug.png)&#39;</span>
 </pre></div>
 </div>
 </dd></dl>

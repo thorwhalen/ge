@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.analysis &mdash; ge 0.1.0 documentation</title>
+  <title>ge.analysis &mdash; ge 0.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/documentation_options.js?v=a58bc63e"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -106,7 +106,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse ISO 8601 date string to datetime.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">datestr</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">datestr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;+00:00&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">datestr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="s2">&quot;+00:00&quot;</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_days_ago</span><span class="p">(</span><span class="n">datestr</span><span class="p">):</span>
@@ -127,13 +127,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">paths</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="c1"># Backtick-wrapped paths</span>
-    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;`([^`]+\.\w{1,10})`&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;`([^`]+\.\w{1,10})`&quot;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">):</span>
         <span class="n">candidate</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="c1"># Heuristic: looks like a file path (has extension, no spaces usually)</span>
-        <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">candidate</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">candidate</span> <span class="ow">or</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">:</span>
             <span class="n">paths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
     <span class="c1"># Bare paths in text (conservative)</span>
-    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(?:^|\s)((?:[\w.-]+/)+[\w.-]+\.\w{1,10})&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(?:^|\s)((?:[\w.-]+/)+[\w.-]+\.\w{1,10})&quot;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">):</span>
         <span class="n">paths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
 
@@ -164,21 +164,21 @@
     <span class="n">signals</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Basic state</span>
-    <span class="n">state</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
-    <span class="n">age_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created_at&#39;</span><span class="p">))</span>
-    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span> <span class="p">[])]</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+    <span class="n">age_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">))</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="p">[])]</span>
 
     <span class="c1"># Last activity</span>
-    <span class="n">activity_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created_at&#39;</span><span class="p">)]</span>
+    <span class="n">activity_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">)]</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">:</span>
-        <span class="n">activity_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created_at&#39;</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;updated_at&#39;</span><span class="p">):</span>
-        <span class="n">activity_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">issue</span><span class="p">[</span><span class="s1">&#39;updated_at&#39;</span><span class="p">])</span>
+        <span class="n">activity_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">):</span>
+        <span class="n">activity_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">issue</span><span class="p">[</span><span class="s2">&quot;updated_at&quot;</span><span class="p">])</span>
     <span class="n">last_activity</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">activity_dates</span> <span class="k">if</span> <span class="n">d</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="n">last_activity_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">last_activity</span><span class="p">)</span>
 
     <span class="c1"># Closed?</span>
-    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;closed&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Issue is CLOSED (closed </span><span class="si">{</span><span class="n">_days_ago</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;closed_at&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">))</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="si">}</span><span class="s2"> days ago)&quot;</span>
         <span class="p">)</span>
@@ -190,36 +190,34 @@
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Last activity was </span><span class="si">{</span><span class="n">last_activity_days</span><span class="si">}</span><span class="s2"> days ago&quot;</span><span class="p">)</span>
 
     <span class="c1"># Related PRs that may have fixed it</span>
-    <span class="n">merged_prs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">related_prs</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;closed&#39;</span><span class="p">]</span>
-    <span class="n">open_prs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">related_prs</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;open&#39;</span><span class="p">]</span>
+    <span class="n">merged_prs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">related_prs</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">]</span>
+    <span class="n">open_prs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">related_prs</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;open&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">merged_prs</span><span class="p">:</span>
-        <span class="n">titles</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">merged_prs</span><span class="p">)</span>
+        <span class="n">titles</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">merged_prs</span><span class="p">)</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Related merged/closed PRs: </span><span class="si">{</span><span class="n">titles</span><span class="si">}</span><span class="s2"> — may already be fixed&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">open_prs</span><span class="p">:</span>
-        <span class="n">titles</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">open_prs</span><span class="p">)</span>
+        <span class="n">titles</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">open_prs</span><span class="p">)</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Related open PRs: </span><span class="si">{</span><span class="n">titles</span><span class="si">}</span><span class="s2"> — someone may be working on this&quot;</span><span class="p">)</span>
 
     <span class="c1"># Related commits</span>
     <span class="k">if</span> <span class="n">related_commits</span><span class="p">:</span>
-        <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">related_commits</span><span class="p">)</span><span class="si">}</span><span class="s2"> commit(s) reference this issue&quot;</span>
-        <span class="p">)</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">related_commits</span><span class="p">)</span><span class="si">}</span><span class="s2"> commit(s) reference this issue&quot;</span><span class="p">)</span>
 
     <span class="c1"># Labels hinting at status</span>
-    <span class="n">status_labels</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;wontfix&#39;</span><span class="p">,</span> <span class="s1">&#39;duplicate&#39;</span><span class="p">,</span> <span class="s1">&#39;invalid&#39;</span><span class="p">,</span> <span class="s1">&#39;stale&#39;</span><span class="p">,</span> <span class="s1">&#39;resolved&#39;</span><span class="p">}</span>
+    <span class="n">status_labels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;wontfix&quot;</span><span class="p">,</span> <span class="s2">&quot;duplicate&quot;</span><span class="p">,</span> <span class="s2">&quot;invalid&quot;</span><span class="p">,</span> <span class="s2">&quot;stale&quot;</span><span class="p">,</span> <span class="s2">&quot;resolved&quot;</span><span class="p">}</span>
     <span class="n">found_status</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">status_labels</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">found_status</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Status labels: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">found_status</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Labels that inform priority and type</span>
     <span class="n">priority_labels</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;good first issue&#39;</span><span class="p">:</span> <span class="s1">&#39;Good first issue — likely well-scoped and approachable&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;help wanted&#39;</span><span class="p">:</span> <span class="s1">&#39;Help wanted — maintainers welcome contributions&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;priority:high&#39;</span><span class="p">:</span> <span class="s1">&#39;High priority&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;priority:critical&#39;</span><span class="p">:</span> <span class="s1">&#39;Critical priority&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;bug&#39;</span><span class="p">:</span> <span class="s1">&#39;Labeled as bug&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;enhancement&#39;</span><span class="p">:</span> <span class="s1">&#39;Labeled as enhancement/feature request&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;documentation&#39;</span><span class="p">:</span> <span class="s1">&#39;Labeled as documentation&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;good first issue&quot;</span><span class="p">:</span> <span class="s2">&quot;Good first issue — likely well-scoped and approachable&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;help wanted&quot;</span><span class="p">:</span> <span class="s2">&quot;Help wanted — maintainers welcome contributions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;priority:high&quot;</span><span class="p">:</span> <span class="s2">&quot;High priority&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;priority:critical&quot;</span><span class="p">:</span> <span class="s2">&quot;Critical priority&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bug&quot;</span><span class="p">:</span> <span class="s2">&quot;Labeled as bug&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;enhancement&quot;</span><span class="p">:</span> <span class="s2">&quot;Labeled as enhancement/feature request&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;documentation&quot;</span><span class="p">:</span> <span class="s2">&quot;Labeled as documentation&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
         <span class="n">desc</span> <span class="o">=</span> <span class="n">priority_labels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
@@ -227,10 +225,16 @@
             <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
 
     <span class="c1"># Check for closing keywords in comments</span>
-    <span class="n">closing_phrases</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;fixed in&#39;</span><span class="p">,</span> <span class="s1">&#39;resolved by&#39;</span><span class="p">,</span> <span class="s1">&#39;this has been&#39;</span><span class="p">,</span> <span class="s1">&#39;closing as&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;no longer&#39;</span><span class="p">,</span> <span class="s1">&#39;already been&#39;</span><span class="p">]</span>
+    <span class="n">closing_phrases</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;fixed in&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;resolved by&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;this has been&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;closing as&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;no longer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;already been&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">closing_phrases</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">body</span><span class="p">:</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -240,30 +244,30 @@
                 <span class="k">break</span>
 
     <span class="c1"># Referenced files</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
-    <span class="n">all_text</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">all_text</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">)</span>
     <span class="n">referenced_files</span> <span class="o">=</span> <span class="n">_extract_file_refs</span><span class="p">(</span><span class="n">all_text</span><span class="p">)</span>
 
     <span class="c1"># Recommendation</span>
-    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;closed&#39;</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;likely_resolved&#39;</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;likely_resolved&quot;</span>
     <span class="k">elif</span> <span class="n">merged_prs</span> <span class="ow">or</span> <span class="n">found_status</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;investigate&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;investigate&quot;</span>
     <span class="k">elif</span> <span class="n">last_activity_days</span> <span class="ow">and</span> <span class="n">last_activity_days</span> <span class="o">&gt;</span> <span class="mi">365</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;investigate&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;investigate&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;proceed&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;proceed&quot;</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">,</span>
-        <span class="s1">&#39;age_days&#39;</span><span class="p">:</span> <span class="n">age_days</span><span class="p">,</span>
-        <span class="s1">&#39;last_activity_days&#39;</span><span class="p">:</span> <span class="n">last_activity_days</span><span class="p">,</span>
-        <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span>
-        <span class="s1">&#39;related_prs&#39;</span><span class="p">:</span> <span class="n">related_prs</span><span class="p">,</span>
-        <span class="s1">&#39;related_commits&#39;</span><span class="p">:</span> <span class="n">related_commits</span><span class="p">,</span>
-        <span class="s1">&#39;referenced_files&#39;</span><span class="p">:</span> <span class="n">referenced_files</span><span class="p">,</span>
-        <span class="s1">&#39;signals&#39;</span><span class="p">:</span> <span class="n">signals</span><span class="p">,</span>
-        <span class="s1">&#39;recommendation&#39;</span><span class="p">:</span> <span class="n">recommendation</span><span class="p">,</span>
+        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">state</span><span class="p">,</span>
+        <span class="s2">&quot;age_days&quot;</span><span class="p">:</span> <span class="n">age_days</span><span class="p">,</span>
+        <span class="s2">&quot;last_activity_days&quot;</span><span class="p">:</span> <span class="n">last_activity_days</span><span class="p">,</span>
+        <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span>
+        <span class="s2">&quot;related_prs&quot;</span><span class="p">:</span> <span class="n">related_prs</span><span class="p">,</span>
+        <span class="s2">&quot;related_commits&quot;</span><span class="p">:</span> <span class="n">related_commits</span><span class="p">,</span>
+        <span class="s2">&quot;referenced_files&quot;</span><span class="p">:</span> <span class="n">referenced_files</span><span class="p">,</span>
+        <span class="s2">&quot;signals&quot;</span><span class="p">:</span> <span class="n">signals</span><span class="p">,</span>
+        <span class="s2">&quot;recommendation&quot;</span><span class="p">:</span> <span class="n">recommendation</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -286,15 +290,15 @@
 
     <span class="n">signals</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">state</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
-    <span class="n">merged</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;merged&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-    <span class="n">mergeable</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mergeable&#39;</span><span class="p">)</span>
-    <span class="n">mergeable_state</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mergeable_state&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
-    <span class="n">draft</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;draft&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;merged&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">mergeable</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mergeable&quot;</span><span class="p">)</span>
+    <span class="n">mergeable_state</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mergeable_state&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+    <span class="n">draft</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;draft&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">merged</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PR is already MERGED&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;closed&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PR is CLOSED without merge&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">draft</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PR is a DRAFT&quot;</span><span class="p">)</span>
@@ -302,11 +306,13 @@
     <span class="c1"># Review states</span>
     <span class="n">review_states</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reviews</span><span class="p">:</span>
-        <span class="n">user</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
-        <span class="n">rstate</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;?&quot;</span><span class="p">)</span>
+        <span class="n">rstate</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;?&quot;</span><span class="p">)</span>
         <span class="n">review_states</span><span class="p">[</span><span class="n">user</span><span class="p">]</span> <span class="o">=</span> <span class="n">rstate</span>
-    <span class="n">approved</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">review_states</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s1">&#39;APPROVED&#39;</span><span class="p">]</span>
-    <span class="n">changes_requested</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">review_states</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s1">&#39;CHANGES_REQUESTED&#39;</span><span class="p">]</span>
+    <span class="n">approved</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">review_states</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;APPROVED&quot;</span><span class="p">]</span>
+    <span class="n">changes_requested</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">review_states</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;CHANGES_REQUESTED&quot;</span>
+    <span class="p">]</span>
     <span class="k">if</span> <span class="n">approved</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Approved by: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">approved</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">changes_requested</span><span class="p">:</span>
@@ -315,73 +321,73 @@
     <span class="c1"># Merge conflicts</span>
     <span class="k">if</span> <span class="n">mergeable</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PR has MERGE CONFLICTS&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">mergeable_state</span> <span class="o">==</span> <span class="s1">&#39;dirty&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">mergeable_state</span> <span class="o">==</span> <span class="s2">&quot;dirty&quot;</span><span class="p">:</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PR may have merge conflicts (mergeable_state=dirty)&quot;</span><span class="p">)</span>
 
     <span class="c1"># Files changed</span>
     <span class="n">n_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-    <span class="n">n_additions</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;additions&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
-    <span class="n">n_deletions</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;deletions&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
+    <span class="n">n_additions</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;additions&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
+    <span class="n">n_deletions</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;deletions&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
     <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Changes: </span><span class="si">{</span><span class="n">n_files</span><span class="si">}</span><span class="s2"> files, +</span><span class="si">{</span><span class="n">n_additions</span><span class="si">}</span><span class="s2">/-</span><span class="si">{</span><span class="n">n_deletions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># CI status</span>
     <span class="n">ci_state</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">head_sha</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;head&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sha&#39;</span><span class="p">)</span>
+    <span class="n">head_sha</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;head&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sha&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">head_sha</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">status</span> <span class="o">=</span> <span class="n">get_commit_status</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">head_sha</span><span class="p">)</span>
-            <span class="n">ci_state</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;state&#39;</span><span class="p">)</span>  <span class="c1"># success, failure, pending, error</span>
-            <span class="n">total</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;total_count&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s1">&#39;success&#39;</span><span class="p">:</span>
+            <span class="n">ci_state</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">)</span>  <span class="c1"># success, failure, pending, error</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;total_count&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CI checks PASSED (</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> check(s))&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s1">&#39;failure&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s2">&quot;failure&quot;</span><span class="p">:</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CI checks FAILED (</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> check(s))&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s1">&#39;pending&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s2">&quot;pending&quot;</span><span class="p">:</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CI checks PENDING (</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> check(s))&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ci_state</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CI checks ERROR (</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> check(s))&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>  <span class="c1"># CI status not available</span>
 
     <span class="c1"># Referenced issues (from PR body)</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
     <span class="n">issue_refs</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
-        <span class="sa">r</span><span class="s1">&#39;(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span>
+        <span class="sa">r</span><span class="s2">&quot;(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)&quot;</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span>
     <span class="p">)</span>
     <span class="n">linked_issues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">issue_refs</span><span class="p">))</span>
 
-    <span class="n">age_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created_at&#39;</span><span class="p">))</span>
-    <span class="n">last_activity_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;updated_at&#39;</span><span class="p">))</span>
+    <span class="n">age_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">))</span>
+    <span class="n">last_activity_days</span> <span class="o">=</span> <span class="n">_days_ago</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">))</span>
 
     <span class="c1"># Recommendation</span>
     <span class="k">if</span> <span class="n">merged</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;already_merged&#39;</span>
-    <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;closed&#39;</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;closed_unmerged&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;already_merged&quot;</span>
+    <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;closed_unmerged&quot;</span>
     <span class="k">elif</span> <span class="n">changes_requested</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;needs_changes&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;needs_changes&quot;</span>
     <span class="k">elif</span> <span class="n">mergeable</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;resolve_conflicts&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;resolve_conflicts&quot;</span>
     <span class="k">elif</span> <span class="n">draft</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;draft_wip&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;draft_wip&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">recommendation</span> <span class="o">=</span> <span class="s1">&#39;proceed&#39;</span>
+        <span class="n">recommendation</span> <span class="o">=</span> <span class="s2">&quot;proceed&quot;</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">,</span>
-        <span class="s1">&#39;merged&#39;</span><span class="p">:</span> <span class="n">merged</span><span class="p">,</span>
-        <span class="s1">&#39;draft&#39;</span><span class="p">:</span> <span class="n">draft</span><span class="p">,</span>
-        <span class="s1">&#39;mergeable&#39;</span><span class="p">:</span> <span class="n">mergeable</span><span class="p">,</span>
-        <span class="s1">&#39;ci_state&#39;</span><span class="p">:</span> <span class="n">ci_state</span><span class="p">,</span>
-        <span class="s1">&#39;age_days&#39;</span><span class="p">:</span> <span class="n">age_days</span><span class="p">,</span>
-        <span class="s1">&#39;last_activity_days&#39;</span><span class="p">:</span> <span class="n">last_activity_days</span><span class="p">,</span>
-        <span class="s1">&#39;review_states&#39;</span><span class="p">:</span> <span class="n">review_states</span><span class="p">,</span>
-        <span class="s1">&#39;linked_issues&#39;</span><span class="p">:</span> <span class="n">linked_issues</span><span class="p">,</span>
-        <span class="s1">&#39;files_changed&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">],</span>
-        <span class="s1">&#39;n_additions&#39;</span><span class="p">:</span> <span class="n">n_additions</span><span class="p">,</span>
-        <span class="s1">&#39;n_deletions&#39;</span><span class="p">:</span> <span class="n">n_deletions</span><span class="p">,</span>
-        <span class="s1">&#39;signals&#39;</span><span class="p">:</span> <span class="n">signals</span><span class="p">,</span>
-        <span class="s1">&#39;recommendation&#39;</span><span class="p">:</span> <span class="n">recommendation</span><span class="p">,</span>
+        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">state</span><span class="p">,</span>
+        <span class="s2">&quot;merged&quot;</span><span class="p">:</span> <span class="n">merged</span><span class="p">,</span>
+        <span class="s2">&quot;draft&quot;</span><span class="p">:</span> <span class="n">draft</span><span class="p">,</span>
+        <span class="s2">&quot;mergeable&quot;</span><span class="p">:</span> <span class="n">mergeable</span><span class="p">,</span>
+        <span class="s2">&quot;ci_state&quot;</span><span class="p">:</span> <span class="n">ci_state</span><span class="p">,</span>
+        <span class="s2">&quot;age_days&quot;</span><span class="p">:</span> <span class="n">age_days</span><span class="p">,</span>
+        <span class="s2">&quot;last_activity_days&quot;</span><span class="p">:</span> <span class="n">last_activity_days</span><span class="p">,</span>
+        <span class="s2">&quot;review_states&quot;</span><span class="p">:</span> <span class="n">review_states</span><span class="p">,</span>
+        <span class="s2">&quot;linked_issues&quot;</span><span class="p">:</span> <span class="n">linked_issues</span><span class="p">,</span>
+        <span class="s2">&quot;files_changed&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;filename&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">],</span>
+        <span class="s2">&quot;n_additions&quot;</span><span class="p">:</span> <span class="n">n_additions</span><span class="p">,</span>
+        <span class="s2">&quot;n_deletions&quot;</span><span class="p">:</span> <span class="n">n_deletions</span><span class="p">,</span>
+        <span class="s2">&quot;signals&quot;</span><span class="p">:</span> <span class="n">signals</span><span class="p">,</span>
+        <span class="s2">&quot;recommendation&quot;</span><span class="p">:</span> <span class="n">recommendation</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -402,10 +408,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">get_file_at_ref</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref</span><span class="p">)</span>
             <span class="c1"># Return first 30 lines as snippet</span>
-            <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[:</span><span class="mi">30</span><span class="p">]</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;exists&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;snippet&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)}</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="mi">30</span><span class="p">]</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;snippet&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)}</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;exists&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;snippet&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;snippet&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 </pre></div>

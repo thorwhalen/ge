@@ -430,7 +430,9 @@ def describe_images(
     content.append({"type": "text", "text": prompt})
 
     msg = client.messages.create(
-        model=model, max_tokens=max_tokens, messages=[{"role": "user", "content": content}]
+        model=model,
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": content}],
     )
     return msg.content[0].text
 
@@ -509,13 +511,11 @@ def copy_images_to_clipboard(
         copy_cmd = [
             "osascript",
             "-e",
-            f'set the clipboard to '
+            f"set the clipboard to "
             f'(read (POSIX file "{montage_path}") as JPEG picture)',
         ]
         result = subprocess.run(copy_cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            raise RuntimeError(
-                f"Failed to copy to clipboard: {result.stderr.strip()}"
-            )
+            raise RuntimeError(f"Failed to copy to clipboard: {result.stderr.strip()}")
 
     return montage_path

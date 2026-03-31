@@ -29,9 +29,7 @@ def _describe_visual_files(visual_files, *, kind_label="issue"):
     Failures are non-fatal — context preparation continues without descriptions.
     """
     image_exts = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
-    images = [
-        f for f in visual_files if Path(f).suffix.lower() in image_exts
-    ]
+    images = [f for f in visual_files if Path(f).suffix.lower() in image_exts]
     if not images:
         return None
     try:
@@ -332,8 +330,10 @@ def render_issue_context(ctx):
         a(media["image_descriptions"])
         a("")
     elif media.get("all_visual_files"):
-        a("*Image descriptions not available. To analyze images, install "
-          "the `anthropic` package and set `ANTHROPIC_API_KEY`.*")
+        a(
+            "*Image descriptions not available. To analyze images, install "
+            "the `anthropic` package and set `ANTHROPIC_API_KEY`.*"
+        )
         a("")
 
     return "\n".join(lines)
@@ -442,8 +442,10 @@ def render_pr_context(ctx):
         a(media["image_descriptions"])
         a("")
     elif media.get("all_visual_files"):
-        a("*Image descriptions not available. To analyze images, install "
-          "the `anthropic` package and set `ANTHROPIC_API_KEY`.*")
+        a(
+            "*Image descriptions not available. To analyze images, install "
+            "the `anthropic` package and set `ANTHROPIC_API_KEY`.*"
+        )
         a("")
 
     return "\n".join(lines)
@@ -569,8 +571,10 @@ def render_discussion_context(ctx):
         a(media["image_descriptions"])
         a("")
     elif media.get("all_visual_files"):
-        a("*Image descriptions not available. To analyze images, install "
-          "the `anthropic` package and set `ANTHROPIC_API_KEY`.*")
+        a(
+            "*Image descriptions not available. To analyze images, install "
+            "the `anthropic` package and set `ANTHROPIC_API_KEY`.*"
+        )
         a("")
 
     return "\n".join(lines)

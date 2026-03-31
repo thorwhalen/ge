@@ -65,7 +65,9 @@ def prepare(
         if media.get("image_descriptions"):
             print("Image descriptions: included (AI-generated via Claude API)")
         elif media.get("all_visual_files"):
-            print("Image descriptions: not available (install anthropic + set ANTHROPIC_API_KEY)")
+            print(
+                "Image descriptions: not available (install anthropic + set ANTHROPIC_API_KEY)"
+            )
         if media.get("all_visual_files"):
             print("Visual files:")
             for f in media["all_visual_files"]:
@@ -239,7 +241,9 @@ def copy_images(
     kwargs = {}
     if montage_path is not None:
         kwargs["montage_path"] = montage_path
-    path = copy_images_to_clipboard(*image_paths, tile=tile, geometry=geometry, **kwargs)
+    path = copy_images_to_clipboard(
+        *image_paths, tile=tile, geometry=geometry, **kwargs
+    )
     print(f"Montage saved to: {path}")
     print("Copied to clipboard. Paste into Claude Code with Cmd+V.")
 

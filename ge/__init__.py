@@ -40,7 +40,9 @@ from ge.media import (
 from ge.util import parse_github_url
 
 
-def prepare(url_or_spec, number=None, *, output_dir=None, describe_media=True, **kwargs):
+def prepare(
+    url_or_spec, number=None, *, output_dir=None, describe_media=True, **kwargs
+):
     """Prepare context from a GitHub URL or repo+number.
 
     Automatically detects whether it's an issue, PR, or discussion.
@@ -68,15 +70,27 @@ def prepare(url_or_spec, number=None, *, output_dir=None, describe_media=True, *
 
     if kind == "pr":
         return prepare_pr(
-            repo_spec, number, output_dir=output_dir, describe_media=describe_media, **kwargs
+            repo_spec,
+            number,
+            output_dir=output_dir,
+            describe_media=describe_media,
+            **kwargs,
         )
     elif kind == "discussion":
         return prepare_discussion(
-            repo_spec, number, output_dir=output_dir, describe_media=describe_media, **kwargs
+            repo_spec,
+            number,
+            output_dir=output_dir,
+            describe_media=describe_media,
+            **kwargs,
         )
     else:
         return prepare_issue(
-            repo_spec, number, output_dir=output_dir, describe_media=describe_media, **kwargs
+            repo_spec,
+            number,
+            output_dir=output_dir,
+            describe_media=describe_media,
+            **kwargs,
         )
 
 

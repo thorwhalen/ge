@@ -204,9 +204,9 @@ class TestRewriteMediaRefs:
     def test_simple_replacement(self):
         md = '![bug](https://example.com/bug.png)'
         result = rewrite_media_refs(
-            md, {'https://example.com/bug.png': '.ge/media/bug.png'}
+            md, {'https://example.com/bug.png': 'media/bug.png'}
         )
-        assert result == '![bug](.ge/media/bug.png)'
+        assert result == '![bug](media/bug.png)'
 
     def test_multiple_replacements(self):
         md = (

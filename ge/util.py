@@ -172,8 +172,8 @@ def rewrite_media_refs(markdown, url_to_local):
     """Replace media URLs in markdown with local file paths.
 
     >>> md = '![bug](https://example.com/bug.png)'
-    >>> rewrite_media_refs(md, {'https://example.com/bug.png': '.ge/media/bug.png'})
-    '![bug](.ge/media/bug.png)'
+    >>> rewrite_media_refs(md, {'https://example.com/bug.png': 'media/bug.png'})
+    '![bug](media/bug.png)'
     """
     for url, local in url_to_local.items():
         markdown = markdown.replace(url, local)
@@ -185,6 +185,21 @@ def ensure_dir(path):
     p = Path(path)
     p.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def default_output_dir(repo, number, kind="issue"):
+    """Compute the default output directory under the user's cache.
+
+    Returns ``~/.cache/ge/<owner>/<repo>/<kind>_<number>``, e.g.
+    ``~/.cache/ge/thorwhalen/dol/issue_42``.
+
+    >>> import os; home = os.path.expanduser('~')
+    >>> p = default_output_dir('thorwhalen/dol', 42, 'issue')
+    >>> str(p) == os.path.join(home, '.cache', 'ge', 'thorwhalen', 'dol', 'issue_42')
+    True
+    """
+    owner, name = parse_repo_spec(repo)
+    return Path.home() / ".cache" / "ge" / owner / name / f"{kind}_{number}"
 
 
 def check_ffmpeg():

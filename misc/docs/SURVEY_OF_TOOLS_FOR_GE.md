@@ -305,7 +305,7 @@ import moondream as md
 from PIL import Image
 
 model = md.vl(api_key="<key>")  # or local endpoint
-image = Image.open(".ge/media/screenshot.png")
+image = Image.open("media/screenshot.png")
 caption = model.caption(image)["caption"]
 answer = model.query(image, "What error message is shown?")["answer"]
 ```
@@ -327,7 +327,7 @@ response = ollama.chat(
     messages=[{
         'role': 'user',
         'content': 'Describe this screenshot of a UI bug',
-        'images': ['.ge/media/screenshot.png'],
+        'images': ['media/screenshot.png'],
     }]
 )
 ```

@@ -35,7 +35,7 @@ from ge.media import process_all_media, extract_video_frames
 from ge.util import parse_github_url
 
 
-def prepare(url_or_spec, number=None, *, output_dir=".ge", **kwargs):
+def prepare(url_or_spec, number=None, *, output_dir=None, **kwargs):
     """Prepare context from a GitHub URL or repo+number.
 
     Automatically detects whether it's an issue, PR, or discussion.

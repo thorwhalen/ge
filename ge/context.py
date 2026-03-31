@@ -19,10 +19,10 @@ from ge.github import (
 )
 from ge.media import process_all_media
 from ge.analysis import analyze_issue, analyze_pr
-from ge.util import ensure_dir, parse_repo_spec
+from ge.util import ensure_dir, parse_repo_spec, default_output_dir
 
 
-def prepare_issue(repo, number, *, output_dir=".ge", download_media_flag=True):
+def prepare_issue(repo, number, *, output_dir=None, download_media_flag=True):
     """Prepare full context for working on a GitHub issue.
 
     Fetches the issue, comments, media, and performs staleness analysis.
@@ -32,6 +32,8 @@ def prepare_issue(repo, number, *, output_dir=".ge", download_media_flag=True):
 
     >>> # ctx = prepare_issue('owner/repo', 42)
     """
+    if output_dir is None:
+        output_dir = default_output_dir(repo, number, "issue")
     owner, name = parse_repo_spec(repo)
     out = ensure_dir(output_dir)
 
@@ -84,6 +86,8 @@ def prepare_issue(repo, number, *, output_dir=".ge", download_media_flag=True):
         "prepared_at": datetime.now(timezone.utc).isoformat(),
     }
 
+    context["output_dir"] = str(out)
+
     # Write context JSON
     context_file = out / f"issue_{number}_context.json"
     context_file.write_text(json.dumps(context, indent=2))
@@ -97,12 +101,14 @@ def prepare_issue(repo, number, *, output_dir=".ge", download_media_flag=True):
 
 
 def prepare_pr(
-    repo, number, *, output_dir=".ge", download_media_flag=True, include_diff=True
+    repo, number, *, output_dir=None, download_media_flag=True, include_diff=True
 ):
     """Prepare full context for working on or reviewing a GitHub PR.
 
     >>> # ctx = prepare_pr('owner/repo', 7)
     """
+    if output_dir is None:
+        output_dir = default_output_dir(repo, number, "pr")
     owner, name = parse_repo_spec(repo)
     out = ensure_dir(output_dir)
 
@@ -179,6 +185,8 @@ def prepare_pr(
         },
         "prepared_at": datetime.now(timezone.utc).isoformat(),
     }
+
+    context["output_dir"] = str(out)
 
     context_file = out / f"pr_{number}_context.json"
     context_file.write_text(json.dumps(context, indent=2, default=str))
@@ -368,7 +376,7 @@ def render_pr_context(ctx):
     return "\n".join(lines)
 
 
-def prepare_discussion(repo, number, *, output_dir=".ge", download_media_flag=True):
+def prepare_discussion(repo, number, *, output_dir=None, download_media_flag=True):
     """Prepare full context for a GitHub Discussion.
 
     Fetches the discussion and its comments via GraphQL, downloads media,
@@ -376,6 +384,8 @@ def prepare_discussion(repo, number, *, output_dir=".ge", download_media_flag=Tr
 
     >>> # ctx = prepare_discussion('owner/repo', 5)
     """
+    if output_dir is None:
+        output_dir = default_output_dir(repo, number, "discussion")
     owner, name = parse_repo_spec(repo)
     out = ensure_dir(output_dir)
 
@@ -421,6 +431,8 @@ def prepare_discussion(repo, number, *, output_dir=".ge", download_media_flag=Tr
         },
         "prepared_at": datetime.now(timezone.utc).isoformat(),
     }
+
+    context["output_dir"] = str(out)
 
     context_file = out / f"discussion_{number}_context.json"
     context_file.write_text(json.dumps(context, indent=2))

@@ -60,7 +60,7 @@ def _download_file(url, dest_path):
 
 def download_media(
     markdown,
-    output_dir=".ge/media",
+    output_dir=None,
     *,
     download_images=True,
     download_videos=True,
@@ -74,6 +74,8 @@ def download_media(
 
     >>> # result = download_media('![img](https://example.com/a.png)', '/tmp/media')
     """
+    if output_dir is None:
+        output_dir = str(Path.home() / ".cache" / "ge" / "media")
     media = extract_media_urls(markdown)
     out = ensure_dir(output_dir)
 
@@ -146,8 +148,8 @@ def extract_video_frames(
 
     Returns list of paths to extracted frame images (JPEG).
 
-    >>> # frames = extract_video_frames('.ge/media/demo.mp4')
-    >>> # frames = extract_video_frames('.ge/media/demo.mp4', mode='uniform', n_frames=5)
+    >>> # frames = extract_video_frames('demo.mp4')
+    >>> # frames = extract_video_frames('demo.mp4', mode='uniform', n_frames=5)
     """
     check_ffmpeg()
     video_path = Path(video_path)
@@ -256,7 +258,7 @@ def _extract_uniform_frames(video_path, output_dir, n_frames=5):
     return frame_paths
 
 
-def process_all_media(markdown, output_dir=".ge/media"):
+def process_all_media(markdown, output_dir=None):
     """Download all media and extract video frames.
 
     Returns a dict with:

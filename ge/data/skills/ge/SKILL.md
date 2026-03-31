@@ -47,11 +47,13 @@ This auto-detects whether it's an issue, PR, or discussion and:
 - Fetches the body, comments, reviews, timeline
 - Downloads images and extracts video frames
 - Runs freshness/staleness analysis
-- Writes `.ge/issue_42_context.md` and `.ge/issue_42_context.json`
+- Writes context files to `~/.cache/ge/<owner>/<repo>/<kind>_<number>/`
+
+The returned dict includes an `output_dir` key with the actual path used.
 
 ### Step 2: Read the context document
 
-Read the generated markdown file (e.g. `.ge/issue_42_context.md`). It contains everything assembled: body, comments, analysis, media manifest.
+Read the context markdown file from `ctx['output_dir']` (e.g. `~/.cache/ge/owner/repo/issue_42/issue_42_context.md`). It contains everything assembled: body, comments, analysis, media manifest.
 
 ### Step 3: Check the recommendation
 
@@ -77,7 +79,7 @@ The context lists downloaded images under "Media Files".
 
 If the issue contains important screenshots, error captures, or UI mockups:
 
-1. Tell the user: "This issue has N image(s) that may contain important visual context. They've been downloaded to `.ge/media/`. Please paste them into our conversation so I can analyze them."
+1. Tell the user: "This issue has N image(s) that may contain important visual context. They've been downloaded to `<output_dir>/media/`. Please paste them into our conversation so I can analyze them."
 2. List the specific files so the user knows which to paste.
 3. If the user pastes images, incorporate what you see into your understanding.
 4. If the user declines, work from the textual context.

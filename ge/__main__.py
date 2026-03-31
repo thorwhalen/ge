@@ -13,11 +13,13 @@ import json
 import argh
 
 
-def prepare(url_or_spec: str, number: int = None, *, output_dir: str = ".ge"):
+def prepare(url_or_spec: str, number: int = None, *, output_dir: str = None):
     """Prepare full context for a GitHub issue or PR.
 
     Fetches all data, downloads media, runs freshness analysis,
     and writes a structured context document to output_dir.
+
+    By default, context is written to ~/.cache/ge/<owner>/<repo>/<kind>_<number>/.
 
     Examples:
         ge prepare owner/repo 42
@@ -25,9 +27,13 @@ def prepare(url_or_spec: str, number: int = None, *, output_dir: str = ".ge"):
     """
     from ge import prepare as _prepare
 
-    ctx = _prepare(url_or_spec, number, output_dir=output_dir)
+    kwargs = {}
+    if output_dir is not None:
+        kwargs["output_dir"] = output_dir
+    ctx = _prepare(url_or_spec, number, **kwargs)
     kind = ctx["kind"]
     num = ctx["number"]
+    actual_dir = ctx.get("output_dir", output_dir or "?")
 
     # Summary output
     print(f"\n{'=' * 60}")
@@ -50,8 +56,8 @@ def prepare(url_or_spec: str, number: int = None, *, output_dir: str = ".ge"):
             for f in media["all_visual_files"]:
                 print(f"  {f}")
 
-    md_file = f"{output_dir}/{kind}_{num}_context.md"
-    json_file = f"{output_dir}/{kind}_{num}_context.json"
+    md_file = f"{actual_dir}/{kind}_{num}_context.md"
+    json_file = f"{actual_dir}/{kind}_{num}_context.json"
     print(f"\nContext files:")
     print(f"  Markdown: {md_file}")
     print(f"  JSON:     {json_file}")
@@ -96,19 +102,25 @@ def fetch_discussion(repo: str, number: int):
     print(json.dumps(result, indent=2))
 
 
-def prepare_discussion(repo: str, number: int, *, output_dir: str = ".ge"):
+def prepare_discussion(repo: str, number: int, *, output_dir: str = None):
     """Prepare full context for a GitHub Discussion.
 
     Fetches the discussion, comments, downloads media, and writes
     a structured context document to output_dir.
+
+    By default, context is written to ~/.cache/ge/<owner>/<repo>/discussion_<number>/.
 
     Examples:
         ge prepare-discussion owner/repo 5
     """
     from ge.context import prepare_discussion as _prepare
 
-    ctx = _prepare(repo, number, output_dir=output_dir)
+    kwargs = {}
+    if output_dir is not None:
+        kwargs["output_dir"] = output_dir
+    ctx = _prepare(repo, number, **kwargs)
     num = ctx["number"]
+    actual_dir = ctx.get("output_dir", output_dir or "?")
 
     print(f"\n{'=' * 60}")
     print(f"Prepared discussion #{num}: {ctx['title']}")
@@ -119,19 +131,24 @@ def prepare_discussion(repo: str, number: int, *, output_dir: str = ".ge"):
     if n_images:
         print(f"\nMedia: {n_images} image(s)")
 
-    md_file = f"{output_dir}/discussion_{num}_context.md"
-    json_file = f"{output_dir}/discussion_{num}_context.json"
+    md_file = f"{actual_dir}/discussion_{num}_context.md"
+    json_file = f"{actual_dir}/discussion_{num}_context.json"
     print(f"\nContext files:")
     print(f"  Markdown: {md_file}")
     print(f"  JSON:     {json_file}")
     print()
 
 
-def media(markdown_file: str, *, output_dir: str = ".ge/media"):
-    """Download media from a markdown file (for standalone use)."""
+def media(markdown_file: str, *, output_dir: str = None):
+    """Download media from a markdown file (for standalone use).
+
+    By default, media is saved to ~/.cache/ge/media/.
+    """
     from pathlib import Path
     from ge.media import process_all_media
 
+    if output_dir is None:
+        output_dir = str(Path.home() / ".cache" / "ge" / "media")
     text = Path(markdown_file).read_text()
     result = process_all_media(text, output_dir)
     print(f"Downloaded {len(result['images'])} image(s)")

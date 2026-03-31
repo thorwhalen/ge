@@ -35,7 +35,7 @@ ctx = ge.prepare_discussion('owner/repo', 5)
 ### Parameters
 
 All `prepare_*` functions accept:
-- `output_dir` (str, default `'.ge'`) — Where to write context files
+- `output_dir` (str, default `None`) — Where to write context files. Defaults to `~/.cache/ge/<owner>/<repo>/<kind>_<number>/`
 - `download_media_flag` (bool, default `True`) — Whether to download images/videos
 
 `prepare_pr` additionally accepts:
@@ -43,14 +43,14 @@ All `prepare_*` functions accept:
 
 ## Output Files
 
-After calling `prepare_*`, two files are written:
+After calling `prepare_*`, two files are written to the output directory (returned in `ctx['output_dir']`):
 
 | File | Format | Contents |
 |------|--------|----------|
-| `.ge/issue_42_context.md` | Markdown | Human/agent-readable context document |
-| `.ge/issue_42_context.json` | JSON | Structured data for programmatic access |
+| `issue_42_context.md` | Markdown | Human/agent-readable context document |
+| `issue_42_context.json` | JSON | Structured data for programmatic access |
 
-The naming pattern is `.ge/{kind}_{number}_context.{ext}` where kind is `issue`, `pr`, or `discussion`.
+The naming pattern is `{kind}_{number}_context.{ext}` where kind is `issue`, `pr`, or `discussion`. Media files are saved to a `media/` subdirectory within the same output directory.
 
 ## Context Document Structure
 
@@ -101,6 +101,6 @@ To download media from any markdown text (not just GitHub context):
 ```python
 from ge.media import process_all_media
 
-result = process_all_media(markdown_text, output_dir='.ge/media')
+result = process_all_media(markdown_text, output_dir='/tmp/my_media')
 # Returns: {'images': [...], 'video_frames': {...}, 'manifest': [...], 'rewritten_markdown': '...'}
 ```

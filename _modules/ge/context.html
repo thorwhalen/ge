@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.context &mdash; ge 0.1.3 documentation</title>
+  <title>ge.context &mdash; ge 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../../_static/documentation_options.js?v=fd825880"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -100,18 +100,50 @@
     <span class="n">get_pr_diff</span><span class="p">,</span>
     <span class="n">get_discussion</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_all_media</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_all_media</span><span class="p">,</span> <span class="n">describe_images</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ge.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">analyze_issue</span><span class="p">,</span> <span class="n">analyze_pr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_dir</span><span class="p">,</span> <span class="n">parse_repo_spec</span><span class="p">,</span> <span class="n">default_output_dir</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_describe_visual_files</span><span class="p">(</span><span class="n">visual_files</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;issue&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use Claude API to describe downloaded images, returning a text summary.</span>
+
+<span class="sd">    Returns None if no images, anthropic is unavailable, or API call fails.</span>
+<span class="sd">    Failures are non-fatal — context preparation continues without descriptions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">image_exts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.gif&quot;</span><span class="p">,</span> <span class="s2">&quot;.webp&quot;</span><span class="p">}</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">visual_files</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">image_exts</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">images</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;These images were attached to a GitHub </span><span class="si">{</span><span class="n">kind_label</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s2">&quot;Describe each image in detail. If they appear to be screenshots &quot;</span>
+            <span class="s2">&quot;of a bug, error, or UI issue, describe the problem visible. &quot;</span>
+            <span class="s2">&quot;If they are video frames, describe what changes across the sequence.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">describe_images</span><span class="p">(</span><span class="o">*</span><span class="n">images</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
 <div class="viewcode-block" id="prepare_issue">
 <a class="viewcode-back" href="../../module_docs/ge/context.html#ge.prepare_issue">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prepare_issue</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_issue</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for working on a GitHub issue.</span>
 
 <span class="sd">    Fetches the issue, comments, media, and performs staleness analysis.</span>
 <span class="sd">    Writes a context document and manifest to output_dir.</span>
+
+<span class="sd">    When ``describe_media`` is True (default) and the ``anthropic`` package</span>
+<span class="sd">    is installed with ``ANTHROPIC_API_KEY`` set, downloaded images are sent</span>
+<span class="sd">    to the Claude API for automated description.  The description is included</span>
+<span class="sd">    in the context document so the agent has visual context without manual</span>
+<span class="sd">    image pasting.</span>
 
 <span class="sd">    Returns dict with all assembled context.</span>
 
@@ -136,6 +168,13 @@
     <span class="k">if</span> <span class="n">download_media_flag</span><span class="p">:</span>
         <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
         <span class="n">media_result</span> <span class="o">=</span> <span class="n">process_all_media</span><span class="p">(</span><span class="n">all_markdown</span><span class="p">,</span> <span class="n">media_dir</span><span class="p">)</span>
+
+    <span class="c1"># Describe images via Claude API (non-fatal if unavailable)</span>
+    <span class="n">image_descriptions</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+        <span class="n">image_descriptions</span> <span class="o">=</span> <span class="n">_describe_visual_files</span><span class="p">(</span>
+            <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;issue&quot;</span>
+        <span class="p">)</span>
 
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;issue&quot;</span><span class="p">,</span>
@@ -167,6 +206,7 @@
             <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">media_result</span>
             <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">&quot;image_descriptions&quot;</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="s2">&quot;prepared_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
     <span class="p">}</span>
@@ -189,7 +229,13 @@
 <div class="viewcode-block" id="prepare_pr">
 <a class="viewcode-back" href="../../module_docs/ge/context.html#ge.prepare_pr">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">prepare_pr</span><span class="p">(</span>
-    <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">include_diff</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">repo</span><span class="p">,</span>
+    <span class="n">number</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_diff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for working on or reviewing a GitHub PR.</span>
 
@@ -218,6 +264,13 @@
     <span class="k">if</span> <span class="n">download_media_flag</span><span class="p">:</span>
         <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
         <span class="n">media_result</span> <span class="o">=</span> <span class="n">process_all_media</span><span class="p">(</span><span class="n">all_markdown</span><span class="p">,</span> <span class="n">media_dir</span><span class="p">)</span>
+
+    <span class="c1"># Describe images via Claude API (non-fatal if unavailable)</span>
+    <span class="n">image_descriptions</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+        <span class="n">image_descriptions</span> <span class="o">=</span> <span class="n">_describe_visual_files</span><span class="p">(</span>
+            <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;PR&quot;</span>
+        <span class="p">)</span>
 
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;pr&quot;</span><span class="p">,</span>
@@ -270,6 +323,7 @@
             <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">media_result</span>
             <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">&quot;image_descriptions&quot;</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="s2">&quot;prepared_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
     <span class="p">}</span>
@@ -352,7 +406,6 @@
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Media Files&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The following visual files were downloaded from this issue.&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**To give the agent visual context, paste these images into the chat.**&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
             <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
@@ -362,6 +415,17 @@
             <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">frames</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;video_frames&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">vid</span><span class="si">}</span><span class="s2">` → </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames&quot;</span><span class="p">)</span>
             <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Image descriptions (from Claude API vision analysis)</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Image Descriptions (AI-generated)&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
+          <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
@@ -461,11 +525,20 @@
     <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Media Files&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**To give the agent visual context, paste these images into the chat.**&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
             <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Image descriptions (from Claude API vision analysis)</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Image Descriptions (AI-generated)&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
+          <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
@@ -473,7 +546,9 @@
 
 <div class="viewcode-block" id="prepare_discussion">
 <a class="viewcode-back" href="../../module_docs/ge/context.html#ge.prepare_discussion">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prepare_discussion</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_discussion</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for a GitHub Discussion.</span>
 
 <span class="sd">    Fetches the discussion and its comments via GraphQL, downloads media,</span>
@@ -500,6 +575,13 @@
         <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
         <span class="n">media_result</span> <span class="o">=</span> <span class="n">process_all_media</span><span class="p">(</span><span class="n">all_markdown</span><span class="p">,</span> <span class="n">media_dir</span><span class="p">)</span>
 
+    <span class="c1"># Describe images via Claude API (non-fatal if unavailable)</span>
+    <span class="n">image_descriptions</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+        <span class="n">image_descriptions</span> <span class="o">=</span> <span class="n">_describe_visual_files</span><span class="p">(</span>
+            <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;discussion&quot;</span>
+        <span class="p">)</span>
+
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;discussion&quot;</span><span class="p">,</span>
         <span class="s2">&quot;repo&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -525,6 +607,7 @@
             <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">media_result</span>
             <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">&quot;image_descriptions&quot;</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="s2">&quot;prepared_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
     <span class="p">}</span>
@@ -575,10 +658,19 @@
     <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Media Files&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;**To give the agent visual context, paste these images into the chat.**&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
             <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Image descriptions (from Claude API vision analysis)</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Image Descriptions (AI-generated)&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
+          <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span><span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>

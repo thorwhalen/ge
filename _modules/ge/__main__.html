@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.__main__ &mdash; ge 0.1.3 documentation</title>
+  <title>ge.__main__ &mdash; ge 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../../_static/documentation_options.js?v=fd825880"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -98,21 +98,32 @@
 
 <div class="viewcode-block" id="prepare">
 <a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.prepare">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="n">url_or_spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span>
+    <span class="n">url_or_spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">describe_media</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for a GitHub issue or PR.</span>
 
 <span class="sd">    Fetches all data, downloads media, runs freshness analysis,</span>
 <span class="sd">    and writes a structured context document to output_dir.</span>
+
+<span class="sd">    When --describe-media is enabled (default), images are described via</span>
+<span class="sd">    the Claude API for automated visual context. Requires: pip install anthropic</span>
+<span class="sd">    and ANTHROPIC_API_KEY set.</span>
 
 <span class="sd">    By default, context is written to ~/.cache/ge/&lt;owner&gt;/&lt;repo&gt;/&lt;kind&gt;_&lt;number&gt;/.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        ge prepare owner/repo --number 42</span>
 <span class="sd">        ge prepare https://github.com/owner/repo/pull/7</span>
+<span class="sd">        ge prepare owner/repo --number 42 -d   # disable image descriptions</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ge</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span> <span class="k">as</span> <span class="n">_prepare</span>
 
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;describe_media&quot;</span><span class="p">:</span> <span class="n">describe_media</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_dir</span>
     <span class="n">ctx</span> <span class="o">=</span> <span class="n">_prepare</span><span class="p">(</span><span class="n">url_or_spec</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -136,8 +147,12 @@
     <span class="n">n_videos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;video_frames&quot;</span><span class="p">,</span> <span class="p">{}))</span>
     <span class="k">if</span> <span class="n">n_images</span> <span class="ow">or</span> <span class="n">n_videos</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Media: </span><span class="si">{</span><span class="n">n_images</span><span class="si">}</span><span class="s2"> image(s), </span><span class="si">{</span><span class="n">n_videos</span><span class="si">}</span><span class="s2"> video(s)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image descriptions: included (AI-generated via Claude API)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image descriptions: not available (install anthropic + set ANTHROPIC_API_KEY)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Visual files (paste these into your agent for visual context):&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Visual files:&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -295,6 +310,56 @@
 
 
 
+<div class="viewcode-block" id="describe_images">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.describe_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">describe_images</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">image_paths</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Describe what you see in these images in detail. If they appear to be screenshots of a bug or UI issue, describe the problem visible.&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;claude-sonnet-4-5-20250514&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Describe images using the Claude API (vision).</span>
+
+<span class="sd">    Requires: pip install anthropic, and ANTHROPIC_API_KEY set.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        ge describe-images screenshot.png error.jpg</span>
+<span class="sd">        ge describe-images frame1.jpg frame2.jpg --prompt &quot;What changed between these frames?&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe_images</span> <span class="k">as</span> <span class="n">_describe</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">_describe</span><span class="p">(</span><span class="o">*</span><span class="n">image_paths</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="copy_images">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.copy_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">copy_images</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">image_paths</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3x&quot;</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;800x600+10+10&quot;</span><span class="p">,</span>
+    <span class="n">montage_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a montage of images and copy to clipboard (macOS).</span>
+
+<span class="sd">    Combines images into a grid and copies to clipboard for pasting</span>
+<span class="sd">    into Claude Code with Cmd+V. Requires ImageMagick.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        ge copy-images screenshot1.png screenshot2.png</span>
+<span class="sd">        ge copy-images media/*.jpg --tile 4x</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_images_to_clipboard</span>
+
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">montage_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;montage_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">montage_path</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">copy_images_to_clipboard</span><span class="p">(</span><span class="o">*</span><span class="n">image_paths</span><span class="p">,</span> <span class="n">tile</span><span class="o">=</span><span class="n">tile</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Montage saved to: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Copied to clipboard. Paste into Claude Code with Cmd+V.&quot;</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="install_skills">
 <a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.install_skills">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -340,6 +405,8 @@
     <span class="n">fetch_discussion</span><span class="p">,</span>
     <span class="n">media</span><span class="p">,</span>
     <span class="n">video_frames</span><span class="p">,</span>
+    <span class="n">describe_images</span><span class="p">,</span>
+    <span class="n">copy_images</span><span class="p">,</span>
     <span class="n">install_skills</span><span class="p">,</span>
     <span class="n">uninstall_skills</span><span class="p">,</span>
 <span class="p">]</span>

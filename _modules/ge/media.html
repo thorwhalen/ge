@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.media &mdash; ge 0.1.3 documentation</title>
+  <title>ge.media &mdash; ge 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../../_static/documentation_options.js?v=fd825880"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -85,10 +85,14 @@
 
 <span class="sd">Downloads images and videos from GitHub issues/PRs, handling private repo</span>
 <span class="sd">auth via gh token. Extracts representative frames from videos using ffmpeg.</span>
+<span class="sd">Provides AI-powered image description and clipboard montage utilities.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -439,6 +443,179 @@
         <span class="p">],</span>
         <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">all_images</span><span class="p">,</span>
     <span class="p">}</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Image description via Claude API (approach 1)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="n">_IMAGE_MEDIA_TYPES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;.png&quot;</span><span class="p">:</span> <span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;.jpg&quot;</span><span class="p">:</span> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;.jpeg&quot;</span><span class="p">:</span> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;.gif&quot;</span><span class="p">:</span> <span class="s2">&quot;image/gif&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;.webp&quot;</span><span class="p">:</span> <span class="s2">&quot;image/webp&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_encode_image</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read an image file and return (base64_data, media_type).&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">media_type</span> <span class="o">=</span> <span class="n">_IMAGE_MEDIA_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">media_type</span><span class="p">:</span>
+        <span class="c1"># Try detecting from magic bytes</span>
+        <span class="n">kind</span><span class="p">,</span> <span class="n">detected_ext</span> <span class="o">=</span> <span class="n">_detect_media_type</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span> <span class="ow">and</span> <span class="n">detected_ext</span><span class="p">:</span>
+            <span class="n">media_type</span> <span class="o">=</span> <span class="n">_IMAGE_MEDIA_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">detected_ext</span><span class="p">,</span> <span class="s2">&quot;image/png&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">media_type</span> <span class="o">=</span> <span class="s2">&quot;image/png&quot;</span>  <span class="c1"># fallback</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">standard_b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">media_type</span>
+
+
+<div class="viewcode-block" id="describe_images">
+<a class="viewcode-back" href="../../module_docs/ge/media.html#ge.describe_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">describe_images</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">image_paths</span><span class="p">,</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;Describe what you see in these images in detail. If they appear to be screenshots of a bug or UI issue, describe the problem visible.&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-sonnet-4-5-20250514&quot;</span><span class="p">,</span>
+    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use the Claude API to describe images, returning a text description.</span>
+
+<span class="sd">    Requires the ``anthropic`` package and a valid ``ANTHROPIC_API_KEY``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *image_paths: One or more paths to image files.</span>
+<span class="sd">        prompt: The text prompt sent alongside the images.</span>
+<span class="sd">        model: Claude model to use for vision analysis.</span>
+<span class="sd">        max_tokens: Maximum tokens in the response.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The model&#39;s textual description of the images.</span>
+
+<span class="sd">    &gt;&gt;&gt; # description = describe_images(&#39;screenshot.png&#39;, &#39;error.jpg&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">anthropic</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;The &#39;anthropic&#39; package is required for image description.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Install it with: pip install anthropic</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Then set ANTHROPIC_API_KEY in your environment.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">anthropic</span><span class="o">.</span><span class="n">Anthropic</span><span class="p">()</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">media_type</span> <span class="o">=</span> <span class="n">_encode_image</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;base64&quot;</span><span class="p">,</span> <span class="s2">&quot;media_type&quot;</span><span class="p">:</span> <span class="n">media_type</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="n">max_tokens</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">}]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Clipboard montage (approach 4: Claude Code orchestrates, user pastes)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_imagemagick</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if ImageMagick&#39;s ``magick`` command is available.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;magick&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
+            <span class="s2">&quot;ImageMagick not found (needed for image montage).</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Install it with:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  brew install imagemagick       # macOS</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  sudo apt install imagemagick   # Debian/Ubuntu</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  https://imagemagick.org        # other platforms&quot;</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="copy_images_to_clipboard">
+<a class="viewcode-back" href="../../module_docs/ge/media.html#ge.copy_images_to_clipboard">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">copy_images_to_clipboard</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">image_paths</span><span class="p">,</span>
+    <span class="n">tile</span><span class="o">=</span><span class="s2">&quot;3x&quot;</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;800x600+10+10&quot;</span><span class="p">,</span>
+    <span class="n">montage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a montage of images and copy it to the macOS clipboard.</span>
+
+<span class="sd">    Combines multiple images into a single grid image using ImageMagick,</span>
+<span class="sd">    then copies it to the clipboard via ``osascript`` so the user can</span>
+<span class="sd">    paste it into Claude Code with Cmd+V.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *image_paths: Paths to image files to combine.</span>
+<span class="sd">        tile: Montage tile layout (e.g. &#39;3x&#39; for 3 columns).</span>
+<span class="sd">        geometry: Tile geometry (size+padding).</span>
+<span class="sd">        montage_path: Where to save the montage file. Defaults to</span>
+<span class="sd">            ``/tmp/ge_montage.png``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to the montage file.</span>
+
+<span class="sd">    &gt;&gt;&gt; # path = copy_images_to_clipboard(&#39;img1.png&#39;, &#39;img2.png&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_imagemagick</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">image_paths</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one image path is required.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">montage_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">montage_path</span> <span class="o">=</span> <span class="s2">&quot;/tmp/ge_montage.png&quot;</span>
+    <span class="n">montage_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">montage_path</span><span class="p">)</span>
+
+    <span class="c1"># Validate all paths exist</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image not found: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create montage</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;magick&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;montage&quot;</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">],</span>
+        <span class="s2">&quot;-geometry&quot;</span><span class="p">,</span>
+        <span class="n">geometry</span><span class="p">,</span>
+        <span class="s2">&quot;-tile&quot;</span><span class="p">,</span>
+        <span class="n">tile</span><span class="p">,</span>
+        <span class="n">montage_path</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;montage failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Copy to clipboard (macOS only)</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>
+        <span class="n">copy_cmd</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;osascript&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;-e&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;set the clipboard to &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;(read (POSIX file &quot;</span><span class="si">{</span><span class="n">montage_path</span><span class="si">}</span><span class="s1">&quot;) as JPEG picture)&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to copy to clipboard: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">montage_path</span></div>
 
 </pre></div>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge &mdash; ge 0.1.3 documentation</title>
+  <title>ge &mdash; ge 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../_static/documentation_options.js?v=fd825880"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,6 +52,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ge</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ge.analyze_issue"><code class="docutils literal notranslate"><span class="pre">analyze_issue()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.analyze_pr"><code class="docutils literal notranslate"><span class="pre">analyze_pr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.copy_images_to_clipboard"><code class="docutils literal notranslate"><span class="pre">copy_images_to_clipboard()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.describe_images"><code class="docutils literal notranslate"><span class="pre">describe_images()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.extract_video_frames"><code class="docutils literal notranslate"><span class="pre">extract_video_frames()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.find_related_commits"><code class="docutils literal notranslate"><span class="pre">find_related_commits()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.find_related_prs"><code class="docutils literal notranslate"><span class="pre">find_related_prs()</span></code></a></li>
@@ -149,6 +151,61 @@ into a structured document the agent can consume.</p>
 <dd><p>Analyze a PR for review context and merge readiness.</p>
 <p>Returns a dict with state, review status, CI signals, conflicts, etc.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_pr(&#39;owner/repo&#39;, 7)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.copy_images_to_clipboard">
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">copy_images_to_clipboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'800x600+10+10'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">montage_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/media.html#copy_images_to_clipboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.copy_images_to_clipboard" title="Link to this definition"></a></dt>
+<dd><p>Create a montage of images and copy it to the macOS clipboard.</p>
+<p>Combines multiple images into a single grid image using ImageMagick,
+then copies it to the clipboard via <code class="docutils literal notranslate"><span class="pre">osascript</span></code> so the user can
+paste it into Claude Code with Cmd+V.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*image_paths</strong> – Paths to image files to combine.</p></li>
+<li><p><strong>tile</strong> – Montage tile layout (e.g. ‘3x’ for 3 columns).</p></li>
+<li><p><strong>geometry</strong> – Tile geometry (size+padding).</p></li>
+<li><p><strong>montage_path</strong> – Where to save the montage file. Defaults to
+<code class="docutils literal notranslate"><span class="pre">/tmp/ge_montage.png</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the montage file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># path = copy_images_to_clipboard(&#39;img1.png&#39;, &#39;img2.png&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.describe_images">
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">describe_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Describe</span> <span class="pre">what</span> <span class="pre">you</span> <span class="pre">see</span> <span class="pre">in</span> <span class="pre">these</span> <span class="pre">images</span> <span class="pre">in</span> <span class="pre">detail.</span> <span class="pre">If</span> <span class="pre">they</span> <span class="pre">appear</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">screenshots</span> <span class="pre">of</span> <span class="pre">a</span> <span class="pre">bug</span> <span class="pre">or</span> <span class="pre">UI</span> <span class="pre">issue,</span> <span class="pre">describe</span> <span class="pre">the</span> <span class="pre">problem</span> <span class="pre">visible.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'claude-sonnet-4-5-20250514'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/media.html#describe_images"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.describe_images" title="Link to this definition"></a></dt>
+<dd><p>Use the Claude API to describe images, returning a text description.</p>
+<p>Requires the <code class="docutils literal notranslate"><span class="pre">anthropic</span></code> package and a valid <code class="docutils literal notranslate"><span class="pre">ANTHROPIC_API_KEY</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*image_paths</strong> – One or more paths to image files.</p></li>
+<li><p><strong>prompt</strong> – The text prompt sent alongside the images.</p></li>
+<li><p><strong>model</strong> – Claude model to use for vision analysis.</p></li>
+<li><p><strong>max_tokens</strong> – Maximum tokens in the response.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The model’s textual description of the images.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># description = describe_images(&#39;screenshot.png&#39;, &#39;error.jpg&#39;)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -254,9 +311,12 @@ is printed if a symlink points elsewhere.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ge.prepare">
-<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url_or_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge.html#prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url_or_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">describe_media</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge.html#prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare" title="Link to this definition"></a></dt>
 <dd><p>Prepare context from a GitHub URL or repo+number.</p>
 <p>Automatically detects whether it’s an issue, PR, or discussion.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">describe_media</span></code> is True (default) and the <code class="docutils literal notranslate"><span class="pre">anthropic</span></code> package
+is available, downloaded images are described via the Claude API so
+the agent gets visual context without manual image pasting.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare(&#39;owner/repo&#39;, 42)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare(&#39;https://github.com/owner/repo/discussions/5&#39;)</span>
@@ -266,7 +326,7 @@ is printed if a symlink points elsewhere.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ge.prepare_discussion">
-<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_discussion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_discussion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_discussion" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_discussion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">describe_media</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_discussion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_discussion" title="Link to this definition"></a></dt>
 <dd><p>Prepare full context for a GitHub Discussion.</p>
 <p>Fetches the discussion and its comments via GraphQL, downloads media,
 and writes a context document.</p>
@@ -277,10 +337,15 @@ and writes a context document.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ge.prepare_issue">
-<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_issue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_issue" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">describe_media</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_issue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_issue" title="Link to this definition"></a></dt>
 <dd><p>Prepare full context for working on a GitHub issue.</p>
 <p>Fetches the issue, comments, media, and performs staleness analysis.
 Writes a context document and manifest to output_dir.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">describe_media</span></code> is True (default) and the <code class="docutils literal notranslate"><span class="pre">anthropic</span></code> package
+is installed with <code class="docutils literal notranslate"><span class="pre">ANTHROPIC_API_KEY</span></code> set, downloaded images are sent
+to the Claude API for automated description.  The description is included
+in the context document so the agent has visual context without manual
+image pasting.</p>
 <p>Returns dict with all assembled context.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_issue(&#39;owner/repo&#39;, 42)</span>
 </pre></div>
@@ -289,7 +354,7 @@ Writes a context document and manifest to output_dir.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ge.prepare_pr">
-<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_pr" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">describe_media</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_pr" title="Link to this definition"></a></dt>
 <dd><p>Prepare full context for working on or reviewing a GitHub PR.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_pr(&#39;owner/repo&#39;, 7)</span>
 </pre></div>

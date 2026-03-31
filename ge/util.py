@@ -212,6 +212,133 @@ def default_output_dir(repo, number, kind="issue"):
     return Path.home() / ".cache" / "ge" / owner / name / f"{kind}_{number}"
 
 
+def resolve_target(user_input, *, current_repo=None):
+    """Resolve flexible user input into a structured target for ge workflows.
+
+    Accepts any of these forms:
+      - A GitHub URL: ``https://github.com/owner/repo/issues/42``
+      - A folder path to pre-prepared context: ``~/.cache/ge/owner/repo/issue_42``
+      - A bare number: ``42`` or ``#42`` (uses *current_repo*)
+      - ``owner/repo#42`` or ``owner/repo/42``
+      - ``owner/repo 42``
+
+    Returns a dict with:
+      - ``repo``: ``"owner/repo"`` (or None if only a folder was given)
+      - ``number``: int
+      - ``kind``: ``"issue"`` | ``"pr"`` | ``"discussion"`` | None
+      - ``context_dir``: path to pre-prepared context (str or None)
+      - ``context_md``: path to the context markdown file (str or None)
+      - ``has_prepared_context``: bool — whether context files already exist
+      - ``source``: how the input was resolved (``"url"``, ``"folder"``,
+        ``"number"``, ``"repo_number"``)
+
+    >>> r = resolve_target('https://github.com/owner/repo/issues/42')
+    >>> r['repo'], r['number'], r['kind'], r['source']
+    ('owner/repo', 42, 'issue', 'url')
+
+    >>> r = resolve_target('#42', current_repo='owner/repo')
+    >>> r['repo'], r['number'], r['source']
+    ('owner/repo', 42, 'number')
+
+    >>> r = resolve_target('owner/repo#42')
+    >>> r['repo'], r['number'], r['source']
+    ('owner/repo', 42, 'repo_number')
+    """
+    user_input = str(user_input).strip()
+
+    repo = None
+    number = None
+    kind = None
+    context_dir = None
+    source = None
+
+    # --- 1. Folder path ---
+    expanded = Path(user_input).expanduser()
+    if expanded.is_dir():
+        context_dir = str(expanded)
+        # Try to infer repo/number/kind from folder name convention:
+        # ~/.cache/ge/<owner>/<repo>/<kind>_<number>
+        m = re.search(r"(issue|pr|discussion)_(\d+)$", expanded.name)
+        if m:
+            kind = m.group(1)
+            number = int(m.group(2))
+            # Try to get owner/repo from parent dirs
+            parts = expanded.parts
+            # Look for the pattern: .../<owner>/<repo>/<kind>_<number>
+            if len(parts) >= 3:
+                repo = f"{parts[-3]}/{parts[-2]}"
+        source = "folder"
+
+    # --- 2. GitHub URL ---
+    elif re.match(r"https?://github\.com/", user_input):
+        owner, name, number, kind = parse_github_url(user_input)
+        repo = f"{owner}/{name}"
+        source = "url"
+
+    # --- 3. owner/repo#number or owner/repo/number ---
+    elif re.match(r"[^/]+/[^/#]+[#/]\d+$", user_input):
+        m = re.match(r"([^/]+/[^/#]+)[#/](\d+)$", user_input)
+        repo = m.group(1)
+        number = int(m.group(2))
+        source = "repo_number"
+
+    # --- 4. "owner/repo 42" (space-separated) ---
+    elif re.match(r"[^/]+/[^/\s]+\s+#?\d+$", user_input):
+        m = re.match(r"([^/]+/[^/\s]+)\s+#?(\d+)$", user_input)
+        repo = m.group(1)
+        number = int(m.group(2))
+        source = "repo_number"
+
+    # --- 5. Bare number: "42" or "#42" ---
+    elif re.match(r"#?\d+$", user_input):
+        number = int(user_input.lstrip("#"))
+        repo = current_repo
+        source = "number"
+
+    else:
+        raise ValueError(
+            f"Cannot resolve target: {user_input!r}. Expected a GitHub URL, "
+            f"folder path, owner/repo#number, or a bare issue number."
+        )
+
+    # --- Check for pre-prepared context ---
+    if context_dir is None and repo and number and kind:
+        candidate = default_output_dir(repo, number, kind)
+        if candidate.is_dir():
+            context_dir = str(candidate)
+
+    # Even without kind, try all three
+    if context_dir is None and repo and number:
+        for k in ("issue", "pr", "discussion"):
+            candidate = default_output_dir(repo, number, k)
+            if candidate.is_dir():
+                context_dir = str(candidate)
+                if kind is None:
+                    kind = k
+                break
+
+    # Find the context markdown file
+    context_md = None
+    has_prepared_context = False
+    if context_dir:
+        ctx_dir = Path(context_dir)
+        # Look for *_context.md
+        md_files = list(ctx_dir.glob("*_context.md"))
+        if md_files:
+            context_md = str(md_files[0])
+            has_prepared_context = True
+
+    return {
+        "repo": repo,
+        "number": number,
+        "kind": kind,
+        "context_dir": context_dir,
+        "context_md": context_md,
+        "has_prepared_context": has_prepared_context,
+        "source": source,
+    }
+
+
 def check_ffmpeg():
     """Check if ffmpeg is available."""
     if not shutil.which("ffmpeg"):

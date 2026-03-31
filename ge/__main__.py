@@ -248,6 +248,24 @@ def copy_images(
     print("Copied to clipboard. Paste into Claude Code with Cmd+V.")
 
 
+def resolve(target: str, *, current_repo: str = None):
+    """Resolve a flexible target reference into a structured result.
+
+    Accepts a GitHub URL, folder path, bare number (#42), or owner/repo#42.
+    Shows what was resolved and whether pre-prepared context exists.
+
+    Examples:
+        ge resolve https://github.com/owner/repo/issues/42
+        ge resolve ~/.cache/ge/owner/repo/issue_42
+        ge resolve '#42' --current-repo owner/repo
+        ge resolve 'owner/repo#42'
+    """
+    from ge.util import resolve_target
+
+    result = resolve_target(target, current_repo=current_repo)
+    print(json.dumps(result, indent=2))
+
+
 def install_skills(*, target_dir: str = None):
     """Install ge skills as symlinks in ~/.claude/skills/.
 
@@ -289,6 +307,7 @@ _cli_commands = [
     video_frames,
     describe_images,
     copy_images,
+    resolve,
     install_skills,
     uninstall_skills,
 ]

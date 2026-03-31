@@ -37,7 +37,7 @@ from ge.media import (
     describe_images,
     copy_images_to_clipboard,
 )
-from ge.util import parse_github_url
+from ge.util import parse_github_url, resolve_target
 
 
 def prepare(
@@ -200,6 +200,7 @@ __all__ = [
     "extract_video_frames",
     "describe_images",
     "copy_images_to_clipboard",
+    "resolve_target",
     "install_skills",
     "uninstall_skills",
 ]

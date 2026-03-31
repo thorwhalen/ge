@@ -1,11 +1,11 @@
 ---
 name: ge
-description: "Use when asked to work on a GitHub issue, PR, or discussion. Prepares context, verifies the issue belongs to the current project, analyzes freshness, and guides the workflow."
+description: "Use when asked to work on a GitHub issue, PR, or discussion. Resolves flexible input (URL, folder, number), confirms with the user, prepares context, and guides the workflow."
 ---
 
 # ge: Work on a GitHub Issue, PR, or Discussion
 
-Use this skill when asked to work on a GitHub issue, PR, or discussion. It orchestrates the full workflow: verify the target, prepare context, check freshness, and guide you through implementation.
+Use this skill when asked to work on a GitHub issue, PR, or discussion. It handles the full workflow: resolve what the user means, confirm, prepare or load context, check freshness, handle media, and guide implementation.
 
 ## Prerequisites
 
@@ -17,45 +17,88 @@ Use this skill when asked to work on a GitHub issue, PR, or discussion. It orche
 
 ## Workflow
 
-### Step 0: Verify the issue belongs to this project
+### Step 0: Resolve what the user means
 
-Before doing any work, confirm the target matches the current repository.
+The user can say "work on THIS" where THIS can be any of:
+
+- A GitHub URL: `https://github.com/owner/repo/issues/42`
+- A folder with pre-prepared context: `~/.cache/ge/owner/repo/issue_42`
+- A bare number: `42` or `#42` (assumes current repo)
+- `owner/repo#42` or `owner/repo/42`
+
+Use `ge.resolve_target()` to parse any of these:
 
 ```python
-import subprocess, json
+import ge
+import subprocess
 
+# Get current repo for bare-number resolution
 result = subprocess.run(
     ['gh', 'repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'],
     capture_output=True, text=True
 )
 current_repo = result.stdout.strip()  # e.g. "owner/repo"
+
+# Resolve the user's input
+target = ge.resolve_target(USER_INPUT, current_repo=current_repo)
 ```
 
-- If the user gave just a number (e.g. "work on issue #42"), assume the current repo.
-- If the user gave a URL or `owner/repo`, parse it and compare with `current_repo`.
-- If they don't match, tell the user: "Issue #42 belongs to `other/repo`, but you're in `owner/repo`. Should I proceed anyway?"
+The returned dict contains:
+- `repo`: `"owner/repo"` (or None)
+- `number`: int
+- `kind`: `"issue"` | `"pr"` | `"discussion"` | None
+- `context_dir`: path to pre-prepared context folder (or None)
+- `context_md`: path to the context markdown file (or None)
+- `has_prepared_context`: bool
+- `source`: how input was resolved (`"url"`, `"folder"`, `"number"`, `"repo_number"`)
 
-### Step 1: Prepare context
+### Step 1: Confirm with the user (MANDATORY)
+
+**Before doing any work**, confirm what you resolved. This is not optional.
+
+**If the repo differs from the current working directory's repo**, flag it:
+
+> I resolved your request as **issue #42** in **other/repo**.
+> You're currently in **owner/repo** — this is a different repository.
+> Should I proceed?
+
+**If resolved normally**, confirm concisely:
+
+> I'll work on **issue #520** in **cosmograph-org/cosmograph**.
+> Pre-prepared context found at `~/.cache/ge/.../issue_520/`.
+> Shall I proceed?
+
+Or if no pre-prepared context:
+
+> I'll work on **issue #42** in **owner/repo**.
+> No pre-prepared context found — I'll fetch and prepare it now.
+> Shall I proceed?
+
+**Wait for the user to confirm before continuing.**
+
+### Step 2: Load or prepare context
+
+**If `target['has_prepared_context']` is True:**
+
+Read the existing context markdown file directly:
 
 ```python
-import ge
-
-ctx = ge.prepare('owner/repo', 42)
-# or from a URL:
-ctx = ge.prepare('https://github.com/owner/repo/issues/42')
+# target['context_md'] is the path to the markdown file
+# Read it with the Read tool
 ```
 
-This auto-detects whether it's an issue, PR, or discussion and:
-- Fetches the body, comments, reviews, timeline
-- Downloads images and extracts video frames
-- Runs freshness/staleness analysis
-- Writes context files to `~/.cache/ge/<owner>/<repo>/<kind>_<number>/`
+Check how fresh it is — the file's `prepared_at` timestamp is in the JSON. If it's more than a day old, mention it: "Context was prepared on DATE. Want me to refresh it?"
 
-The returned dict includes an `output_dir` key with the actual path used.
+**If `target['has_prepared_context']` is False:**
 
-### Step 2: Read the context document
+Prepare fresh context:
 
-Read the context markdown file from `ctx['output_dir']` (e.g. `~/.cache/ge/owner/repo/issue_42/issue_42_context.md`). It contains everything assembled: body, comments, analysis, media manifest.
+```python
+ctx = ge.prepare(target['repo'], target['number'])
+# ctx['output_dir'] has the path to the context files
+```
+
+This auto-detects type (issue/PR/discussion), fetches everything, downloads media, runs analysis, and generates image descriptions if `anthropic` is available.
 
 ### Step 3: Check the recommendation
 
@@ -77,33 +120,37 @@ The context includes an analysis with a `recommendation` field:
 
 ### Step 4: Handle media / images
 
-The context document includes downloaded images and — when `anthropic` is installed and `ANTHROPIC_API_KEY` is set — **AI-generated image descriptions** under the "Image Descriptions (AI-generated)" section. These descriptions are created automatically during `ge.prepare()` by sending images to the Claude API for vision analysis.
+The context document includes downloaded images and — when `anthropic` is installed and `ANTHROPIC_API_KEY` is set — **AI-generated image descriptions** under the "Image Descriptions (AI-generated)" section.
 
-**If image descriptions are present** (check `ctx['media']['image_descriptions']` or the "Image Descriptions" section in the markdown):
+**If image descriptions are present** (check the "Image Descriptions" section in the markdown):
 - Read and incorporate the descriptions into your understanding.
-- The descriptions cover screenshots, bug captures, UI mockups, and video frame sequences.
-- No manual image pasting needed — the visual context is already in your context document.
+- No manual image pasting needed.
 
 **If image descriptions are NOT present** but images were downloaded:
-The context document will list the image files. You have three options, in order of preference:
 
-1. **Describe images programmatically** (if `anthropic` is available):
+1. **Describe images programmatically** (preferred — if `anthropic` is available):
    ```python
    from ge.media import describe_images
-   description = describe_images('media/screenshot.png', 'media/error.jpg')
+   import glob
+   imgs = sorted(glob.glob(target['context_dir'] + '/media/*.png'))
+   imgs += sorted(glob.glob(target['context_dir'] + '/media/*/*.jpg'))
+   if imgs:
+       description = describe_images(*imgs)
+       print(description)
    ```
+   **Tell the user if this fails** — they need to know you couldn't analyze the visual content.
 
 2. **Create a montage and ask the user to paste** (if ImageMagick is available):
    ```python
    from ge.media import copy_images_to_clipboard
-   path = copy_images_to_clipboard('media/img1.png', 'media/img2.png')
+   path = copy_images_to_clipboard(*imgs)
    ```
    Then tell the user: "A montage of N images has been copied to your clipboard. Please paste it here with Cmd+V so I can see the visual context."
 
-3. **Ask the user to paste individual images** (fallback):
-   Tell the user which files to paste and why they matter.
+3. **Ask the user to paste individual images** (last resort):
+   List the specific files and explain why they matter.
 
-For **videos**: frames are extracted into a directory named after the video's UUID (e.g., `media/<uuid>/scene_001.jpg`). These frames are included in the image description if available. Otherwise, suggest the user paste key frames.
+**Always tell the user if you had problems accessing or analyzing media files.**
 
 ### Step 5: Check referenced code
 
@@ -136,29 +183,22 @@ For more details on interpreting analysis results, see the `ge-analyze` skill.
 
 | Function | Description |
 |----------|-------------|
+| `ge.resolve_target(input, current_repo=...)` | Resolve flexible input to a target dict |
 | `ge.prepare(url_or_spec, number)` | Full context preparation (auto-detects type) |
 | `ge.prepare_issue(repo, number)` | Prepare issue context |
 | `ge.prepare_pr(repo, number)` | Prepare PR context |
 | `ge.prepare_discussion(repo, number)` | Prepare discussion context |
 | `ge.analyze_issue(repo, number)` | Staleness analysis (JSON, no media) |
 | `ge.analyze_pr(repo, number)` | PR review analysis (JSON, no media) |
-| `ge.get_issue(repo, number)` | Raw issue data |
-| `ge.get_pr(repo, number)` | Raw PR data |
-| `ge.get_comments(repo, number)` | Issue/PR comments |
-| `ge.get_pr_diff(repo, number)` | PR diff text |
-| `ge.get_discussion(repo, number)` | Discussion data (GraphQL) |
-| `ge.find_related_prs(repo, number)` | PRs that reference this issue |
-| `ge.find_related_commits(repo, number)` | Commits that reference this issue |
-| `ge.process_all_media(markdown, output_dir)` | Download images + extract video frames |
-| `ge.extract_video_frames(path)` | Extract frames from a video file |
 | `ge.describe_images(*paths)` | Describe images via Claude API (vision) |
 | `ge.copy_images_to_clipboard(*paths)` | Create montage + copy to clipboard |
+| `ge.process_all_media(markdown, output_dir)` | Download images + extract video frames |
 
 ## Key Principles
 
-1. **Always prepare context before working.** Don't rely on memory or assumptions about issue state.
-2. **Verify the issue belongs to this project.** Don't work on the wrong repo's issues.
+1. **Always confirm with the user before working.** Show what you resolved and wait for approval.
+2. **Use pre-prepared context when available.** Don't re-fetch if `has_prepared_context` is True (unless stale).
 3. **Check freshness before coding.** Issues may be stale, already fixed, or deprioritized.
-4. **Ask the user about ambiguity.** If the analysis shows conflicting signals, discuss with the user.
-5. **Use image descriptions when available.** `ge.prepare()` automatically describes images via the Claude API. Read the "Image Descriptions" section in the context document. Only ask for manual paste as a fallback.
+4. **Use image descriptions when available.** Read the "Image Descriptions" section. If missing, generate them with `describe_images()`. Tell the user if you can't analyze images.
+5. **Ask the user about ambiguity.** If the analysis shows conflicting signals, discuss with the user.
 6. **Use `gh` for all GitHub access.** This ensures private repo access works via the user's existing auth.

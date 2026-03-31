@@ -88,6 +88,7 @@ ge media <file.md>                 Download media from markdown
 ge video-frames <video>            Extract frames (scene detection by default)
 ge describe-images <img>...        Describe images via Claude API (vision)
 ge copy-images <img>...            Create montage + copy to clipboard (macOS)
+ge resolve <target>                Resolve a URL, folder, or number to structured target
 ge install-skills                  Register skills with Claude Code (~/.claude/skills/)
 ge uninstall-skills                Remove ge skill symlinks
 ```
@@ -124,6 +125,10 @@ ctx = ge.prepare('https://github.com/owner/repo/discussions/5')
 
 # Just analysis
 analysis = ge.analyze_issue('owner/repo', 42)
+
+# Resolve flexible input (URL, folder, number, owner/repo#N)
+target = ge.resolve_target('#42', current_repo='owner/repo')
+# Returns: {repo, number, kind, context_dir, context_md, has_prepared_context, source}
 ```
 
 ## Image analysis

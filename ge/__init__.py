@@ -31,14 +31,23 @@ from ge.github import (
     find_related_prs,
     find_related_commits,
 )
-from ge.media import process_all_media, extract_video_frames
+from ge.media import (
+    process_all_media,
+    extract_video_frames,
+    describe_images,
+    copy_images_to_clipboard,
+)
 from ge.util import parse_github_url
 
 
-def prepare(url_or_spec, number=None, *, output_dir=None, **kwargs):
+def prepare(url_or_spec, number=None, *, output_dir=None, describe_media=True, **kwargs):
     """Prepare context from a GitHub URL or repo+number.
 
     Automatically detects whether it's an issue, PR, or discussion.
+
+    When ``describe_media`` is True (default) and the ``anthropic`` package
+    is available, downloaded images are described via the Claude API so
+    the agent gets visual context without manual image pasting.
 
     >>> # ctx = ge.prepare('https://github.com/owner/repo/issues/42')
     >>> # ctx = ge.prepare('owner/repo', 42)
@@ -58,11 +67,17 @@ def prepare(url_or_spec, number=None, *, output_dir=None, **kwargs):
             kind = "issue"
 
     if kind == "pr":
-        return prepare_pr(repo_spec, number, output_dir=output_dir, **kwargs)
+        return prepare_pr(
+            repo_spec, number, output_dir=output_dir, describe_media=describe_media, **kwargs
+        )
     elif kind == "discussion":
-        return prepare_discussion(repo_spec, number, output_dir=output_dir, **kwargs)
+        return prepare_discussion(
+            repo_spec, number, output_dir=output_dir, describe_media=describe_media, **kwargs
+        )
     else:
-        return prepare_issue(repo_spec, number, output_dir=output_dir, **kwargs)
+        return prepare_issue(
+            repo_spec, number, output_dir=output_dir, describe_media=describe_media, **kwargs
+        )
 
 
 _SKILLS_DIR = _Path(__file__).parent / "data" / "skills"
@@ -169,6 +184,8 @@ __all__ = [
     "find_related_commits",
     "process_all_media",
     "extract_video_frames",
+    "describe_images",
+    "copy_images_to_clipboard",
     "install_skills",
     "uninstall_skills",
 ]

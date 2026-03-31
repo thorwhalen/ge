@@ -12,6 +12,8 @@ Use this skill when asked to work on a GitHub issue, PR, or discussion. It orche
 - `ge` package installed (`pip install ge` or `pip install -e /path/to/ge`)
 - `gh` CLI installed and authenticated (`gh auth login`)
 - `ffmpeg` (optional, for video frame extraction)
+- `anthropic` package + `ANTHROPIC_API_KEY` (optional, for AI image descriptions)
+- ImageMagick (optional, for clipboard montage via `copy_images_to_clipboard`)
 
 ## Workflow
 
@@ -75,16 +77,33 @@ The context includes an analysis with a `recommendation` field:
 
 ### Step 4: Handle media / images
 
-The context lists downloaded images under "Media Files".
+The context document includes downloaded images and — when `anthropic` is installed and `ANTHROPIC_API_KEY` is set — **AI-generated image descriptions** under the "Image Descriptions (AI-generated)" section. These descriptions are created automatically during `ge.prepare()` by sending images to the Claude API for vision analysis.
 
-If the issue contains important screenshots, error captures, or UI mockups:
+**If image descriptions are present** (check `ctx['media']['image_descriptions']` or the "Image Descriptions" section in the markdown):
+- Read and incorporate the descriptions into your understanding.
+- The descriptions cover screenshots, bug captures, UI mockups, and video frame sequences.
+- No manual image pasting needed — the visual context is already in your context document.
 
-1. Tell the user: "This issue has N image(s) that may contain important visual context. They've been downloaded to `<output_dir>/media/`. Please paste them into our conversation so I can analyze them."
-2. List the specific files so the user knows which to paste.
-3. If the user pastes images, incorporate what you see into your understanding.
-4. If the user declines, work from the textual context.
+**If image descriptions are NOT present** but images were downloaded:
+The context document will list the image files. You have three options, in order of preference:
 
-For **videos**: frames are extracted into a directory named after the video's UUID (e.g., `media/<uuid>/scene_001.jpg`). The source video is also saved (e.g., `media/<uuid>.mp4`). Suggest the user paste key frames.
+1. **Describe images programmatically** (if `anthropic` is available):
+   ```python
+   from ge.media import describe_images
+   description = describe_images('media/screenshot.png', 'media/error.jpg')
+   ```
+
+2. **Create a montage and ask the user to paste** (if ImageMagick is available):
+   ```python
+   from ge.media import copy_images_to_clipboard
+   path = copy_images_to_clipboard('media/img1.png', 'media/img2.png')
+   ```
+   Then tell the user: "A montage of N images has been copied to your clipboard. Please paste it here with Cmd+V so I can see the visual context."
+
+3. **Ask the user to paste individual images** (fallback):
+   Tell the user which files to paste and why they matter.
+
+For **videos**: frames are extracted into a directory named after the video's UUID (e.g., `media/<uuid>/scene_001.jpg`). These frames are included in the image description if available. Otherwise, suggest the user paste key frames.
 
 ### Step 5: Check referenced code
 
@@ -132,6 +151,8 @@ For more details on interpreting analysis results, see the `ge-analyze` skill.
 | `ge.find_related_commits(repo, number)` | Commits that reference this issue |
 | `ge.process_all_media(markdown, output_dir)` | Download images + extract video frames |
 | `ge.extract_video_frames(path)` | Extract frames from a video file |
+| `ge.describe_images(*paths)` | Describe images via Claude API (vision) |
+| `ge.copy_images_to_clipboard(*paths)` | Create montage + copy to clipboard |
 
 ## Key Principles
 
@@ -139,5 +160,5 @@ For more details on interpreting analysis results, see the `ge-analyze` skill.
 2. **Verify the issue belongs to this project.** Don't work on the wrong repo's issues.
 3. **Check freshness before coding.** Issues may be stale, already fixed, or deprioritized.
 4. **Ask the user about ambiguity.** If the analysis shows conflicting signals, discuss with the user.
-5. **Request image paste when visual context matters.** Don't skip visual bugs just because you can't see screenshots directly.
+5. **Use image descriptions when available.** `ge.prepare()` automatically describes images via the Claude API. Read the "Image Descriptions" section in the context document. Only ask for manual paste as a fallback.
 6. **Use `gh` for all GitHub access.** This ensures private repo access works via the user's existing auth.

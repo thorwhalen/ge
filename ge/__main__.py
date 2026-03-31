@@ -13,21 +13,32 @@ import json
 import argh
 
 
-def prepare(url_or_spec: str, number: int = None, *, output_dir: str = None):
+def prepare(
+    url_or_spec: str,
+    number: int = None,
+    *,
+    output_dir: str = None,
+    describe_media: bool = True,
+):
     """Prepare full context for a GitHub issue or PR.
 
     Fetches all data, downloads media, runs freshness analysis,
     and writes a structured context document to output_dir.
+
+    When --describe-media is enabled (default), images are described via
+    the Claude API for automated visual context. Requires: pip install anthropic
+    and ANTHROPIC_API_KEY set.
 
     By default, context is written to ~/.cache/ge/<owner>/<repo>/<kind>_<number>/.
 
     Examples:
         ge prepare owner/repo --number 42
         ge prepare https://github.com/owner/repo/pull/7
+        ge prepare owner/repo --number 42 -d   # disable image descriptions
     """
     from ge import prepare as _prepare
 
-    kwargs = {}
+    kwargs = {"describe_media": describe_media}
     if output_dir is not None:
         kwargs["output_dir"] = output_dir
     ctx = _prepare(url_or_spec, number, **kwargs)
@@ -51,8 +62,12 @@ def prepare(url_or_spec: str, number: int = None, *, output_dir: str = None):
     n_videos = len(media.get("video_frames", {}))
     if n_images or n_videos:
         print(f"\nMedia: {n_images} image(s), {n_videos} video(s)")
+        if media.get("image_descriptions"):
+            print("Image descriptions: included (AI-generated via Claude API)")
+        elif media.get("all_visual_files"):
+            print("Image descriptions: not available (install anthropic + set ANTHROPIC_API_KEY)")
         if media.get("all_visual_files"):
-            print("Visual files (paste these into your agent for visual context):")
+            print("Visual files:")
             for f in media["all_visual_files"]:
                 print(f"  {f}")
 
@@ -185,6 +200,50 @@ def video_frames(
         print(f"  {f}")
 
 
+def describe_images(
+    *image_paths: str,
+    prompt: str = "Describe what you see in these images in detail. If they appear to be screenshots of a bug or UI issue, describe the problem visible.",
+    model: str = "claude-sonnet-4-5-20250514",
+):
+    """Describe images using the Claude API (vision).
+
+    Requires: pip install anthropic, and ANTHROPIC_API_KEY set.
+
+    Examples:
+        ge describe-images screenshot.png error.jpg
+        ge describe-images frame1.jpg frame2.jpg --prompt "What changed between these frames?"
+    """
+    from ge.media import describe_images as _describe
+
+    description = _describe(*image_paths, prompt=prompt, model=model)
+    print(description)
+
+
+def copy_images(
+    *image_paths: str,
+    tile: str = "3x",
+    geometry: str = "800x600+10+10",
+    montage_path: str = None,
+):
+    """Create a montage of images and copy to clipboard (macOS).
+
+    Combines images into a grid and copies to clipboard for pasting
+    into Claude Code with Cmd+V. Requires ImageMagick.
+
+    Examples:
+        ge copy-images screenshot1.png screenshot2.png
+        ge copy-images media/*.jpg --tile 4x
+    """
+    from ge.media import copy_images_to_clipboard
+
+    kwargs = {}
+    if montage_path is not None:
+        kwargs["montage_path"] = montage_path
+    path = copy_images_to_clipboard(*image_paths, tile=tile, geometry=geometry, **kwargs)
+    print(f"Montage saved to: {path}")
+    print("Copied to clipboard. Paste into Claude Code with Cmd+V.")
+
+
 def install_skills(*, target_dir: str = None):
     """Install ge skills as symlinks in ~/.claude/skills/.
 
@@ -224,6 +283,8 @@ _cli_commands = [
     fetch_discussion,
     media,
     video_frames,
+    describe_images,
+    copy_images,
     install_skills,
     uninstall_skills,
 ]

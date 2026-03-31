@@ -23,7 +23,7 @@ This creates symlinks in `~/.claude/skills/` pointing to the skills bundled with
 2. Fetch the full issue context (body, comments, media, cross-references)
 3. Analyze freshness — is it stale? already fixed? has related merged PRs?
 4. Ask you before working on ambiguous or likely-resolved issues
-5. Request you paste images when visual context matters
+5. Describe images automatically via the Claude API (or ask you to paste them as fallback)
 
 Three skills are installed:
 
@@ -45,6 +45,7 @@ To remove the skills: `ge uninstall-skills`
 - **Freshness analysis** — is this issue stale? already fixed? has related merged PRs?
 - **Cross-references** — commits and PRs that mention this issue
 - **Code file checks** — do the files mentioned in the issue still exist?
+- **AI image descriptions** — images are automatically described via the Claude API, so the agent understands visual bugs and UI screenshots without manual pasting
 
 All via `gh` CLI, so private repos just work.
 
@@ -68,6 +69,8 @@ ge analyze-issue owner/repo 42
 
 - **`gh` CLI** — installed and authenticated (`gh auth login`)
 - **`ffmpeg`** — optional, for video frame extraction
+- **`anthropic`** — optional, for AI-powered image descriptions (`pip install anthropic` + set `ANTHROPIC_API_KEY`)
+- **ImageMagick** — optional, for clipboard montage (`brew install imagemagick` on macOS)
 - **Python 3.10+**
 
 ## Commands
@@ -83,6 +86,8 @@ ge fetch-pr <repo> <N>                     Raw PR JSON
 ge fetch-discussion <repo> <N>             GitHub Discussion JSON
 ge media <file.md>                 Download media from markdown
 ge video-frames <video>            Extract frames (scene detection by default)
+ge describe-images <img>...        Describe images via Claude API (vision)
+ge copy-images <img>...            Create montage + copy to clipboard (macOS)
 ge install-skills                  Register skills with Claude Code (~/.claude/skills/)
 ge uninstall-skills                Remove ge skill symlinks
 ```
@@ -119,4 +124,47 @@ ctx = ge.prepare('https://github.com/owner/repo/discussions/5')
 
 # Just analysis
 analysis = ge.analyze_issue('owner/repo', 42)
+```
+
+## Image analysis
+
+When `ge prepare` runs, it downloads images and — if `anthropic` is installed — automatically sends them to the Claude API for visual analysis. The resulting descriptions are embedded in the context document under "Image Descriptions (AI-generated)", so the agent understands screenshots and visual bugs without manual image pasting.
+
+To set up:
+
+```bash
+pip install anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Image descriptions are generated automatically during `ge prepare`. To disable them:
+
+```bash
+ge prepare owner/repo --number 42 -d
+```
+
+### Standalone image tools
+
+```bash
+# Describe images via Claude API
+ge describe-images screenshot.png error.jpg
+
+# Describe with a custom prompt
+ge describe-images frame1.jpg frame2.jpg --prompt "What changed between these frames?"
+
+# Create montage + copy to clipboard for pasting into Claude Code (macOS, requires ImageMagick)
+ge copy-images screenshot1.png screenshot2.png
+# Then Cmd+V in Claude Code
+```
+
+Python API:
+
+```python
+from ge.media import describe_images, copy_images_to_clipboard
+
+# Get text description of images
+text = describe_images('screenshot.png', 'error.jpg')
+
+# Create montage, copy to clipboard
+path = copy_images_to_clipboard('img1.png', 'img2.png')
 ```

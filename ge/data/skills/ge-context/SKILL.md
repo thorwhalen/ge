@@ -12,6 +12,8 @@ Use this skill when you need to prepare or refresh a structured context document
 - `ge` package installed
 - `gh` CLI authenticated
 - `ffmpeg` (optional, for video frame extraction)
+- `anthropic` package + `ANTHROPIC_API_KEY` (optional, for AI image descriptions)
+- ImageMagick (optional, for clipboard montage via `copy_images_to_clipboard`)
 
 ## Preparing Context
 
@@ -37,6 +39,7 @@ ctx = ge.prepare_discussion('owner/repo', 5)
 All `prepare_*` functions accept:
 - `output_dir` (str, default `None`) — Where to write context files. Defaults to `~/.cache/ge/<owner>/<repo>/<kind>_<number>/`
 - `download_media_flag` (bool, default `True`) — Whether to download images/videos
+- `describe_media` (bool, default `True`) — Whether to describe images via Claude API. Requires `anthropic` package and `ANTHROPIC_API_KEY`. Fails silently if unavailable.
 
 `prepare_pr` additionally accepts:
 - `include_diff` (bool, default `True`) — Whether to include the full diff
@@ -74,6 +77,7 @@ The markdown context document contains these sections:
 5. **Diff** (PRs only) — Full diff if `include_diff=True`
 6. **Analysis** — Freshness assessment, signals, recommendation
 7. **Media Files** — Manifest of downloaded images and extracted video frames
+8. **Image Descriptions** — AI-generated descriptions of all visual files (when available)
 
 ## Return Value
 
@@ -95,10 +99,36 @@ The `prepare_*` functions return a dict containing:
         'images': [...],
         'video_frames': {...},
         'all_visual_files': [...],
-        'manifest': [...]
+        'manifest': [...],
+        'image_descriptions': '...',  # AI-generated (or None)
     },
     'context_md': '...',       # The rendered markdown
 }
+```
+
+## Image Analysis Tools
+
+Beyond automatic descriptions during `prepare_*`, two standalone tools are available:
+
+### Describe images (Claude API)
+
+```python
+from ge.media import describe_images
+
+# Describe one or more images
+text = describe_images('screenshot.png', 'error.jpg')
+text = describe_images('frame1.jpg', 'frame2.jpg',
+                       prompt="What changed between these frames?")
+```
+
+### Copy images to clipboard (montage)
+
+```python
+from ge.media import copy_images_to_clipboard
+
+# Create montage and copy to clipboard for pasting into Claude Code
+path = copy_images_to_clipboard('img1.png', 'img2.png', 'img3.png')
+# Then Cmd+V in Claude Code
 ```
 
 ## Refreshing Context

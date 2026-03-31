@@ -17,16 +17,48 @@ from ge.github import (
     get_pr_diff,
     get_discussion,
 )
-from ge.media import process_all_media
+from ge.media import process_all_media, describe_images
 from ge.analysis import analyze_issue, analyze_pr
 from ge.util import ensure_dir, parse_repo_spec, default_output_dir
 
 
-def prepare_issue(repo, number, *, output_dir=None, download_media_flag=True):
+def _describe_visual_files(visual_files, *, kind_label="issue"):
+    """Use Claude API to describe downloaded images, returning a text summary.
+
+    Returns None if no images, anthropic is unavailable, or API call fails.
+    Failures are non-fatal — context preparation continues without descriptions.
+    """
+    image_exts = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+    images = [
+        f for f in visual_files if Path(f).suffix.lower() in image_exts
+    ]
+    if not images:
+        return None
+    try:
+        prompt = (
+            f"These images were attached to a GitHub {kind_label}. "
+            "Describe each image in detail. If they appear to be screenshots "
+            "of a bug, error, or UI issue, describe the problem visible. "
+            "If they are video frames, describe what changes across the sequence."
+        )
+        return describe_images(*images, prompt=prompt)
+    except Exception:
+        return None
+
+
+def prepare_issue(
+    repo, number, *, output_dir=None, download_media_flag=True, describe_media=True
+):
     """Prepare full context for working on a GitHub issue.
 
     Fetches the issue, comments, media, and performs staleness analysis.
     Writes a context document and manifest to output_dir.
+
+    When ``describe_media`` is True (default) and the ``anthropic`` package
+    is installed with ``ANTHROPIC_API_KEY`` set, downloaded images are sent
+    to the Claude API for automated description.  The description is included
+    in the context document so the agent has visual context without manual
+    image pasting.
 
     Returns dict with all assembled context.
 
@@ -51,6 +83,13 @@ def prepare_issue(repo, number, *, output_dir=None, download_media_flag=True):
     if download_media_flag:
         media_dir = str(out / "media")
         media_result = process_all_media(all_markdown, media_dir)
+
+    # Describe images via Claude API (non-fatal if unavailable)
+    image_descriptions = None
+    if describe_media and media_result and media_result.get("all_visual_files"):
+        image_descriptions = _describe_visual_files(
+            media_result["all_visual_files"], kind_label="issue"
+        )
 
     context = {
         "kind": "issue",
@@ -82,6 +121,7 @@ def prepare_issue(repo, number, *, output_dir=None, download_media_flag=True):
             "all_visual_files": media_result["all_visual_files"]
             if media_result
             else [],
+            "image_descriptions": image_descriptions,
         },
         "prepared_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -101,7 +141,13 @@ def prepare_issue(repo, number, *, output_dir=None, download_media_flag=True):
 
 
 def prepare_pr(
-    repo, number, *, output_dir=None, download_media_flag=True, include_diff=True
+    repo,
+    number,
+    *,
+    output_dir=None,
+    download_media_flag=True,
+    include_diff=True,
+    describe_media=True,
 ):
     """Prepare full context for working on or reviewing a GitHub PR.
 
@@ -130,6 +176,13 @@ def prepare_pr(
     if download_media_flag:
         media_dir = str(out / "media")
         media_result = process_all_media(all_markdown, media_dir)
+
+    # Describe images via Claude API (non-fatal if unavailable)
+    image_descriptions = None
+    if describe_media and media_result and media_result.get("all_visual_files"):
+        image_descriptions = _describe_visual_files(
+            media_result["all_visual_files"], kind_label="PR"
+        )
 
     context = {
         "kind": "pr",
@@ -182,6 +235,7 @@ def prepare_pr(
             "all_visual_files": media_result["all_visual_files"]
             if media_result
             else [],
+            "image_descriptions": image_descriptions,
         },
         "prepared_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -261,7 +315,6 @@ def render_issue_context(ctx):
         a(f"## Media Files")
         a(f"")
         a(f"The following visual files were downloaded from this issue.")
-        a(f"**To give the agent visual context, paste these images into the chat.**")
         a(f"")
         for f in media["all_visual_files"]:
             a(f"- `{f}`")
@@ -271,6 +324,17 @@ def render_issue_context(ctx):
             for vid, frames in media["video_frames"].items():
                 a(f"- `{vid}` → {len(frames)} frames")
             a("")
+
+    # Image descriptions (from Claude API vision analysis)
+    if media.get("image_descriptions"):
+        a("## Image Descriptions (AI-generated)")
+        a("")
+        a(media["image_descriptions"])
+        a("")
+    elif media.get("all_visual_files"):
+        a("*Image descriptions not available. To analyze images, install "
+          "the `anthropic` package and set `ANTHROPIC_API_KEY`.*")
+        a("")
 
     return "\n".join(lines)
 
@@ -367,16 +431,27 @@ def render_pr_context(ctx):
     if media.get("all_visual_files"):
         a(f"## Media Files")
         a(f"")
-        a(f"**To give the agent visual context, paste these images into the chat.**")
-        a(f"")
         for f in media["all_visual_files"]:
             a(f"- `{f}`")
         a(f"")
 
+    # Image descriptions (from Claude API vision analysis)
+    if media.get("image_descriptions"):
+        a("## Image Descriptions (AI-generated)")
+        a("")
+        a(media["image_descriptions"])
+        a("")
+    elif media.get("all_visual_files"):
+        a("*Image descriptions not available. To analyze images, install "
+          "the `anthropic` package and set `ANTHROPIC_API_KEY`.*")
+        a("")
+
     return "\n".join(lines)
 
 
-def prepare_discussion(repo, number, *, output_dir=None, download_media_flag=True):
+def prepare_discussion(
+    repo, number, *, output_dir=None, download_media_flag=True, describe_media=True
+):
     """Prepare full context for a GitHub Discussion.
 
     Fetches the discussion and its comments via GraphQL, downloads media,
@@ -403,6 +478,13 @@ def prepare_discussion(repo, number, *, output_dir=None, download_media_flag=Tru
         media_dir = str(out / "media")
         media_result = process_all_media(all_markdown, media_dir)
 
+    # Describe images via Claude API (non-fatal if unavailable)
+    image_descriptions = None
+    if describe_media and media_result and media_result.get("all_visual_files"):
+        image_descriptions = _describe_visual_files(
+            media_result["all_visual_files"], kind_label="discussion"
+        )
+
     context = {
         "kind": "discussion",
         "repo": f"{owner}/{name}",
@@ -428,6 +510,7 @@ def prepare_discussion(repo, number, *, output_dir=None, download_media_flag=Tru
             "all_visual_files": media_result["all_visual_files"]
             if media_result
             else [],
+            "image_descriptions": image_descriptions,
         },
         "prepared_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -475,10 +558,19 @@ def render_discussion_context(ctx):
     if media.get("all_visual_files"):
         a("## Media Files")
         a("")
-        a("**To give the agent visual context, paste these images into the chat.**")
-        a("")
         for f in media["all_visual_files"]:
             a(f"- `{f}`")
+        a("")
+
+    # Image descriptions (from Claude API vision analysis)
+    if media.get("image_descriptions"):
+        a("## Image Descriptions (AI-generated)")
+        a("")
+        a(media["image_descriptions"])
+        a("")
+    elif media.get("all_visual_files"):
+        a("*Image descriptions not available. To analyze images, install "
+          "the `anthropic` package and set `ANTHROPIC_API_KEY`.*")
         a("")
 
     return "\n".join(lines)

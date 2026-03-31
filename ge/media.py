@@ -2,10 +2,14 @@
 
 Downloads images and videos from GitHub issues/PRs, handling private repo
 auth via gh token. Extracts representative frames from videos using ffmpeg.
+Provides AI-powered image description and clipboard montage utilities.
 """
 
 import subprocess
 import re
+import shutil
+import base64
+import sys
 from pathlib import Path
 
 from ge.util import (
@@ -348,3 +352,170 @@ def process_all_media(markdown, output_dir=None):
         ],
         "all_visual_files": all_images,
     }
+
+
+# ---------------------------------------------------------------------------
+# Image description via Claude API (approach 1)
+# ---------------------------------------------------------------------------
+
+_IMAGE_MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+}
+
+
+def _encode_image(path):
+    """Read an image file and return (base64_data, media_type)."""
+    p = Path(path)
+    ext = p.suffix.lower()
+    media_type = _IMAGE_MEDIA_TYPES.get(ext)
+    if not media_type:
+        # Try detecting from magic bytes
+        kind, detected_ext = _detect_media_type(str(p))
+        if kind == "image" and detected_ext:
+            media_type = _IMAGE_MEDIA_TYPES.get(detected_ext, "image/png")
+        else:
+            media_type = "image/png"  # fallback
+    with open(p, "rb") as f:
+        data = base64.standard_b64encode(f.read()).decode()
+    return data, media_type
+
+
+def describe_images(
+    *image_paths,
+    prompt="Describe what you see in these images in detail. If they appear to be screenshots of a bug or UI issue, describe the problem visible.",
+    model="claude-sonnet-4-5-20250514",
+    max_tokens=4096,
+):
+    """Use the Claude API to describe images, returning a text description.
+
+    Requires the ``anthropic`` package and a valid ``ANTHROPIC_API_KEY``.
+
+    Args:
+        *image_paths: One or more paths to image files.
+        prompt: The text prompt sent alongside the images.
+        model: Claude model to use for vision analysis.
+        max_tokens: Maximum tokens in the response.
+
+    Returns:
+        str: The model's textual description of the images.
+
+    >>> # description = describe_images('screenshot.png', 'error.jpg')
+    """
+    try:
+        import anthropic
+    except ImportError:
+        raise ImportError(
+            "The 'anthropic' package is required for image description.\n"
+            "Install it with: pip install anthropic\n"
+            "Then set ANTHROPIC_API_KEY in your environment."
+        )
+
+    client = anthropic.Anthropic()
+    content = []
+    for path in image_paths:
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(f"Image not found: {path}")
+        data, media_type = _encode_image(p)
+        content.append(
+            {
+                "type": "image",
+                "source": {"type": "base64", "media_type": media_type, "data": data},
+            }
+        )
+    content.append({"type": "text", "text": prompt})
+
+    msg = client.messages.create(
+        model=model, max_tokens=max_tokens, messages=[{"role": "user", "content": content}]
+    )
+    return msg.content[0].text
+
+
+# ---------------------------------------------------------------------------
+# Clipboard montage (approach 4: Claude Code orchestrates, user pastes)
+# ---------------------------------------------------------------------------
+
+
+def _check_imagemagick():
+    """Check if ImageMagick's ``magick`` command is available."""
+    if not shutil.which("magick"):
+        raise EnvironmentError(
+            "ImageMagick not found (needed for image montage).\n"
+            "Install it with:\n"
+            "  brew install imagemagick       # macOS\n"
+            "  sudo apt install imagemagick   # Debian/Ubuntu\n"
+            "  https://imagemagick.org        # other platforms"
+        )
+
+
+def copy_images_to_clipboard(
+    *image_paths,
+    tile="3x",
+    geometry="800x600+10+10",
+    montage_path=None,
+):
+    """Create a montage of images and copy it to the macOS clipboard.
+
+    Combines multiple images into a single grid image using ImageMagick,
+    then copies it to the clipboard via ``osascript`` so the user can
+    paste it into Claude Code with Cmd+V.
+
+    Args:
+        *image_paths: Paths to image files to combine.
+        tile: Montage tile layout (e.g. '3x' for 3 columns).
+        geometry: Tile geometry (size+padding).
+        montage_path: Where to save the montage file. Defaults to
+            ``/tmp/ge_montage.png``.
+
+    Returns:
+        str: Path to the montage file.
+
+    >>> # path = copy_images_to_clipboard('img1.png', 'img2.png')
+    """
+    _check_imagemagick()
+    if not image_paths:
+        raise ValueError("At least one image path is required.")
+
+    if montage_path is None:
+        montage_path = "/tmp/ge_montage.png"
+    montage_path = str(montage_path)
+
+    # Validate all paths exist
+    for p in image_paths:
+        if not Path(p).exists():
+            raise FileNotFoundError(f"Image not found: {p}")
+
+    # Create montage
+    cmd = [
+        "magick",
+        "montage",
+        *[str(p) for p in image_paths],
+        "-geometry",
+        geometry,
+        "-tile",
+        tile,
+        montage_path,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"montage failed: {result.stderr.strip()}")
+
+    # Copy to clipboard (macOS only)
+    if sys.platform == "darwin":
+        copy_cmd = [
+            "osascript",
+            "-e",
+            f'set the clipboard to '
+            f'(read (POSIX file "{montage_path}") as JPEG picture)',
+        ]
+        result = subprocess.run(copy_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"Failed to copy to clipboard: {result.stderr.strip()}"
+            )
+
+    return montage_path

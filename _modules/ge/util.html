@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.util &mdash; ge 0.1.1 documentation</title>
+  <title>ge.util &mdash; ge 0.1.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../../_static/documentation_options.js?v=92734c54"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -225,7 +225,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_media_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract image and video URLs from GitHub-flavored markdown.</span>
 
-<span class="sd">    Returns list of dicts with keys: url, alt, kind (&#39;image&#39; or &#39;video&#39;).</span>
+<span class="sd">    Returns list of dicts with keys: url, alt, kind (&#39;image&#39;, &#39;video&#39;, or &#39;unknown&#39;).</span>
 
 <span class="sd">    &gt;&gt;&gt; urls = extract_media_urls(&#39;![screenshot](https://example.com/img.png)&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; urls[0][&#39;kind&#39;]</span>
@@ -261,6 +261,16 @@
         <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
             <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
             <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">&quot;alt&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;video&quot;</span><span class="p">})</span>
+
+    <span class="c1"># Bare GitHub user-attachment URLs (no extension — could be image or video,</span>
+    <span class="c1"># resolved after download via content-type detection)</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s2">&quot;https://github\.com/user-attachments/assets/[\w-]+&quot;</span><span class="p">,</span> <span class="n">markdown</span>
+    <span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">&quot;alt&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">})</span>
 
     <span class="k">return</span> <span class="n">results</span></div>
 

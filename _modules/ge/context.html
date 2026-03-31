@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.context &mdash; ge 0.1.4 documentation</title>
+  <title>ge.context &mdash; ge 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -112,9 +112,7 @@
 <span class="sd">    Failures are non-fatal — context preparation continues without descriptions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">image_exts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.gif&quot;</span><span class="p">,</span> <span class="s2">&quot;.webp&quot;</span><span class="p">}</span>
-    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">visual_files</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">image_exts</span>
-    <span class="p">]</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">visual_files</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">image_exts</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">images</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
@@ -423,8 +421,10 @@
         <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
-          <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span>
+            <span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
+            <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span>
+        <span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
@@ -536,8 +536,10 @@
         <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
-          <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span>
+            <span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
+            <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span>
+        <span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
@@ -669,8 +671,10 @@
         <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
-          <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span>
+            <span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
+            <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span>
+        <span class="p">)</span>
         <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>

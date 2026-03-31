@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge &mdash; ge 0.1.4 documentation</title>
+  <title>ge &mdash; ge 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../_static/documentation_options.js?v=59fadc99"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -68,6 +68,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#ge.prepare_issue"><code class="docutils literal notranslate"><span class="pre">prepare_issue()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.prepare_pr"><code class="docutils literal notranslate"><span class="pre">prepare_pr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.process_all_media"><code class="docutils literal notranslate"><span class="pre">process_all_media()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.resolve_target"><code class="docutils literal notranslate"><span class="pre">resolve_target()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ge.uninstall_skills"><code class="docutils literal notranslate"><span class="pre">uninstall_skills()</span></code></a></li>
 </ul>
 </li>
@@ -375,6 +376,48 @@ image pasting.</p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># result = process_all_media(issue_body)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.resolve_target">
+<span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">resolve_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_input</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/util.html#resolve_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.resolve_target" title="Link to this definition"></a></dt>
+<dd><p>Resolve flexible user input into a structured target for ge workflows.</p>
+<dl class="simple">
+<dt>Accepts any of these forms:</dt><dd><ul class="simple">
+<li><p>A GitHub URL: <code class="docutils literal notranslate"><span class="pre">https://github.com/owner/repo/issues/42</span></code></p></li>
+<li><p>A folder path to pre-prepared context: <code class="docutils literal notranslate"><span class="pre">~/.cache/ge/owner/repo/issue_42</span></code></p></li>
+<li><p>A bare number: <code class="docutils literal notranslate"><span class="pre">42</span></code> or <code class="docutils literal notranslate"><span class="pre">#42</span></code> (uses <em>current_repo</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">owner/repo#42</span></code> or <code class="docutils literal notranslate"><span class="pre">owner/repo/42</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">owner/repo</span> <span class="pre">42</span></code></p></li>
+</ul>
+</dd>
+<dt>Returns a dict with:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">repo</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;owner/repo&quot;</span></code> (or None if only a folder was given)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">number</span></code>: int</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kind</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;issue&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;pr&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;discussion&quot;</span></code> | None</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">context_dir</span></code>: path to pre-prepared context (str or None)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">context_md</span></code>: path to the context markdown file (str or None)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">has_prepared_context</span></code>: bool — whether context files already exist</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source</span></code>: how the input was resolved (<code class="docutils literal notranslate"><span class="pre">&quot;url&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;folder&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;number&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;repo_number&quot;</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">&#39;https://github.com/owner/repo/issues/42&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
+<span class="go">(&#39;owner/repo&#39;, 42, &#39;issue&#39;, &#39;url&#39;)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">&#39;#42&#39;</span><span class="p">,</span> <span class="n">current_repo</span><span class="o">=</span><span class="s1">&#39;owner/repo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
+<span class="go">(&#39;owner/repo&#39;, 42, &#39;number&#39;)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">&#39;owner/repo#42&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
+<span class="go">(&#39;owner/repo&#39;, 42, &#39;repo_number&#39;)</span>
 </pre></div>
 </div>
 </dd></dl>

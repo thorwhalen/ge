@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.util &mdash; ge 0.1.4 documentation</title>
+  <title>ge.util &mdash; ge 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -116,7 +116,7 @@
 
 
 <div class="viewcode-block" id="gh_api">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.gh_api">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.gh_api">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">gh_api</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paginate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Call the GitHub REST API via gh CLI.</span>
 
@@ -148,7 +148,7 @@
 
 
 <div class="viewcode-block" id="gh_auth_token">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.gh_auth_token">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.gh_auth_token">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">gh_auth_token</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the current gh auth token for authenticated downloads.</span>
 
@@ -167,7 +167,7 @@
 
 
 <div class="viewcode-block" id="parse_repo_spec">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.parse_repo_spec">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.parse_repo_spec">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_repo_spec</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse &#39;owner/repo&#39; or full GitHub URL into (owner, repo).</span>
 
@@ -194,7 +194,7 @@
 
 
 <div class="viewcode-block" id="parse_github_url">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.parse_github_url">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.parse_github_url">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_github_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a full GitHub issue/PR/discussion URL into (owner, repo, number, kind).</span>
 
@@ -221,7 +221,7 @@
 
 
 <div class="viewcode-block" id="extract_media_urls">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.extract_media_urls">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.extract_media_urls">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_media_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract image and video URLs from GitHub-flavored markdown.</span>
 
@@ -277,7 +277,7 @@
 
 
 <div class="viewcode-block" id="rewrite_media_refs">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.rewrite_media_refs">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.rewrite_media_refs">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rewrite_media_refs</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">url_to_local</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace media URLs in markdown with local file paths.</span>
 
@@ -292,7 +292,7 @@
 
 
 <div class="viewcode-block" id="ensure_dir">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.ensure_dir">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.ensure_dir">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ensure_dir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create directory if it doesn&#39;t exist, return Path.&quot;&quot;&quot;</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -302,7 +302,7 @@
 
 
 <div class="viewcode-block" id="default_output_dir">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.default_output_dir">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.default_output_dir">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;issue&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the default output directory under the user&#39;s cache.</span>
 
@@ -319,8 +319,138 @@
 
 
 
+<div class="viewcode-block" id="resolve_target">
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.resolve_target">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_target</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">current_repo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve flexible user input into a structured target for ge workflows.</span>
+
+<span class="sd">    Accepts any of these forms:</span>
+<span class="sd">      - A GitHub URL: ``https://github.com/owner/repo/issues/42``</span>
+<span class="sd">      - A folder path to pre-prepared context: ``~/.cache/ge/owner/repo/issue_42``</span>
+<span class="sd">      - A bare number: ``42`` or ``#42`` (uses *current_repo*)</span>
+<span class="sd">      - ``owner/repo#42`` or ``owner/repo/42``</span>
+<span class="sd">      - ``owner/repo 42``</span>
+
+<span class="sd">    Returns a dict with:</span>
+<span class="sd">      - ``repo``: ``&quot;owner/repo&quot;`` (or None if only a folder was given)</span>
+<span class="sd">      - ``number``: int</span>
+<span class="sd">      - ``kind``: ``&quot;issue&quot;`` | ``&quot;pr&quot;`` | ``&quot;discussion&quot;`` | None</span>
+<span class="sd">      - ``context_dir``: path to pre-prepared context (str or None)</span>
+<span class="sd">      - ``context_md``: path to the context markdown file (str or None)</span>
+<span class="sd">      - ``has_prepared_context``: bool — whether context files already exist</span>
+<span class="sd">      - ``source``: how the input was resolved (``&quot;url&quot;``, ``&quot;folder&quot;``,</span>
+<span class="sd">        ``&quot;number&quot;``, ``&quot;repo_number&quot;``)</span>
+
+<span class="sd">    &gt;&gt;&gt; r = resolve_target(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; r[&#39;repo&#39;], r[&#39;number&#39;], r[&#39;kind&#39;], r[&#39;source&#39;]</span>
+<span class="sd">    (&#39;owner/repo&#39;, 42, &#39;issue&#39;, &#39;url&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; r = resolve_target(&#39;#42&#39;, current_repo=&#39;owner/repo&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; r[&#39;repo&#39;], r[&#39;number&#39;], r[&#39;source&#39;]</span>
+<span class="sd">    (&#39;owner/repo&#39;, 42, &#39;number&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; r = resolve_target(&#39;owner/repo#42&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; r[&#39;repo&#39;], r[&#39;number&#39;], r[&#39;source&#39;]</span>
+<span class="sd">    (&#39;owner/repo&#39;, 42, &#39;repo_number&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user_input</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="n">repo</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">context_dir</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># --- 1. Folder path ---</span>
+    <span class="n">expanded</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">expanded</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">context_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">expanded</span><span class="p">)</span>
+        <span class="c1"># Try to infer repo/number/kind from folder name convention:</span>
+        <span class="c1"># ~/.cache/ge/&lt;owner&gt;/&lt;repo&gt;/&lt;kind&gt;_&lt;number&gt;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(issue|pr|discussion)_(\d+)$&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="c1"># Try to get owner/repo from parent dirs</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">expanded</span><span class="o">.</span><span class="n">parts</span>
+            <span class="c1"># Look for the pattern: .../&lt;owner&gt;/&lt;repo&gt;/&lt;kind&gt;_&lt;number&gt;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">repo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;folder&quot;</span>
+
+    <span class="c1"># --- 2. GitHub URL ---</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;https?://github\.com/&quot;</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+        <span class="n">owner</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">kind</span> <span class="o">=</span> <span class="n">parse_github_url</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;url&quot;</span>
+
+    <span class="c1"># --- 3. owner/repo#number or owner/repo/number ---</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^/]+/[^/#]+[#/]\d+$&quot;</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([^/]+/[^/#]+)[#/](\d+)$&quot;</span><span class="p">,</span> <span class="n">user_input</span><span class="p">)</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;repo_number&quot;</span>
+
+    <span class="c1"># --- 4. &quot;owner/repo 42&quot; (space-separated) ---</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^/]+/[^/\s]+\s+#?\d+$&quot;</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([^/]+/[^/\s]+)\s+#?(\d+)$&quot;</span><span class="p">,</span> <span class="n">user_input</span><span class="p">)</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;repo_number&quot;</span>
+
+    <span class="c1"># --- 5. Bare number: &quot;42&quot; or &quot;#42&quot; ---</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;#?\d+$&quot;</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">user_input</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">))</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">current_repo</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;number&quot;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot resolve target: </span><span class="si">{</span><span class="n">user_input</span><span class="si">!r}</span><span class="s2">. Expected a GitHub URL, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;folder path, owner/repo#number, or a bare issue number.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># --- Check for pre-prepared context ---</span>
+    <span class="k">if</span> <span class="n">context_dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">repo</span> <span class="ow">and</span> <span class="n">number</span> <span class="ow">and</span> <span class="n">kind</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">context_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+
+    <span class="c1"># Even without kind, try all three</span>
+    <span class="k">if</span> <span class="n">context_dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">repo</span> <span class="ow">and</span> <span class="n">number</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;issue&quot;</span><span class="p">,</span> <span class="s2">&quot;pr&quot;</span><span class="p">,</span> <span class="s2">&quot;discussion&quot;</span><span class="p">):</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">context_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">kind</span> <span class="o">=</span> <span class="n">k</span>
+                <span class="k">break</span>
+
+    <span class="c1"># Find the context markdown file</span>
+    <span class="n">context_md</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">has_prepared_context</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">context_dir</span><span class="p">:</span>
+        <span class="n">ctx_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">context_dir</span><span class="p">)</span>
+        <span class="c1"># Look for *_context.md</span>
+        <span class="n">md_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ctx_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*_context.md&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">md_files</span><span class="p">:</span>
+            <span class="n">context_md</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">md_files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">has_prepared_context</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;repo&quot;</span><span class="p">:</span> <span class="n">repo</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+        <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
+        <span class="s2">&quot;context_dir&quot;</span><span class="p">:</span> <span class="n">context_dir</span><span class="p">,</span>
+        <span class="s2">&quot;context_md&quot;</span><span class="p">:</span> <span class="n">context_md</span><span class="p">,</span>
+        <span class="s2">&quot;has_prepared_context&quot;</span><span class="p">:</span> <span class="n">has_prepared_context</span><span class="p">,</span>
+        <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
 <div class="viewcode-block" id="check_ffmpeg">
-<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.util.check_ffmpeg">[docs]</a>
+<a class="viewcode-back" href="../../module_docs/ge/util.html#ge.check_ffmpeg">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_ffmpeg</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if ffmpeg is available.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;ffmpeg&quot;</span><span class="p">):</span>

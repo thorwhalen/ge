@@ -1,5 +1,5 @@
 ---
-name: autonomous-execution
+name: ge-autonomous-execution
 description: "Behavioural policy for running unattended. Use when you have been launched in headless / auto-permission mode (e.g. by `ge run-roadmap` or `ge run-triage`) and there is no user available to answer questions. Converts every clarifying question into a logged decision so progress continues."
 ---
 

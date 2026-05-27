@@ -154,13 +154,13 @@ def _build_roadmap_prompt(
     decisions = decisions_target if decisions_target is not None else roadmap_issue
     return (
         "You are running unattended via the ge autonomous runner. "
-        "Load and follow the `autonomous-execution` and `roadmap-execution` "
+        "Load and follow the `ge-autonomous-execution` and `ge-roadmap-execution` "
         "skills. Do not stop to ask questions; decide-and-log instead.\n\n"
         f"REPO = {repo}\n"
         f"ROADMAP_ISSUE = {roadmap_issue}\n"
         f"DECISIONS_TARGET = {decisions}\n\n"
         "Perform exactly one roadmap iteration as described in the "
-        "`roadmap-execution` skill: pick the next todo task, mark it doing, "
+        "`ge-roadmap-execution` skill: pick the next todo task, mark it doing, "
         "complete it (with verification), mark it done, and exit. If there "
         "are no todo tasks left, exit immediately. Token/context exhaustion "
         "is not a failure — the outer runner relaunches with a fresh "
@@ -177,7 +177,7 @@ def _build_triage_prompt(
 ) -> str:
     return (
         "You are running unattended via the ge autonomous runner. "
-        "Load and follow the `autonomous-execution` and `cross-repo-triage` "
+        "Load and follow the `ge-autonomous-execution` and `ge-cross-repo-triage` "
         "skills. Do not stop to ask questions; decide-and-log instead.\n\n"
         f"REPOS = {json.dumps(repos)}\n"
         f"TRACKING_REPO = {tracking_repo}\n"

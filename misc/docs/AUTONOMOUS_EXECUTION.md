@@ -10,7 +10,7 @@ exhaustion is no longer a failure mode.
 | Layer | Lives in | What it does |
 |-------|----------|--------------|
 | **1. Tools** | `ge/memory.py` | `RoadmapStore`, `DecisionLog`, `TriageBacklog` — `MutableMapping`/`Iterable` facades over GitHub. All GraphQL/CLI complexity is contained here. |
-| **2. Skills** | `ge/data/skills/{autonomous-execution,roadmap-execution,cross-repo-triage}/SKILL.md` | Behaviour. How and when to use Layer 1. Skills call tools; they don't reimplement GitHub access. |
+| **2. Skills** | `ge/data/skills/{ge-autonomous-execution,ge-roadmap-execution,ge-cross-repo-triage}/SKILL.md` | Behaviour. How and when to use Layer 1. Skills call tools; they don't reimplement GitHub access. |
 | **3. Runner** | `ge/run.py` | Launch wrapper. Owns the outer loop and the `--permission-mode` flag (which SKILL.md cannot set). One headless `claude -p` per iteration. |
 
 Layer 1 is independently useful: you can use the stores from Python or
@@ -82,7 +82,7 @@ The runner:
 
 - Calls `check_requirements()` (`gh` installed, authenticated).
 - Builds a self-contained prompt for one work unit, naming the skills
-  (`autonomous-execution`, `roadmap-execution` or `cross-repo-triage`)
+  (`ge-autonomous-execution`, `ge-roadmap-execution` or `ge-cross-repo-triage`)
   and the relevant store coordinates.
 - Spawns `claude -p ...` with the chosen `--permission-mode`.
 - Inspects the exit:
@@ -96,7 +96,7 @@ The runner:
 
 ## Decision-and-log policy
 
-The `autonomous-execution` skill makes this binding. In short:
+The `ge-autonomous-execution` skill makes this binding. In short:
 
 - Do not stop to ask questions. Decide, log, proceed.
 - Only stop and escalate if an action is destructive **and**

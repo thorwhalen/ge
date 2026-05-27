@@ -97,8 +97,7 @@ def _claude_binary() -> str:
 def _permission_flags(mode: str) -> tuple[str, ...]:
     if mode not in PERMISSION_MODES:
         raise ValueError(
-            f"Unknown permission mode {mode!r}. "
-            f"Use one of: {sorted(PERMISSION_MODES)}"
+            f"Unknown permission mode {mode!r}. Use one of: {sorted(PERMISSION_MODES)}"
         )
     return PERMISSION_MODES[mode]
 
@@ -140,7 +139,8 @@ def _spawn_claude(
             iteration=0,
             returncode=124,
             stdout=exc.stdout or "",
-            stderr=(exc.stderr or "") + f"\n[runner] session exceeded {timeout}s timeout",
+            stderr=(exc.stderr or "")
+            + f"\n[runner] session exceeded {timeout}s timeout",
             duration_sec=time.monotonic() - start,
         )
 
@@ -245,7 +245,10 @@ def _run_loop(
                             "cap on iteration "
                             f"{iteration}. Retrying with a fresh context."
                         ),
-                        metadata={"iteration": iteration, "returncode": result.returncode},
+                        metadata={
+                            "iteration": iteration,
+                            "returncode": result.returncode,
+                        },
                     )
                 except Exception:
                     pass  # decision logging is best-effort
@@ -457,7 +460,9 @@ def cli_run_roadmap(
         repo,
         int(roadmap_issue),
         mode=mode,
-        decisions_target=decisions_target if decisions_target is None else int(decisions_target),
+        decisions_target=decisions_target
+        if decisions_target is None
+        else int(decisions_target),
         max_sessions=int(max_sessions),
         cwd=cwd,
         on_session=_print_session,

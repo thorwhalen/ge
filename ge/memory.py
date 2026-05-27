@@ -229,9 +229,7 @@ def _splice_block(
     >>> _splice_block('pre <!--B-->\\nold\\n<!--E--> post', '<!--B-->', '<!--E-->', 'new')
     'pre <!--B-->\\nnew\\n<!--E--> post'
     """
-    pattern = re.compile(
-        re.escape(begin) + r".*?" + re.escape(end), re.DOTALL
-    )
+    pattern = re.compile(re.escape(begin) + r".*?" + re.escape(end), re.DOTALL)
     replacement = f"{begin}\n{inner}\n{end}"
     if pattern.search(body):
         return pattern.sub(replacement, body)
@@ -392,7 +390,9 @@ class RoadmapStore(MutableMapping):
         )
         _patch_issue_body(self.repo, self.issue_number, new_body)
         # refetch to keep cache in sync with server state
-        self._snapshot({"html_url": issue.get("html_url"), "title": issue.get("title")}, tasks)
+        self._snapshot(
+            {"html_url": issue.get("html_url"), "title": issue.get("title")}, tasks
+        )
 
     # ----- public roadmap helpers ----- #
 
@@ -583,14 +583,14 @@ def _parse_decision_body(body: str) -> tuple[str, str, dict]:
     m = re.match(r"###\s*Decision:\s*(.+)", text)
     if m:
         summary = m.group(1).strip()
-        text = text[m.end():].strip()
+        text = text[m.end() :].strip()
     code = re.search(r"```json\s*\n(.*?)\n```", text, re.DOTALL)
     if code:
         try:
             meta = json.loads(code.group(1))
         except json.JSONDecodeError:
             meta = {}
-        text = (text[: code.start()] + text[code.end():]).strip()
+        text = (text[: code.start()] + text[code.end() :]).strip()
     rationale = text.strip()
     return summary, rationale, meta
 
@@ -699,11 +699,11 @@ class TriageBacklog(MutableMapping):
             raise KeyError(key)
         return entries[key]
 
-    def __setitem__(self, key: str, value: TriageEntry | Mapping | TriageVerdict) -> None:
+    def __setitem__(
+        self, key: str, value: TriageEntry | Mapping | TriageVerdict
+    ) -> None:
         if not _ISSUE_REF_RE.match(key):
-            raise ValueError(
-                f"Triage key must be 'owner/repo#N', got {key!r}"
-            )
+            raise ValueError(f"Triage key must be 'owner/repo#N', got {key!r}")
         entries = self._fetch()
         entries[key] = self._coerce(key, value, existing=entries.get(key))
         self._write(entries)
@@ -742,8 +742,12 @@ class TriageBacklog(MutableMapping):
                 ref=key,
                 verdict=TriageVerdict(value.get("verdict", "fixable")),
                 order=int(value.get("order", existing.order if existing else 0)),
-                rationale=value.get("rationale", existing.rationale if existing else ""),
-                metadata=dict(value.get("metadata", existing.metadata if existing else {})),
+                rationale=value.get(
+                    "rationale", existing.rationale if existing else ""
+                ),
+                metadata=dict(
+                    value.get("metadata", existing.metadata if existing else {})
+                ),
             )
         raise TypeError(
             f"TriageBacklog values must be TriageEntry/TriageVerdict/Mapping, "
@@ -810,8 +814,7 @@ def check_requirements(*, require_project_scope: bool = False) -> dict:
     scopes = [s.strip().strip("'\"") for s in scopes_raw.split(",") if s.strip()]
     missing: list[str] = []
     if require_project_scope and not any(
-        s == "project" or s == "read:project" or s.endswith(":project")
-        for s in scopes
+        s == "project" or s == "read:project" or s.endswith(":project") for s in scopes
     ):
         missing.append("project")
     return {
@@ -838,10 +841,7 @@ def cli_roadmap_show(repo: str, issue: int) -> str:
     store = RoadmapStore(repo, issue)
     tasks = store.hydrate()
     return json.dumps(
-        [
-            {"id": t.id, "title": t.title, "state": t.state.value}
-            for t in tasks
-        ],
+        [{"id": t.id, "title": t.title, "state": t.state.value} for t in tasks],
         indent=2,
     )
 
@@ -923,9 +923,7 @@ def cli_triage_set(
 
 def cli_check_requirements(*, project_scope: bool = False) -> str:
     """Check that gh is installed, authed, and (optionally) has project scope."""
-    return json.dumps(
-        check_requirements(require_project_scope=project_scope), indent=2
-    )
+    return json.dumps(check_requirements(require_project_scope=project_scope), indent=2)
 
 
 __all__ = [

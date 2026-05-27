@@ -316,9 +316,7 @@ def roadmap_append(repo: str, issue: int, title: str):
     print(cli_roadmap_append(repo, issue, title))
 
 
-def decision_log(
-    repo: str, target: int, summary: str, *, rationale: str = ""
-):
+def decision_log(repo: str, target: int, summary: str, *, rationale: str = ""):
     """Append a decision-tagged comment to an issue or PR."""
     from ge.memory import cli_decision_log
 
@@ -351,11 +349,7 @@ def triage_set(
     """Add or update a triage entry (ref is 'owner/repo#N')."""
     from ge.memory import cli_triage_set
 
-    print(
-        cli_triage_set(
-            repo, issue, ref, verdict, order=order, rationale=rationale
-        )
-    )
+    print(cli_triage_set(repo, issue, ref, verdict, order=order, rationale=rationale))
 
 
 def check_requirements(*, project_scope: bool = False):

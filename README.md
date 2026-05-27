@@ -34,15 +34,64 @@ The agent resolves whatever you give it, **confirms** what it understood before 
 4. **Asks you** before working on ambiguous or likely-resolved issues
 5. **Works on the issue** — creates a branch, makes changes, submits a PR
 
-Three skills are installed:
+Six skills are installed:
 
 | Skill | Purpose |
 |-------|---------|
 | `ge` | Full workflow — resolve target, confirm, prepare context, analyze, work |
 | `ge-analyze` | Quick triage — check if an issue is worth working on |
 | `ge-context` | Context preparation — fetch and assemble structured documents |
+| `autonomous-execution` | Behaviour policy for unattended runs (decide-and-log, don't ask) |
+| `roadmap-execution` | Drive a roadmap issue end-to-end, one task per iteration |
+| `cross-repo-triage` | Classify & resolve issues across repos (failing test → fix → PR) |
 
 To remove the skills: `ge uninstall-skills`
+
+## Autonomous execution
+
+`ge` can drive Claude Code through a long body of work **without interrupting you**. State lives in GitHub (issues, comments) so each session can exit, the runner relaunches a fresh one, and progress resumes — context exhaustion is no longer a failure mode.
+
+```bash
+# Drive a roadmap issue to completion (one headless `claude -p` per task).
+ge run-roadmap owner/repo <ROADMAP_ISSUE>
+
+# Triage and resolve issues across several repos.
+ge run-triage <TRACKING_REPO> <TRACKING_ISSUE> "owner/a,owner/b" --phase analyze
+ge run-triage <TRACKING_REPO> <TRACKING_ISSUE> "owner/a,owner/b" --phase execute
+```
+
+The runner launches `claude` with `--permission-mode auto` by default; pass `--mode bypass` if you have explicitly authorised `--dangerously-skip-permissions`. Between iterations the session is *gone* — the next one rehydrates state from GitHub.
+
+### The memory model
+
+| Store | Backing | Use for |
+|-------|---------|---------|
+| `RoadmapStore` | A *roadmap issue* whose body holds a markdown task list between `<!-- ge:roadmap:begin -->` / `end`. Checkboxes render as GitHub's task-list progress bar. | Roadmap of tasks; agent-modifiable. |
+| `DecisionLog` | Tagged comments (`<!-- ge:decision -->`) on an issue or PR. | Significant decisions and course-corrections. |
+| `TriageBacklog` | A *tracking issue* whose body holds a JSON block keyed by `owner/repo#N`. | Cross-repo triage with explicit resolution order. |
+
+GitHub is the single source of truth; the `.ge/cache/` snapshot is hydrate-only (gitignored).
+
+```python
+import ge
+
+mall = ge.github_memory(
+    "owner/repo",
+    roadmap_issue=1,
+    decisions_target=1,
+    triage_issue=9,
+)
+roadmap = mall["roadmap"]
+roadmap.next_todo()                  # next "- [ ]" task
+roadmap.append("New task")           # adds "- [ ] New task"
+
+mall["decisions"].append("Used X over Y", rationale="cheaper")
+mall["triage"]["owner/repoA#42"] = ge.TriageEntry(
+    ref="owner/repoA#42", verdict=ge.TriageVerdict.fixable, order=1,
+)
+```
+
+CLI equivalents: `ge roadmap-show`, `ge roadmap-next`, `ge roadmap-set`, `ge roadmap-append`, `ge decision-log`, `ge decisions-show`, `ge triage-set`, `ge triage-show`, `ge check-requirements`.
 
 ## Tools — what the skills use under the hood
 
@@ -150,8 +199,13 @@ ge/
 ├── analysis.py      # Staleness/freshness/relevance analysis
 ├── context.py       # Assembles everything into context docs
 ├── util.py          # Internal helpers: gh wrapper, URL parsing, resolve_target
+├── memory.py        # GitHub-backed memory: RoadmapStore, DecisionLog, TriageBacklog
+├── run.py           # Autonomous runner: launches `claude` in a loop
 └── data/skills/     # Claude Code skills (symlinked by install-skills)
-    ├── ge/          # Full workflow skill
-    ├── ge-analyze/  # Triage/staleness skill
-    └── ge-context/  # Context preparation skill
+    ├── ge/                     # Full workflow skill
+    ├── ge-analyze/             # Triage/staleness skill
+    ├── ge-context/             # Context preparation skill
+    ├── autonomous-execution/   # Unattended-mode behaviour policy
+    ├── roadmap-execution/      # Drive a roadmap issue end-to-end
+    └── cross-repo-triage/      # Multi-repo triage and resolution
 ```

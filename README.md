@@ -41,9 +41,9 @@ Six skills are installed:
 | `ge` | Full workflow — resolve target, confirm, prepare context, analyze, work |
 | `ge-analyze` | Quick triage — check if an issue is worth working on |
 | `ge-context` | Context preparation — fetch and assemble structured documents |
-| `autonomous-execution` | Behaviour policy for unattended runs (decide-and-log, don't ask) |
-| `roadmap-execution` | Drive a roadmap issue end-to-end, one task per iteration |
-| `cross-repo-triage` | Classify & resolve issues across repos (failing test → fix → PR) |
+| `ge-autonomous-execution` | Behaviour policy for unattended runs (decide-and-log, don't ask) |
+| `ge-roadmap-execution` | Drive a roadmap issue end-to-end, one task per iteration |
+| `ge-cross-repo-triage` | Classify & resolve issues across repos (failing test → fix → PR) |
 
 To remove the skills: `ge uninstall-skills`
 
@@ -205,7 +205,7 @@ ge/
     ├── ge/                     # Full workflow skill
     ├── ge-analyze/             # Triage/staleness skill
     ├── ge-context/             # Context preparation skill
-    ├── autonomous-execution/   # Unattended-mode behaviour policy
-    ├── roadmap-execution/      # Drive a roadmap issue end-to-end
-    └── cross-repo-triage/      # Multi-repo triage and resolution
+    ├── ge-autonomous-execution/  # Unattended-mode behaviour policy
+    ├── ge-roadmap-execution/     # Drive a roadmap issue end-to-end
+    └── ge-cross-repo-triage/     # Multi-repo triage and resolution
 ```

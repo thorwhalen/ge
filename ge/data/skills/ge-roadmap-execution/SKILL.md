@@ -1,5 +1,5 @@
 ---
-name: roadmap-execution
+name: ge-roadmap-execution
 description: "Execute a roadmap of tasks end-to-end using GitHub as durable memory. Use when launched against a roadmap issue (typically by `ge run-roadmap`) — take the next todo task, do it, verify it, mark it done, log decisions, and repeat. Survives context exhaustion because each work unit rehydrates from GitHub."
 ---
 
@@ -14,7 +14,7 @@ of `- [ ]` (todo), `- [ ] … <!-- ge:doing -->` (in progress), or `- [x]`
 Memory model: **GitHub is the single source of truth.** The local
 `.ge/cache/` snapshot is hydrate-only — never the authority.
 
-If you are running unattended, the `autonomous-execution` skill applies
+If you are running unattended, the `ge-autonomous-execution` skill applies
 in parallel: decide-and-log instead of asking.
 
 ## Inputs you receive

@@ -1,5 +1,5 @@
 ---
-name: cross-repo-triage
+name: ge-cross-repo-triage
 description: "Triage and resolve a cross-repo issue backlog. Use when launched by `ge run-triage` against multiple repos — Phase A classifies and orders issues into a `TriageBacklog`; Phase B executes them one at a time (failing test → confirm red → fix → confirm green → open PR, then stop). Stops at PR; merging is a separate later phase."
 ---
 
@@ -13,7 +13,7 @@ Two phases. **Phase A is read-mostly; Phase B opens PRs but stops short
 of merge** — merging is deferred so conflicts and dependencies can be
 handled deliberately later.
 
-If you are running unattended, the `autonomous-execution` skill applies
+If you are running unattended, the `ge-autonomous-execution` skill applies
 in parallel.
 
 ## Phase A — analyse and order

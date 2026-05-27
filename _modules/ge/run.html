@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.run &mdash; ge 0.1.9 documentation</title>
+  <title>ge.run &mdash; ge 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8618f531"></script>
+      <script src="../../_static/documentation_options.js?v=bafade30"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -185,8 +185,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_permission_flags</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PERMISSION_MODES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown permission mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Use one of: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">PERMISSION_MODES</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown permission mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">. Use one of: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">PERMISSION_MODES</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">PERMISSION_MODES</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
 
@@ -228,7 +227,8 @@
             <span class="n">iteration</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">returncode</span><span class="o">=</span><span class="mi">124</span><span class="p">,</span>
             <span class="n">stdout</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">stderr</span><span class="o">=</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[runner] session exceeded </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s timeout&quot;</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[runner] session exceeded </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s timeout&quot;</span><span class="p">,</span>
             <span class="n">duration_sec</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -242,13 +242,13 @@
     <span class="n">decisions</span> <span class="o">=</span> <span class="n">decisions_target</span> <span class="k">if</span> <span class="n">decisions_target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">roadmap_issue</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="s2">&quot;You are running unattended via the ge autonomous runner. &quot;</span>
-        <span class="s2">&quot;Load and follow the `autonomous-execution` and `roadmap-execution` &quot;</span>
+        <span class="s2">&quot;Load and follow the `ge-autonomous-execution` and `ge-roadmap-execution` &quot;</span>
         <span class="s2">&quot;skills. Do not stop to ask questions; decide-and-log instead.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;REPO = </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;ROADMAP_ISSUE = </span><span class="si">{</span><span class="n">roadmap_issue</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;DECISIONS_TARGET = </span><span class="si">{</span><span class="n">decisions</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
         <span class="s2">&quot;Perform exactly one roadmap iteration as described in the &quot;</span>
-        <span class="s2">&quot;`roadmap-execution` skill: pick the next todo task, mark it doing, &quot;</span>
+        <span class="s2">&quot;`ge-roadmap-execution` skill: pick the next todo task, mark it doing, &quot;</span>
         <span class="s2">&quot;complete it (with verification), mark it done, and exit. If there &quot;</span>
         <span class="s2">&quot;are no todo tasks left, exit immediately. Token/context exhaustion &quot;</span>
         <span class="s2">&quot;is not a failure — the outer runner relaunches with a fresh &quot;</span>
@@ -265,7 +265,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="s2">&quot;You are running unattended via the ge autonomous runner. &quot;</span>
-        <span class="s2">&quot;Load and follow the `autonomous-execution` and `cross-repo-triage` &quot;</span>
+        <span class="s2">&quot;Load and follow the `ge-autonomous-execution` and `ge-cross-repo-triage` &quot;</span>
         <span class="s2">&quot;skills. Do not stop to ask questions; decide-and-log instead.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;REPOS = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">repos</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;TRACKING_REPO = </span><span class="si">{</span><span class="n">tracking_repo</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -333,7 +333,10 @@
                             <span class="s2">&quot;cap on iteration &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">. Retrying with a fresh context.&quot;</span>
                         <span class="p">),</span>
-                        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;iteration&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;returncode&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">},</span>
+                        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                            <span class="s2">&quot;iteration&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
+                            <span class="s2">&quot;returncode&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
+                        <span class="p">},</span>
                     <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="k">pass</span>  <span class="c1"># decision logging is best-effort</span>
@@ -551,7 +554,9 @@
         <span class="n">repo</span><span class="p">,</span>
         <span class="nb">int</span><span class="p">(</span><span class="n">roadmap_issue</span><span class="p">),</span>
         <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
-        <span class="n">decisions_target</span><span class="o">=</span><span class="n">decisions_target</span> <span class="k">if</span> <span class="n">decisions_target</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">decisions_target</span><span class="p">),</span>
+        <span class="n">decisions_target</span><span class="o">=</span><span class="n">decisions_target</span>
+        <span class="k">if</span> <span class="n">decisions_target</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">decisions_target</span><span class="p">),</span>
         <span class="n">max_sessions</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">max_sessions</span><span class="p">),</span>
         <span class="n">cwd</span><span class="o">=</span><span class="n">cwd</span><span class="p">,</span>
         <span class="n">on_session</span><span class="o">=</span><span class="n">_print_session</span><span class="p">,</span>

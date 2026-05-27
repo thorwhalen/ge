@@ -281,6 +281,167 @@ def install_skills(*, target_dir: str = None):
     _install(target_dir=target_dir)
 
 
+# ---------------------------------------------------------------------------
+# Memory layer (GitHub-backed durable memory for autonomous execution)
+# ---------------------------------------------------------------------------
+
+
+def roadmap_show(repo: str, issue: int):
+    """Show parsed roadmap tasks from a roadmap issue (JSON)."""
+    from ge.memory import cli_roadmap_show
+
+    print(cli_roadmap_show(repo, issue))
+
+
+def roadmap_next(repo: str, issue: int):
+    """Print the id of the next todo task in the roadmap (or empty)."""
+    from ge.memory import cli_roadmap_next
+
+    nxt = cli_roadmap_next(repo, issue)
+    if nxt:
+        print(nxt)
+
+
+def roadmap_set(repo: str, issue: int, task_id: str, state: str):
+    """Set a roadmap task's state (todo|doing|done)."""
+    from ge.memory import cli_roadmap_set
+
+    print(cli_roadmap_set(repo, issue, task_id, state))
+
+
+def roadmap_append(repo: str, issue: int, title: str):
+    """Append a new todo task to the roadmap."""
+    from ge.memory import cli_roadmap_append
+
+    print(cli_roadmap_append(repo, issue, title))
+
+
+def decision_log(
+    repo: str, target: int, summary: str, *, rationale: str = ""
+):
+    """Append a decision-tagged comment to an issue or PR."""
+    from ge.memory import cli_decision_log
+
+    print(cli_decision_log(repo, target, summary, rationale=rationale))
+
+
+def decisions_show(repo: str, target: int):
+    """Show decisions logged on an issue or PR (JSON)."""
+    from ge.memory import cli_decisions_show
+
+    print(cli_decisions_show(repo, target))
+
+
+def triage_show(repo: str, issue: int):
+    """Show the triage backlog from a tracking issue (JSON, in order)."""
+    from ge.memory import cli_triage_show
+
+    print(cli_triage_show(repo, issue))
+
+
+def triage_set(
+    repo: str,
+    issue: int,
+    ref: str,
+    verdict: str,
+    *,
+    order: int = 0,
+    rationale: str = "",
+):
+    """Add or update a triage entry (ref is 'owner/repo#N')."""
+    from ge.memory import cli_triage_set
+
+    print(
+        cli_triage_set(
+            repo, issue, ref, verdict, order=order, rationale=rationale
+        )
+    )
+
+
+def check_requirements(*, project_scope: bool = False):
+    """Check gh CLI installation, auth, and (optionally) project scope."""
+    from ge.memory import cli_check_requirements
+
+    print(cli_check_requirements(project_scope=project_scope))
+
+
+# ---------------------------------------------------------------------------
+# Autonomous runner (Layer 3)
+# ---------------------------------------------------------------------------
+
+
+def run_roadmap(
+    repo: str,
+    roadmap_issue: int,
+    *,
+    mode: str = "auto",
+    decisions_target: int = None,
+    max_sessions: int = 50,
+    cwd: str = None,
+):
+    """Launch claude in a loop to drive a roadmap issue to completion.
+
+    Each iteration is one headless `claude -p` invocation that performs
+    one roadmap step. State persists between iterations via the
+    GitHub-backed roadmap issue.
+
+    Modes:
+        auto   — `--permission-mode auto` (default; safer)
+        bypass — `--dangerously-skip-permissions` (on request only)
+
+    Examples:
+        ge run-roadmap owner/repo 1
+        ge run-roadmap owner/repo 1 --mode bypass --max-sessions 20
+    """
+    from ge.run import cli_run_roadmap
+
+    print(
+        cli_run_roadmap(
+            repo,
+            roadmap_issue,
+            mode=mode,
+            decisions_target=decisions_target,
+            max_sessions=max_sessions,
+            cwd=cwd,
+        )
+    )
+
+
+def run_triage(
+    tracking_repo: str,
+    tracking_issue: int,
+    repos: str,
+    *,
+    phase: str = "analyze",
+    mode: str = "auto",
+    max_sessions: int = 50,
+    cwd: str = None,
+):
+    """Launch claude in a loop to drive a cross-repo triage backlog.
+
+    `repos` is a comma-separated list of `owner/repo` strings. Phase A
+    (`analyze`) classifies/orders; Phase B (`execute`) opens one PR per
+    iteration (stops at PR — does not merge).
+
+    Examples:
+        ge run-triage owner/track 9 "a/b,c/d" --phase analyze
+        ge run-triage owner/track 9 "a/b,c/d" --phase execute --mode bypass
+    """
+    from ge.run import cli_run_triage
+
+    print(
+        cli_run_triage(
+            tracking_repo,
+            tracking_issue,
+            repos,
+            phase=phase,
+            mode=mode,
+            max_sessions=max_sessions,
+            cwd=cwd,
+        )
+    )
+
+
 def uninstall_skills(*, target_dir: str = None):
     """Remove ge skill symlinks from ~/.claude/skills/.
 
@@ -310,6 +471,19 @@ _cli_commands = [
     resolve,
     install_skills,
     uninstall_skills,
+    # Memory layer
+    roadmap_show,
+    roadmap_next,
+    roadmap_set,
+    roadmap_append,
+    decision_log,
+    decisions_show,
+    triage_show,
+    triage_set,
+    check_requirements,
+    # Autonomous runner
+    run_roadmap,
+    run_triage,
 ]
 
 

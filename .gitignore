@@ -9,6 +9,10 @@ __pycache__/
 
 
 .DS_Store
+
+# ge memory layer — local cache (GitHub is SSOT)
+.ge/
+.claude/handoffs/
 # C extensions
 *.so
 

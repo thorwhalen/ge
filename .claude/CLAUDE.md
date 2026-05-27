@@ -13,7 +13,9 @@
 - **`ge/context.py`** — Orchestrates everything into structured context documents (markdown + JSON)
 - **`ge/__init__.py`** — Public facade (`prepare()`, `resolve_target()`, etc.)
 - **`ge/__main__.py`** — CLI via argh. SSOT: `_cli_commands` list
-- **`ge/data/skills/`** — Claude Code skills (symlinked into `.claude/skills/`)
+- **`ge/memory.py`** — GitHub-backed durable memory: `RoadmapStore`, `DecisionLog`, `TriageBacklog` (Mapping/Iterable facades over `gh`); `github_memory()` factory; local `.ge/cache/` snapshot.
+- **`ge/run.py`** — Autonomous runner. `run_roadmap()` / `run_triage()` launch headless `claude -p` in a loop; permission mode (`auto` / `bypass`) is set here, not in any skill.
+- **`ge/data/skills/`** — Claude Code skills (symlinked into `.claude/skills/`). Includes `autonomous-execution`, `roadmap-execution`, and `cross-repo-triage` for unattended runs.
 
 ## Conventions
 

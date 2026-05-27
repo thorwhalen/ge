@@ -38,6 +38,18 @@ from ge.media import (
     copy_images_to_clipboard,
 )
 from ge.util import parse_github_url, resolve_target
+from ge.memory import (
+    RoadmapStore,
+    DecisionLog,
+    TriageBacklog,
+    TaskState,
+    TaskRecord,
+    TriageVerdict,
+    TriageEntry,
+    Decision,
+    github_memory,
+    check_requirements,
+)
 
 
 def prepare(
@@ -203,4 +215,15 @@ __all__ = [
     "resolve_target",
     "install_skills",
     "uninstall_skills",
+    # Memory layer (autonomous execution)
+    "RoadmapStore",
+    "DecisionLog",
+    "TriageBacklog",
+    "TaskState",
+    "TaskRecord",
+    "TriageVerdict",
+    "TriageEntry",
+    "Decision",
+    "github_memory",
+    "check_requirements",
 ]

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.__main__ &mdash; ge 0.1.8 documentation</title>
+  <title>ge.__main__ &mdash; ge 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,9 +14,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=22607128"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=8618f531"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -52,6 +52,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/context.html">ge.context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/github.html">ge.github</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/memory.html">ge.memory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/run.html">ge.run</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/util.html">ge.util</a></li>
 </ul>
 
@@ -403,6 +405,200 @@
 
 
 
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Memory layer (GitHub-backed durable memory for autonomous execution)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="roadmap_show">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.roadmap_show">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">roadmap_show</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show parsed roadmap tasks from a roadmap issue (JSON).&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_roadmap_show</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_roadmap_show</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="roadmap_next">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.roadmap_next">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">roadmap_next</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print the id of the next todo task in the roadmap (or empty).&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_roadmap_next</span>
+
+    <span class="n">nxt</span> <span class="o">=</span> <span class="n">cli_roadmap_next</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nxt</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">nxt</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="roadmap_set">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.roadmap_set">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">roadmap_set</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a roadmap task&#39;s state (todo|doing|done).&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_roadmap_set</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_roadmap_set</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">state</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="roadmap_append">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.roadmap_append">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">roadmap_append</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append a new todo task to the roadmap.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_roadmap_append</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_roadmap_append</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">,</span> <span class="n">title</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="decision_log">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.decision_log">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decision_log</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append a decision-tagged comment to an issue or PR.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_decision_log</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_decision_log</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">summary</span><span class="p">,</span> <span class="n">rationale</span><span class="o">=</span><span class="n">rationale</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="decisions_show">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.decisions_show">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decisions_show</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show decisions logged on an issue or PR (JSON).&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_decisions_show</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_decisions_show</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="triage_show">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.triage_show">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">triage_show</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show the triage backlog from a tracking issue (JSON, in order).&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_triage_show</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_triage_show</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="triage_set">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.triage_set">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">triage_set</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">verdict</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add or update a triage entry (ref is &#39;owner/repo#N&#39;).&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_triage_set</span>
+
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">cli_triage_set</span><span class="p">(</span>
+            <span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">verdict</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">rationale</span><span class="o">=</span><span class="n">rationale</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="check_requirements">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.check_requirements">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_requirements</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">project_scope</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check gh CLI installation, auth, and (optionally) project scope.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_check_requirements</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">cli_check_requirements</span><span class="p">(</span><span class="n">project_scope</span><span class="o">=</span><span class="n">project_scope</span><span class="p">))</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Autonomous runner (Layer 3)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="run_roadmap">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.run_roadmap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_roadmap</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">roadmap_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">decisions_target</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">cwd</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch claude in a loop to drive a roadmap issue to completion.</span>
+
+<span class="sd">    Each iteration is one headless `claude -p` invocation that performs</span>
+<span class="sd">    one roadmap step. State persists between iterations via the</span>
+<span class="sd">    GitHub-backed roadmap issue.</span>
+
+<span class="sd">    Modes:</span>
+<span class="sd">        auto   — `--permission-mode auto` (default; safer)</span>
+<span class="sd">        bypass — `--dangerously-skip-permissions` (on request only)</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        ge run-roadmap owner/repo 1</span>
+<span class="sd">        ge run-roadmap owner/repo 1 --mode bypass --max-sessions 20</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.run</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_run_roadmap</span>
+
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">cli_run_roadmap</span><span class="p">(</span>
+            <span class="n">repo</span><span class="p">,</span>
+            <span class="n">roadmap_issue</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+            <span class="n">decisions_target</span><span class="o">=</span><span class="n">decisions_target</span><span class="p">,</span>
+            <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">,</span>
+            <span class="n">cwd</span><span class="o">=</span><span class="n">cwd</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_triage">
+<a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.run_triage">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_triage</span><span class="p">(</span>
+    <span class="n">tracking_repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tracking_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">repos</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;analyze&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">cwd</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch claude in a loop to drive a cross-repo triage backlog.</span>
+
+<span class="sd">    `repos` is a comma-separated list of `owner/repo` strings. Phase A</span>
+<span class="sd">    (`analyze`) classifies/orders; Phase B (`execute`) opens one PR per</span>
+<span class="sd">    iteration (stops at PR — does not merge).</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        ge run-triage owner/track 9 &quot;a/b,c/d&quot; --phase analyze</span>
+<span class="sd">        ge run-triage owner/track 9 &quot;a/b,c/d&quot; --phase execute --mode bypass</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ge.run</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli_run_triage</span>
+
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">cli_run_triage</span><span class="p">(</span>
+            <span class="n">tracking_repo</span><span class="p">,</span>
+            <span class="n">tracking_issue</span><span class="p">,</span>
+            <span class="n">repos</span><span class="p">,</span>
+            <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+            <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">,</span>
+            <span class="n">cwd</span><span class="o">=</span><span class="n">cwd</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="uninstall_skills">
 <a class="viewcode-back" href="../../module_docs/ge/__main__.html#ge.__main__.uninstall_skills">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">uninstall_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -435,6 +631,19 @@
     <span class="n">resolve</span><span class="p">,</span>
     <span class="n">install_skills</span><span class="p">,</span>
     <span class="n">uninstall_skills</span><span class="p">,</span>
+    <span class="c1"># Memory layer</span>
+    <span class="n">roadmap_show</span><span class="p">,</span>
+    <span class="n">roadmap_next</span><span class="p">,</span>
+    <span class="n">roadmap_set</span><span class="p">,</span>
+    <span class="n">roadmap_append</span><span class="p">,</span>
+    <span class="n">decision_log</span><span class="p">,</span>
+    <span class="n">decisions_show</span><span class="p">,</span>
+    <span class="n">triage_show</span><span class="p">,</span>
+    <span class="n">triage_set</span><span class="p">,</span>
+    <span class="n">check_requirements</span><span class="p">,</span>
+    <span class="c1"># Autonomous runner</span>
+    <span class="n">run_roadmap</span><span class="p">,</span>
+    <span class="n">run_triage</span><span class="p">,</span>
 <span class="p">]</span>
 
 

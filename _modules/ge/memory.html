@@ -1,0 +1,1099 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge.memory &mdash; ge 0.1.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8618f531"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/context.html">ge.context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/github.html">ge.github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/memory.html">ge.memory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/run.html">ge.run</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ge/util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../ge.html">ge</a></li>
+      <li class="breadcrumb-item active">ge.memory</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ge.memory</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;GitHub-backed durable memory for autonomous agent execution.</span>
+
+<span class="sd">Three stores exposed as ``collections.abc`` facades. GitHub is the single</span>
+<span class="sd">source of truth; a thin per-store local snapshot under ``.ge/cache/`` is a</span>
+<span class="sd">hydrate-only cache (disposable, never authoritative).</span>
+
+<span class="sd">- :class:`RoadmapStore` — ``MutableMapping[task_id, TaskRecord]`` over a</span>
+<span class="sd">  *roadmap issue* whose body holds a markdown task list between</span>
+<span class="sd">  ``&lt;!-- ge:roadmap:begin --&gt;`` / ``&lt;!-- ge:roadmap:end --&gt;`` markers.</span>
+<span class="sd">- :class:`DecisionLog` — append-only ``Iterable[Decision]`` backed by</span>
+<span class="sd">  decision-tagged comments on an issue or PR.</span>
+<span class="sd">- :class:`TriageBacklog` — ``MutableMapping[issue_ref, TriageVerdict]``</span>
+<span class="sd">  spanning multiple repos. Backed by a tracking issue containing a fenced</span>
+<span class="sd">  JSON block (``&lt;!-- ge:triage:begin --&gt;`` / ``end``). Cross-repo refs use</span>
+<span class="sd">  ``&quot;owner/repo#N&quot;``.</span>
+
+<span class="sd">The :func:`github_memory` factory bundles these into a mall.</span>
+
+<span class="sd">Design notes</span>
+<span class="sd">------------</span>
+<span class="sd">- Writes go to GitHub *first*; the local cache is updated as a side-effect on</span>
+<span class="sd">  successful round-trip. A failed write does **not** poison the cache.</span>
+<span class="sd">- ``check_requirements`` verifies ``gh`` is installed, authenticated, and</span>
+<span class="sd">  carries the ``project`` scope (needed if the user later switches the</span>
+<span class="sd">  triage backend to a GitHub Project).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_gh</span><span class="p">,</span> <span class="n">gh_api</span><span class="p">,</span> <span class="n">parse_repo_spec</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Constants / markers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="n">ROADMAP_BEGIN</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- ge:roadmap:begin --&gt;&quot;</span>
+<span class="n">ROADMAP_END</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- ge:roadmap:end --&gt;&quot;</span>
+<span class="n">DOING_MARKER</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- ge:doing --&gt;&quot;</span>
+<span class="n">TRIAGE_BEGIN</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- ge:triage:begin --&gt;&quot;</span>
+<span class="n">TRIAGE_END</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- ge:triage:end --&gt;&quot;</span>
+<span class="n">DECISION_TAG</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- ge:decision --&gt;&quot;</span>
+
+<span class="n">_TASK_LINE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">&quot;^- \[( |x|X)\] (.*?)\s*(&lt;!-- ge:doing --&gt;)?\s*$&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">_ISSUE_REF_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^([^/\s]+)/([^/\s#]+)#(\d+)$&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Data types</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="TaskState">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.TaskState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskState</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Roadmap task lifecycle state.&quot;&quot;&quot;</span>
+
+    <span class="n">todo</span> <span class="o">=</span> <span class="s2">&quot;todo&quot;</span>
+    <span class="n">doing</span> <span class="o">=</span> <span class="s2">&quot;doing&quot;</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="s2">&quot;done&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="TaskRecord">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.TaskRecord">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskRecord</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A single roadmap task.</span>
+
+<span class="sd">    ``id`` is a stable slug derived from the title. ``metadata`` holds any</span>
+<span class="sd">    extra agent-attached fields (e.g. links to PRs).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">TaskState</span> <span class="o">=</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">todo</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TriageVerdict">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.TriageVerdict">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TriageVerdict</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Triage classification for an issue.&quot;&quot;&quot;</span>
+
+    <span class="n">stale</span> <span class="o">=</span> <span class="s2">&quot;stale&quot;</span>
+    <span class="n">closeable</span> <span class="o">=</span> <span class="s2">&quot;closeable&quot;</span>
+    <span class="n">fixable</span> <span class="o">=</span> <span class="s2">&quot;fixable&quot;</span>
+    <span class="n">blocked</span> <span class="o">=</span> <span class="s2">&quot;blocked&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="TriageEntry">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.TriageEntry">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TriageEntry</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A cross-repo triage backlog entry.&quot;&quot;&quot;</span>
+
+    <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &quot;owner/repo#N&quot;</span>
+    <span class="n">verdict</span><span class="p">:</span> <span class="n">TriageVerdict</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Decision">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.Decision">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Decision</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A logged decision (rendered as a tagged comment on an issue/PR).&quot;&quot;&quot;</span>
+
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Local cache (plain JSON, disposable)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cache_root</span><span class="p">(</span><span class="n">repo_root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the local cache root, ``&lt;repo_root&gt;/.ge/cache``.</span>
+
+<span class="sd">    &gt;&gt;&gt; p = _cache_root(Path(&#39;/tmp&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; str(p).endswith(&#39;.ge/cache&#39;)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">repo_root</span><span class="p">)</span> <span class="k">if</span> <span class="n">repo_root</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.ge&quot;</span> <span class="o">/</span> <span class="s2">&quot;cache&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cache_write</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cache_read</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Slugify helper (stable task ids)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_slugify</span><span class="p">(</span><span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a task title to a stable slug suitable as a dict key.</span>
+
+<span class="sd">    &gt;&gt;&gt; _slugify(&#39;Fix #42: the thing!&#39;)</span>
+<span class="sd">    &#39;fix-42-the-thing&#39;</span>
+<span class="sd">    &gt;&gt;&gt; _slugify(&#39;  Hello   World  &#39;)</span>
+<span class="sd">    &#39;hello-world&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">title</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^a-z0-9]+&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">max_len</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;task&quot;</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Markdown task-list parsing / rendering</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_task_block</span><span class="p">(</span><span class="n">block</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse the contents of a roadmap block into TaskRecords.</span>
+
+<span class="sd">    &gt;&gt;&gt; tasks = _parse_task_block(&#39;- [ ] Foo\\n- [x] Bar\\n- [ ] Baz &lt;!-- ge:doing --&gt;&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; [(t.title, t.state.value) for t in tasks]</span>
+<span class="sd">    [(&#39;Foo&#39;, &#39;todo&#39;), (&#39;Bar&#39;, &#39;done&#39;), (&#39;Baz&#39;, &#39;doing&#39;)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">_TASK_LINE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">doing</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">done</span>
+        <span class="k">elif</span> <span class="n">doing</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">doing</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">todo</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">_slugify</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">tid</span> <span class="o">=</span> <span class="n">base</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">seen_ids</span><span class="p">:</span>
+            <span class="n">tid</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">seen_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TaskRecord</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">tid</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render_task_block</span><span class="p">(</span><span class="n">tasks</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render TaskRecords as a markdown task list.</span>
+
+<span class="sd">    &gt;&gt;&gt; _render_task_block([TaskRecord(&#39;x&#39;, &#39;Foo&#39;, TaskState.done)])</span>
+<span class="sd">    &#39;- [x] Foo&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">done</span> <span class="k">else</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">DOING_MARKER</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">doing</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- [</span><span class="si">{</span><span class="n">check</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">title</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_splice_block</span><span class="p">(</span>
+    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">begin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inner</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace the content between ``begin`` and ``end`` markers in ``body``.</span>
+
+<span class="sd">    If the markers do not exist, append a new block (optionally preceded by</span>
+<span class="sd">    ``header``) at the end of ``body``.</span>
+
+<span class="sd">    &gt;&gt;&gt; _splice_block(&#39;x&#39;, &#39;&lt;!--B--&gt;&#39;, &#39;&lt;!--E--&gt;&#39;, &#39;inside&#39;)</span>
+<span class="sd">    &#39;x\\n\\n&lt;!--B--&gt;\\ninside\\n&lt;!--E--&gt;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; _splice_block(&#39;pre &lt;!--B--&gt;\\nold\\n&lt;!--E--&gt; post&#39;, &#39;&lt;!--B--&gt;&#39;, &#39;&lt;!--E--&gt;&#39;, &#39;new&#39;)</span>
+<span class="sd">    &#39;pre &lt;!--B--&gt;\\nnew\\n&lt;!--E--&gt; post&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">begin</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;.*?&quot;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">end</span><span class="p">),</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span>
+    <span class="p">)</span>
+    <span class="n">replacement</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">begin</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">body</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">body</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">extras</span> <span class="o">=</span> <span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">header</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">body</span><span class="si">}{</span><span class="n">sep</span><span class="si">}{</span><span class="n">extras</span><span class="si">}{</span><span class="n">replacement</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_block</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">begin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the text between begin/end markers, or None if not found.</span>
+
+<span class="sd">    &gt;&gt;&gt; _extract_block(&#39;x &lt;!--B--&gt;\\nhi\\n&lt;!--E--&gt; y&#39;, &#39;&lt;!--B--&gt;&#39;, &#39;&lt;!--E--&gt;&#39;)</span>
+<span class="sd">    &#39;hi&#39;</span>
+<span class="sd">    &gt;&gt;&gt; _extract_block(&#39;nope&#39;, &#39;&lt;!--B--&gt;&#39;, &#39;&lt;!--E--&gt;&#39;) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">begin</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\s*\n?(.*?)\n?\s*&quot;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">end</span><span class="p">),</span>
+        <span class="n">body</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">m</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Issue body read / write helpers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_issue_body</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch issue dict (title, body, html_url, ...).&quot;&quot;&quot;</span>
+    <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_patch_issue_body</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PATCH an issue body via gh api.&quot;&quot;&quot;</span>
+    <span class="n">_check_gh</span><span class="p">()</span>
+    <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;gh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;api&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-X&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PATCH&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-f&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;body=</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to PATCH issue </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_post_issue_comment</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;POST a comment on an issue/PR via gh api.&quot;&quot;&quot;</span>
+    <span class="n">_check_gh</span><span class="p">()</span>
+    <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;gh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;api&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-X&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/comments&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-f&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;body=</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to comment on </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># RoadmapStore</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="RoadmapStore">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.RoadmapStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RoadmapStore</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A ``MutableMapping[task_id, TaskRecord]`` over a roadmap issue.</span>
+
+<span class="sd">    Iteration yields task ids in roadmap order. Mutations rewrite the</span>
+<span class="sd">    roadmap issue body in place; the local cache is updated on success.</span>
+
+<span class="sd">    Initialise via :func:`github_memory` or directly with ``(repo, issue)``.</span>
+<span class="sd">    The roadmap issue body should contain (or will be augmented with) a</span>
+<span class="sd">    block::</span>
+
+<span class="sd">        &lt;!-- ge:roadmap:begin --&gt;</span>
+<span class="sd">        - [ ] Task one</span>
+<span class="sd">        - [x] Task two</span>
+<span class="sd">        &lt;!-- ge:roadmap:end --&gt;</span>
+
+<span class="sd">    Tasks outside the block are ignored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">issue_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">issue_number</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">_cache_root</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;roadmap_</span><span class="si">{</span><span class="n">repo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">issue_number</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ----- backing store I/O ----- #</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">]:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">_get_issue_body</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_number</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">_extract_block</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">ROADMAP_BEGIN</span><span class="p">,</span> <span class="n">ROADMAP_END</span><span class="p">)</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="n">_parse_task_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span><span class="n">issue</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tasks</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">tasks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_cache_write</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;fetched_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s2">&quot;repo&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span>
+                <span class="s2">&quot;issue_number&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_number</span><span class="p">,</span>
+                <span class="s2">&quot;issue_url&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;tasks&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span>
+                <span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">_get_issue_body</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_number</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">new_inner</span> <span class="o">=</span> <span class="n">_render_task_block</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="n">new_body</span> <span class="o">=</span> <span class="n">_splice_block</span><span class="p">(</span>
+            <span class="n">body</span><span class="p">,</span> <span class="n">ROADMAP_BEGIN</span><span class="p">,</span> <span class="n">ROADMAP_END</span><span class="p">,</span> <span class="n">new_inner</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s2">&quot;## Roadmap&quot;</span>
+        <span class="p">)</span>
+        <span class="n">_patch_issue_body</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_number</span><span class="p">,</span> <span class="n">new_body</span><span class="p">)</span>
+        <span class="c1"># refetch to keep cache in sync with server state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">({</span><span class="s2">&quot;html_url&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">),</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">)},</span> <span class="n">tasks</span><span class="p">)</span>
+
+    <span class="c1"># ----- public roadmap helpers ----- #</span>
+
+<div class="viewcode-block" id="RoadmapStore.hydrate">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.RoadmapStore.hydrate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hydrate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Refresh the local cache from GitHub and return the current task list.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RoadmapStore.next_todo">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.RoadmapStore.next_todo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">next_todo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskRecord</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the first ``todo`` task in roadmap order, or None.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">todo</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">t</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="RoadmapStore.append">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.RoadmapStore.append">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">TaskState</span> <span class="o">=</span> <span class="n">TaskState</span><span class="o">.</span><span class="n">todo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskRecord</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new task to the end of the roadmap.&quot;&quot;&quot;</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">()</span>
+        <span class="n">slug</span> <span class="o">=</span> <span class="n">_slugify</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">existing_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">}</span>
+        <span class="n">tid</span> <span class="o">=</span> <span class="n">slug</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">existing_ids</span><span class="p">:</span>
+            <span class="n">tid</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">slug</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="n">TaskRecord</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">tid</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rec</span></div>
+
+
+    <span class="c1"># ----- MutableMapping interface ----- #</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskRecord</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">t</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">TaskRecord</span> <span class="o">|</span> <span class="n">TaskState</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">()</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tasks</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">tasks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+                <span class="k">return</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">()</span>
+        <span class="n">kept</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kept</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_tasks</span><span class="p">(</span><span class="n">kept</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">key</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_tasks</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_coerce</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskRecord</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TaskRecord</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TaskState</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">TaskRecord</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">TaskRecord</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">TaskState</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;RoadmapStore values must be TaskRecord/TaskState/str, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># DecisionLog</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="DecisionLog">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.DecisionLog">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DecisionLog</span><span class="p">(</span><span class="n">Iterable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append-only iterable of :class:`Decision` records.</span>
+
+<span class="sd">    Backed by issue/PR comments tagged with ``&lt;!-- ge:decision --&gt;`` on a</span>
+<span class="sd">    single target (issue or PR). Iteration fetches all comments from</span>
+<span class="sd">    GitHub, filters by tag, and yields parsed decisions in chronological</span>
+<span class="sd">    order.</span>
+
+<span class="sd">    Significant choices and course-corrections should be appended here so</span>
+<span class="sd">    they survive into future sessions. Micro-decisions belong in local</span>
+<span class="sd">    scratch and should be summarised at handover.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">target_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target_number</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">_cache_root</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;decisions_</span><span class="si">{</span><span class="n">repo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_number</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="DecisionLog.append">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.DecisionLog.append">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decision</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post a tagged comment recording this decision.</span>
+
+<span class="sd">        Returns the :class:`Decision` (with ``url`` and ``created_at``</span>
+<span class="sd">        populated from the GitHub response on success).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="n">body_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">DECISION_TAG</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;### Decision: </span><span class="si">{</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rationale</span><span class="p">:</span>
+            <span class="n">body_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">body_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rationale</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">meta</span><span class="p">:</span>
+            <span class="n">body_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">body_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;```json&quot;</span><span class="p">)</span>
+            <span class="n">body_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
+            <span class="n">body_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body_parts</span><span class="p">)</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">_post_issue_comment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_number</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="n">Decision</span><span class="p">(</span>
+            <span class="n">summary</span><span class="o">=</span><span class="n">summary</span><span class="p">,</span>
+            <span class="n">rationale</span><span class="o">=</span><span class="n">rationale</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
+            <span class="n">created_at</span><span class="o">=</span><span class="n">resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">),</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_cache</span><span class="p">(</span><span class="n">dec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dec</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_append_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dec</span><span class="p">:</span> <span class="n">Decision</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">_cache_read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{</span><span class="s2">&quot;decisions&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="n">existing</span><span class="p">[</span><span class="s2">&quot;decisions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">asdict</span><span class="p">(</span><span class="n">dec</span><span class="p">))</span>
+        <span class="n">_cache_write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">,</span> <span class="n">existing</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Decision</span><span class="p">]:</span>
+        <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_number</span><span class="si">}</span><span class="s2">/comments&quot;</span><span class="p">,</span>
+            <span class="n">paginate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">DECISION_TAG</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">body</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">summary</span><span class="p">,</span> <span class="n">rationale</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">_parse_decision_body</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Decision</span><span class="p">(</span>
+                    <span class="n">summary</span><span class="o">=</span><span class="n">summary</span><span class="p">,</span>
+                    <span class="n">rationale</span><span class="o">=</span><span class="n">rationale</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
+                    <span class="n">created_at</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">),</span>
+                    <span class="n">url</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">_cache_write</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">&quot;decisions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">asdict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">out</span><span class="p">]},</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_decision_body</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a decision-tagged comment body.</span>
+
+<span class="sd">    &gt;&gt;&gt; s, r, m = _parse_decision_body(&#39;&lt;!-- ge:decision --&gt;\\n### Decision: Try X\\n\\nbecause Y&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; s, r, m</span>
+<span class="sd">    (&#39;Try X&#39;, &#39;because Y&#39;, {})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">rationale</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">DECISION_TAG</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;###\s*Decision:\s*(.+)&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">():]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;```json\s*\n(.*?)\n```&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span><span class="p">[:</span> <span class="n">code</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="n">code</span><span class="o">.</span><span class="n">end</span><span class="p">():])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">rationale</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">summary</span><span class="p">,</span> <span class="n">rationale</span><span class="p">,</span> <span class="n">meta</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># TriageBacklog</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="TriageBacklog">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.TriageBacklog">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TriageBacklog</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-repo triage backlog.</span>
+
+<span class="sd">    Keys are issue refs of the form ``&quot;owner/repo#N&quot;``; values are</span>
+<span class="sd">    :class:`TriageEntry`. Iteration order is the agent-chosen resolution</span>
+<span class="sd">    order (the ``order`` field).</span>
+
+<span class="sd">    Backed by a *tracking issue* whose body holds a JSON block between</span>
+<span class="sd">    ``&lt;!-- ge:triage:begin --&gt;`` / ``end``. This keeps the implementation</span>
+<span class="sd">    free of GraphQL/Project dependencies while preserving full cross-repo</span>
+<span class="sd">    semantics — fully-qualified refs do the heavy lifting.</span>
+
+<span class="sd">    Switching to a GitHub Project backend later is a swap of this class&#39;s</span>
+<span class="sd">    I/O methods; the public interface stays the same.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tracking_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracking_issue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tracking_issue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">_cache_root</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;triage_</span><span class="si">{</span><span class="n">repo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tracking_issue</span><span class="si">}</span><span class="s2">.json&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ----- backing I/O ----- #</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TriageEntry</span><span class="p">]:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">_get_issue_body</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracking_issue</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">_extract_block</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">TRIAGE_BEGIN</span><span class="p">,</span> <span class="n">TRIAGE_END</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;[]&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">entries</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TriageEntry</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ref</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_ISSUE_REF_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">ref</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">entries</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">=</span> <span class="n">TriageEntry</span><span class="p">(</span>
+                <span class="n">ref</span><span class="o">=</span><span class="n">ref</span><span class="p">,</span>
+                <span class="n">verdict</span><span class="o">=</span><span class="n">TriageVerdict</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;verdict&quot;</span><span class="p">,</span> <span class="s2">&quot;fixable&quot;</span><span class="p">)),</span>
+                <span class="n">order</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                <span class="n">rationale</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rationale&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="p">)</span>
+        <span class="n">_cache_write</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_path</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;fetched_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s2">&quot;tracking_issue&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracking_issue</span><span class="p">,</span>
+                <span class="s2">&quot;entries&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
+                        <span class="s2">&quot;verdict&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">verdict</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
+                        <span class="s2">&quot;rationale&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">rationale</span><span class="p">,</span>
+                        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">entries</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TriageEntry</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">entries</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">ref</span><span class="p">))</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
+                <span class="s2">&quot;verdict&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">verdict</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
+                <span class="s2">&quot;rationale&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">rationale</span><span class="p">,</span>
+                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">ordered</span>
+        <span class="p">]</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">_get_issue_body</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracking_issue</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">new_body</span> <span class="o">=</span> <span class="n">_splice_block</span><span class="p">(</span>
+            <span class="n">body</span><span class="p">,</span> <span class="n">TRIAGE_BEGIN</span><span class="p">,</span> <span class="n">TRIAGE_END</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s2">&quot;## Triage backlog&quot;</span>
+        <span class="p">)</span>
+        <span class="n">_patch_issue_body</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracking_issue</span><span class="p">,</span> <span class="n">new_body</span><span class="p">)</span>
+
+    <span class="c1"># ----- MutableMapping ----- #</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TriageEntry</span><span class="p">:</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">entries</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">TriageEntry</span> <span class="o">|</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">TriageVerdict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_ISSUE_REF_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Triage key must be &#39;owner/repo#N&#39;, got </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch</span><span class="p">()</span>
+        <span class="n">entries</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">existing</span><span class="o">=</span><span class="n">entries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">entries</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">ref</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">entries</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">ref</span><span class="p">))</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fetch</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_coerce</span><span class="p">(</span>
+        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">existing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TriageEntry</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TriageEntry</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TriageEntry</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TriageVerdict</span><span class="p">):</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">existing</span> <span class="ow">or</span> <span class="n">TriageEntry</span><span class="p">(</span><span class="n">ref</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">verdict</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">base</span><span class="o">.</span><span class="n">verdict</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">base</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">TriageEntry</span><span class="p">(</span>
+                <span class="n">ref</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                <span class="n">verdict</span><span class="o">=</span><span class="n">TriageVerdict</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;verdict&quot;</span><span class="p">,</span> <span class="s2">&quot;fixable&quot;</span><span class="p">)),</span>
+                <span class="n">order</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="n">existing</span><span class="o">.</span><span class="n">order</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)),</span>
+                <span class="n">rationale</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rationale&quot;</span><span class="p">,</span> <span class="n">existing</span><span class="o">.</span><span class="n">rationale</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="n">existing</span><span class="o">.</span><span class="n">metadata</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="p">{})),</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;TriageBacklog values must be TriageEntry/TriageVerdict/Mapping, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Mall factory</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="github_memory">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.github_memory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">github_memory</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">roadmap_issue</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">decisions_target</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">triage_issue</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bundle the three stores into a &quot;mall&quot; dict keyed by name.</span>
+
+<span class="sd">    Each store is only constructed if its target was provided. ``roadmap``</span>
+<span class="sd">    requires ``roadmap_issue``; ``decisions`` requires ``decisions_target``</span>
+<span class="sd">    (the issue or PR number where decisions are logged); ``triage``</span>
+<span class="sd">    requires ``triage_issue`` (the tracking issue holding the JSON block).</span>
+
+<span class="sd">    &gt;&gt;&gt; # mall = github_memory(&#39;owner/repo&#39;, roadmap_issue=1, decisions_target=1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mall</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">roadmap_issue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mall</span><span class="p">[</span><span class="s2">&quot;roadmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RoadmapStore</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">roadmap_issue</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">decisions_target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mall</span><span class="p">[</span><span class="s2">&quot;decisions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DecisionLog</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">decisions_target</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">triage_issue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mall</span><span class="p">[</span><span class="s2">&quot;triage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TriageBacklog</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">triage_issue</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mall</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># check_requirements</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="check_requirements">
+<a class="viewcode-back" href="../../module_docs/ge/memory.html#ge.check_requirements">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_requirements</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">require_project_scope</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify external prerequisites for the memory layer.</span>
+
+<span class="sd">    Returns a dict ``{&quot;ok&quot;: bool, &quot;gh&quot;: ..., &quot;auth&quot;: ..., &quot;scopes&quot;: [...],</span>
+<span class="sd">    &quot;missing&quot;: [...]}``. Raises ``EnvironmentError`` with actionable</span>
+<span class="sd">    install instructions if a hard requirement is missing.</span>
+
+<span class="sd">    Set ``require_project_scope=True`` if you plan to swap the triage</span>
+<span class="sd">    backend to a GitHub Project.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_gh</span><span class="p">()</span>  <span class="c1"># raises with install instructions if gh missing/not authed</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;gh&quot;</span><span class="p">,</span> <span class="s2">&quot;auth&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">],</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span>
+    <span class="n">scopes_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Token scopes:\s*(.+)&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">scopes_raw</span> <span class="o">=</span> <span class="n">scopes_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">scopes_match</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">scopes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scopes_raw</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="n">missing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">require_project_scope</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;project&quot;</span> <span class="ow">or</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;read:project&quot;</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;:project&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scopes</span>
+    <span class="p">):</span>
+        <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="ow">not</span> <span class="n">missing</span><span class="p">,</span>
+        <span class="s2">&quot;gh&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;auth&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;scopes&quot;</span><span class="p">:</span> <span class="n">scopes</span><span class="p">,</span>
+        <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="n">missing</span><span class="p">,</span>
+        <span class="s2">&quot;hint&quot;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s2">&quot;Run `gh auth refresh -s project` to grant the project scope.&quot;</span>
+            <span class="k">if</span> <span class="n">missing</span>
+            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># CLI dispatch functions (used by ge.__main__)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_roadmap_show</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show the parsed roadmap tasks (JSON).&quot;&quot;&quot;</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">RoadmapStore</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">hydrate</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span>
+        <span class="p">],</span>
+        <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_roadmap_next</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print the next todo task id (or empty string).&quot;&quot;&quot;</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">RoadmapStore</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="n">nxt</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">next_todo</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">nxt</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">nxt</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_roadmap_set</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a roadmap task&#39;s state (todo|doing|done).&quot;&quot;&quot;</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">RoadmapStore</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">store</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span>
+    <span class="n">rec</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TaskState</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">store</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_roadmap_append</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append a new todo task to the roadmap.&quot;&quot;&quot;</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">RoadmapStore</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rec</span><span class="o">.</span><span class="n">id</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_decision_log</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append a decision to the decision log.&quot;&quot;&quot;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">DecisionLog</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">rationale</span><span class="o">=</span><span class="n">rationale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dec</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="n">summary</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_decisions_show</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show recorded decisions (JSON).&quot;&quot;&quot;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">DecisionLog</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="n">asdict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">log</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_triage_show</span><span class="p">(</span><span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show the triage backlog (JSON, in resolution order).&quot;&quot;&quot;</span>
+    <span class="n">backlog</span> <span class="o">=</span> <span class="n">TriageBacklog</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">backlog</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
+                <span class="s2">&quot;verdict&quot;</span><span class="p">:</span> <span class="n">backlog</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">verdict</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">backlog</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
+                <span class="s2">&quot;rationale&quot;</span><span class="p">:</span> <span class="n">backlog</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">rationale</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">backlog</span>
+        <span class="p">],</span>
+        <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_triage_set</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">verdict</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add or update a triage entry.&quot;&quot;&quot;</span>
+    <span class="n">backlog</span> <span class="o">=</span> <span class="n">TriageBacklog</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue</span><span class="p">)</span>
+    <span class="n">backlog</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">=</span> <span class="n">TriageEntry</span><span class="p">(</span>
+        <span class="n">ref</span><span class="o">=</span><span class="n">ref</span><span class="p">,</span>
+        <span class="n">verdict</span><span class="o">=</span><span class="n">TriageVerdict</span><span class="p">(</span><span class="n">verdict</span><span class="p">),</span>
+        <span class="n">order</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+        <span class="n">rationale</span><span class="o">=</span><span class="n">rationale</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">verdict</span><span class="si">}</span><span class="s2"> (order=</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cli_check_requirements</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">project_scope</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check that gh is installed, authed, and (optionally) has project scope.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+        <span class="n">check_requirements</span><span class="p">(</span><span class="n">require_project_scope</span><span class="o">=</span><span class="n">project_scope</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span>
+    <span class="p">)</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;TaskState&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaskRecord&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TriageVerdict&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TriageEntry&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Decision&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RoadmapStore&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecisionLog&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TriageBacklog&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;github_memory&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;check_requirements&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge.run &mdash; ge 0.1.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8618f531"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ge.util" href="util.html" />
+    <link rel="prev" title="ge.memory" href="memory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">ge.context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="github.html">ge.github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="media.html">ge.media</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory.html">ge.memory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ge.run</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ge.run.SessionResult"><code class="docutils literal notranslate"><span class="pre">SessionResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ge.run.SessionResult.killed_by_denial_cap"><code class="docutils literal notranslate"><span class="pre">SessionResult.killed_by_denial_cap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.run.run_roadmap"><code class="docutils literal notranslate"><span class="pre">run_roadmap()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.run.run_triage"><code class="docutils literal notranslate"><span class="pre">run_triage()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ge.run</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/ge/run.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ge.run">
+<span id="ge-run"></span><h1>ge.run<a class="headerlink" href="#module-ge.run" title="Link to this heading"></a></h1>
+<p>Autonomous-execution runner — Layer 3.</p>
+<p>Launches <code class="docutils literal notranslate"><span class="pre">claude</span></code> in headless mode in a loop, one invocation per work
+unit. State persists between iterations <em>only</em> through GitHub-backed
+memory (<a class="reference internal" href="memory.html#module-ge.memory" title="ge.memory"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ge.memory</span></code></a>); each session starts with a fresh context
+window and rehydrates from the roadmap / triage backlog.</p>
+<p>Two entry points:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ge.run.run_roadmap" title="ge.run.run_roadmap"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_roadmap()</span></code></a> — drive a roadmap issue end to end.</p></li>
+<li><p><a class="reference internal" href="#ge.run.run_triage" title="ge.run.run_triage"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_triage()</span></code></a>  — drive a cross-repo triage backlog (Phase A or B).</p></li>
+</ul>
+<p>The permission-mode choice (<code class="docutils literal notranslate"><span class="pre">auto</span></code> vs <code class="docutils literal notranslate"><span class="pre">bypass</span></code>) lives here because
+SKILL.md files cannot set <code class="docutils literal notranslate"><span class="pre">--permission-mode</span></code> — that is a launch-time
+flag on <code class="docutils literal notranslate"><span class="pre">claude</span></code>.</p>
+<p>Token / context exhaustion is <em>not</em> a failure: it ends the current
+session; the loop’s next iteration just rehydrates and continues. A
+session terminated by the permission-denial cap <em>is</em> a failure: the
+runner retries once and then escalates.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.run.SessionResult">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.run.</span></span><span class="sig-name descname"><span class="pre">SessionResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returncode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_sec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/run.html#SessionResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.run.SessionResult" title="Link to this definition"></a></dt>
+<dd><p>Outcome of a single <code class="docutils literal notranslate"><span class="pre">claude</span></code> invocation.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ge.run.SessionResult.killed_by_denial_cap">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">killed_by_denial_cap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#ge.run.SessionResult.killed_by_denial_cap" title="Link to this definition"></a></dt>
+<dd><p>did Claude Code terminate due to the denial cap?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Heuristic</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.run.run_roadmap">
+<span class="sig-prename descclassname"><span class="pre">ge.run.</span></span><span class="sig-name descname"><span class="pre">run_roadmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roadmap_issue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decisions_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/ge/run.html#run_roadmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.run.run_roadmap" title="Link to this definition"></a></dt>
+<dd><p>Drive a roadmap issue to completion.</p>
+<p>Each iteration is one headless <code class="docutils literal notranslate"><span class="pre">claude</span></code> invocation that performs
+exactly one roadmap step. The loop terminates when:</p>
+<ul class="simple">
+<li><p>no todo tasks remain (<code class="docutils literal notranslate"><span class="pre">status='completed'</span></code>),</p></li>
+<li><p>two consecutive sessions hit the denial cap (<code class="docutils literal notranslate"><span class="pre">status='escalated_denial_cap'</span></code>),</p></li>
+<li><p>a session exits non-zero for another reason (<code class="docutils literal notranslate"><span class="pre">status='escalated_error'</span></code>),</p></li>
+<li><p>or <code class="docutils literal notranslate"><span class="pre">max_sessions</span></code> is reached.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>repo</strong> – <code class="docutils literal notranslate"><span class="pre">&quot;owner/repo&quot;</span></code> containing the roadmap issue.</p></li>
+<li><p><strong>roadmap_issue</strong> – the roadmap issue number.</p></li>
+<li><p><strong>mode</strong> – <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">&quot;bypass&quot;</span></code>.</p></li>
+<li><p><strong>decisions_target</strong> – issue/PR number to log decisions on. Defaults
+to <code class="docutils literal notranslate"><span class="pre">roadmap_issue</span></code>.</p></li>
+<li><p><strong>max_sessions</strong> – safety ceiling on total iterations.</p></li>
+<li><p><strong>cwd</strong> – working directory for the spawned <code class="docutils literal notranslate"><span class="pre">claude</span></code> (typically the
+target repo’s local checkout).</p></li>
+<li><p><strong>on_session</strong> – optional callable invoked with each <a class="reference internal" href="#ge.run.SessionResult" title="ge.run.SessionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SessionResult</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.run.run_triage">
+<span class="sig-prename descclassname"><span class="pre">ge.run.</span></span><span class="sig-name descname"><span class="pre">run_triage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_issue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'analyze'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/ge/run.html#run_triage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.run.run_triage" title="Link to this definition"></a></dt>
+<dd><p>Drive a cross-repo triage backlog.</p>
+<p><code class="docutils literal notranslate"><span class="pre">phase='analyze'</span></code> runs Phase A (classify + order); a single
+iteration is normally enough. <code class="docutils literal notranslate"><span class="pre">phase='execute'</span></code> runs Phase B
+(one fix-and-PR per iteration); the loop terminates when no
+unactioned <code class="docutils literal notranslate"><span class="pre">fixable</span></code> entries remain.</p>
+<p>The triage backlog lives in <code class="docutils literal notranslate"><span class="pre">tracking_repo#tracking_issue</span></code> (see
+<a class="reference internal" href="memory.html#ge.memory.TriageBacklog" title="ge.memory.TriageBacklog"><code class="xref py py-class docutils literal notranslate"><span class="pre">ge.memory.TriageBacklog</span></code></a>).</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="memory.html" class="btn btn-neutral float-left" title="ge.memory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="util.html" class="btn btn-neutral float-right" title="ge.util" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

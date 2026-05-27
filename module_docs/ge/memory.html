@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ge.memory &mdash; ge 0.1.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8618f531"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ge.run" href="run.html" />
+    <link rel="prev" title="ge.media" href="media.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ge.html">ge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">ge.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">ge.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">ge.context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="github.html">ge.github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="media.html">ge.media</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ge.memory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#design-notes">Design notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.Decision"><code class="docutils literal notranslate"><span class="pre">Decision</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.DecisionLog"><code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ge.memory.DecisionLog.append"><code class="docutils literal notranslate"><span class="pre">DecisionLog.append()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.RoadmapStore"><code class="docutils literal notranslate"><span class="pre">RoadmapStore</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ge.memory.RoadmapStore.append"><code class="docutils literal notranslate"><span class="pre">RoadmapStore.append()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ge.memory.RoadmapStore.hydrate"><code class="docutils literal notranslate"><span class="pre">RoadmapStore.hydrate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ge.memory.RoadmapStore.next_todo"><code class="docutils literal notranslate"><span class="pre">RoadmapStore.next_todo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.TaskRecord"><code class="docutils literal notranslate"><span class="pre">TaskRecord</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.TaskState"><code class="docutils literal notranslate"><span class="pre">TaskState</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.TriageBacklog"><code class="docutils literal notranslate"><span class="pre">TriageBacklog</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.TriageEntry"><code class="docutils literal notranslate"><span class="pre">TriageEntry</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.TriageVerdict"><code class="docutils literal notranslate"><span class="pre">TriageVerdict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.check_requirements"><code class="docutils literal notranslate"><span class="pre">check_requirements()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ge.memory.github_memory"><code class="docutils literal notranslate"><span class="pre">github_memory()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">ge.run</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">ge.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ge.memory</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/ge/memory.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ge.memory">
+<span id="ge-memory"></span><h1>ge.memory<a class="headerlink" href="#module-ge.memory" title="Link to this heading"></a></h1>
+<p>GitHub-backed durable memory for autonomous agent execution.</p>
+<p>Three stores exposed as <code class="docutils literal notranslate"><span class="pre">collections.abc</span></code> facades. GitHub is the single
+source of truth; a thin per-store local snapshot under <code class="docutils literal notranslate"><span class="pre">.ge/cache/</span></code> is a
+hydrate-only cache (disposable, never authoritative).</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ge.memory.RoadmapStore" title="ge.memory.RoadmapStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoadmapStore</span></code></a> — <code class="docutils literal notranslate"><span class="pre">MutableMapping[task_id,</span> <span class="pre">TaskRecord]</span></code> over a
+<em>roadmap issue</em> whose body holds a markdown task list between
+<code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">ge:roadmap:begin</span> <span class="pre">--&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">ge:roadmap:end</span> <span class="pre">--&gt;</span></code> markers.</p></li>
+<li><p><a class="reference internal" href="#ge.memory.DecisionLog" title="ge.memory.DecisionLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecisionLog</span></code></a> — append-only <code class="docutils literal notranslate"><span class="pre">Iterable[Decision]</span></code> backed by
+decision-tagged comments on an issue or PR.</p></li>
+<li><p><a class="reference internal" href="#ge.memory.TriageBacklog" title="ge.memory.TriageBacklog"><code class="xref py py-class docutils literal notranslate"><span class="pre">TriageBacklog</span></code></a> — <code class="docutils literal notranslate"><span class="pre">MutableMapping[issue_ref,</span> <span class="pre">TriageVerdict]</span></code>
+spanning multiple repos. Backed by a tracking issue containing a fenced
+JSON block (<code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">ge:triage:begin</span> <span class="pre">--&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">end</span></code>). Cross-repo refs use
+<code class="docutils literal notranslate"><span class="pre">&quot;owner/repo#N&quot;</span></code>.</p></li>
+</ul>
+<p>The <a class="reference internal" href="#ge.memory.github_memory" title="ge.memory.github_memory"><code class="xref py py-func docutils literal notranslate"><span class="pre">github_memory()</span></code></a> factory bundles these into a mall.</p>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Writes go to GitHub <em>first</em>; the local cache is updated as a side-effect on
+successful round-trip. A failed write does <strong>not</strong> poison the cache.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">check_requirements</span></code> verifies <code class="docutils literal notranslate"><span class="pre">gh</span></code> is installed, authenticated, and
+carries the <code class="docutils literal notranslate"><span class="pre">project</span></code> scope (needed if the user later switches the
+triage backend to a GitHub Project).</p></li>
+</ul>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.Decision">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">Decision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rationale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#Decision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.Decision" title="Link to this definition"></a></dt>
+<dd><p>A logged decision (rendered as a tagged comment on an issue/PR).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.DecisionLog">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">DecisionLog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#DecisionLog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.DecisionLog" title="Link to this definition"></a></dt>
+<dd><p>Append-only iterable of <a class="reference internal" href="#ge.memory.Decision" title="ge.memory.Decision"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decision</span></code></a> records.</p>
+<p>Backed by issue/PR comments tagged with <code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">ge:decision</span> <span class="pre">--&gt;</span></code> on a
+single target (issue or PR). Iteration fetches all comments from
+GitHub, filters by tag, and yields parsed decisions in chronological
+order.</p>
+<p>Significant choices and course-corrections should be appended here so
+they survive into future sessions. Micro-decisions belong in local
+scratch and should be summarised at handover.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ge.memory.DecisionLog.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">rationale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ge.memory.Decision" title="ge.memory.Decision"><span class="pre">Decision</span></a></span></span><a class="reference internal" href="../../_modules/ge/memory.html#DecisionLog.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.DecisionLog.append" title="Link to this definition"></a></dt>
+<dd><p>Post a tagged comment recording this decision.</p>
+<p>Returns the <a class="reference internal" href="#ge.memory.Decision" title="ge.memory.Decision"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decision</span></code></a> (with <code class="docutils literal notranslate"><span class="pre">url</span></code> and <code class="docutils literal notranslate"><span class="pre">created_at</span></code>
+populated from the GitHub response on success).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.RoadmapStore">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">RoadmapStore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#RoadmapStore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.RoadmapStore" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">MutableMapping[task_id,</span> <span class="pre">TaskRecord]</span></code> over a roadmap issue.</p>
+<p>Iteration yields task ids in roadmap order. Mutations rewrite the
+roadmap issue body in place; the local cache is updated on success.</p>
+<p>Initialise via <a class="reference internal" href="#ge.memory.github_memory" title="ge.memory.github_memory"><code class="xref py py-func docutils literal notranslate"><span class="pre">github_memory()</span></code></a> or directly with <code class="docutils literal notranslate"><span class="pre">(repo,</span> <span class="pre">issue)</span></code>.
+The roadmap issue body should contain (or will be augmented with) a
+block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;!-- ge:roadmap:begin --&gt;
+- [ ] Task one
+- [x] Task two
+&lt;!-- ge:roadmap:end --&gt;
+</pre></div>
+</div>
+<p>Tasks outside the block are ignored.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ge.memory.RoadmapStore.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ge.memory.TaskState" title="ge.memory.TaskState"><span class="pre">TaskState</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">TaskState.todo</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ge.memory.TaskRecord" title="ge.memory.TaskRecord"><span class="pre">TaskRecord</span></a></span></span><a class="reference internal" href="../../_modules/ge/memory.html#RoadmapStore.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.RoadmapStore.append" title="Link to this definition"></a></dt>
+<dd><p>Add a new task to the end of the roadmap.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ge.memory.RoadmapStore.hydrate">
+<span class="sig-name descname"><span class="pre">hydrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ge.memory.TaskRecord" title="ge.memory.TaskRecord"><span class="pre">TaskRecord</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/ge/memory.html#RoadmapStore.hydrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.RoadmapStore.hydrate" title="Link to this definition"></a></dt>
+<dd><p>Refresh the local cache from GitHub and return the current task list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ge.memory.RoadmapStore.next_todo">
+<span class="sig-name descname"><span class="pre">next_todo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ge.memory.TaskRecord" title="ge.memory.TaskRecord"><span class="pre">TaskRecord</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/ge/memory.html#RoadmapStore.next_todo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.RoadmapStore.next_todo" title="Link to this definition"></a></dt>
+<dd><p>Return the first <code class="docutils literal notranslate"><span class="pre">todo</span></code> task in roadmap order, or None.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.TaskRecord">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">TaskRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ge.memory.TaskState" title="ge.memory.TaskState"><span class="pre">TaskState</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">TaskState.todo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#TaskRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.TaskRecord" title="Link to this definition"></a></dt>
+<dd><p>A single roadmap task.</p>
+<p><code class="docutils literal notranslate"><span class="pre">id</span></code> is a stable slug derived from the title. <code class="docutils literal notranslate"><span class="pre">metadata</span></code> holds any
+extra agent-attached fields (e.g. links to PRs).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.TaskState">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">TaskState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#TaskState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.TaskState" title="Link to this definition"></a></dt>
+<dd><p>Roadmap task lifecycle state.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.TriageBacklog">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">TriageBacklog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_issue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#TriageBacklog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.TriageBacklog" title="Link to this definition"></a></dt>
+<dd><p>Cross-repo triage backlog.</p>
+<p>Keys are issue refs of the form <code class="docutils literal notranslate"><span class="pre">&quot;owner/repo#N&quot;</span></code>; values are
+<a class="reference internal" href="#ge.memory.TriageEntry" title="ge.memory.TriageEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">TriageEntry</span></code></a>. Iteration order is the agent-chosen resolution
+order (the <code class="docutils literal notranslate"><span class="pre">order</span></code> field).</p>
+<p>Backed by a <em>tracking issue</em> whose body holds a JSON block between
+<code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">ge:triage:begin</span> <span class="pre">--&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">end</span></code>. This keeps the implementation
+free of GraphQL/Project dependencies while preserving full cross-repo
+semantics — fully-qualified refs do the heavy lifting.</p>
+<p>Switching to a GitHub Project backend later is a swap of this class’s
+I/O methods; the public interface stays the same.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.TriageEntry">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">TriageEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ge.memory.TriageVerdict" title="ge.memory.TriageVerdict"><span class="pre">TriageVerdict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rationale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#TriageEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.TriageEntry" title="Link to this definition"></a></dt>
+<dd><p>A cross-repo triage backlog entry.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ge.memory.TriageVerdict">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">TriageVerdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/memory.html#TriageVerdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.TriageVerdict" title="Link to this definition"></a></dt>
+<dd><p>Triage classification for an issue.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.memory.check_requirements">
+<span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">check_requirements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_project_scope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/ge/memory.html#check_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.check_requirements" title="Link to this definition"></a></dt>
+<dd><p>Verify external prerequisites for the memory layer.</p>
+<p>Returns a dict <code class="docutils literal notranslate"><span class="pre">{&quot;ok&quot;:</span> <span class="pre">bool,</span> <span class="pre">&quot;gh&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;auth&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;scopes&quot;:</span> <span class="pre">[...],</span>
+<span class="pre">&quot;missing&quot;:</span> <span class="pre">[...]}</span></code>. Raises <code class="docutils literal notranslate"><span class="pre">EnvironmentError</span></code> with actionable
+install instructions if a hard requirement is missing.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">require_project_scope=True</span></code> if you plan to swap the triage
+backend to a GitHub Project.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ge.memory.github_memory">
+<span class="sig-prename descclassname"><span class="pre">ge.memory.</span></span><span class="sig-name descname"><span class="pre">github_memory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">roadmap_issue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decisions_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triage_issue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/ge/memory.html#github_memory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.memory.github_memory" title="Link to this definition"></a></dt>
+<dd><p>Bundle the three stores into a “mall” dict keyed by name.</p>
+<p>Each store is only constructed if its target was provided. <code class="docutils literal notranslate"><span class="pre">roadmap</span></code>
+requires <code class="docutils literal notranslate"><span class="pre">roadmap_issue</span></code>; <code class="docutils literal notranslate"><span class="pre">decisions</span></code> requires <code class="docutils literal notranslate"><span class="pre">decisions_target</span></code>
+(the issue or PR number where decisions are logged); <code class="docutils literal notranslate"><span class="pre">triage</span></code>
+requires <code class="docutils literal notranslate"><span class="pre">triage_issue</span></code> (the tracking issue holding the JSON block).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># mall = github_memory(&#39;owner/repo&#39;, roadmap_issue=1, decisions_target=1)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="media.html" class="btn btn-neutral float-left" title="ge.media" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="run.html" class="btn btn-neutral float-right" title="ge.run" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

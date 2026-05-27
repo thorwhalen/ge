@@ -8,4 +8,6 @@
    module_docs/ge/context
    module_docs/ge/github
    module_docs/ge/media
+   module_docs/ge/memory
+   module_docs/ge/run
    module_docs/ge/util

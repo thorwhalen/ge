@@ -8,16 +8,26 @@ version = "0.1.11"
 description = "Github Expert - Agentic tools for github"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = []
+license = "MIT"
+keywords = ["github", "agents", "issues", "pull-requests", "automation", "llm"]
 authors = [{ name = "Thor Whalen" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Version Control :: Git",
+]
 dependencies = ["argh"]
 
-[project.license]
-text = "mit"
-
 [project.urls]
-Homepage = "https://github.com/thorwhalen/ge"
+Homepage = "https://thorwhalen.github.io/ge/"
 Repository = "https://github.com/thorwhalen/ge"
+Issues = "https://github.com/thorwhalen/ge/issues"
+Changelog = "https://github.com/thorwhalen/ge/blob/main/CHANGELOG.md"
 Documentation = "https://thorwhalen.github.io/ge"
 
 [project.scripts]

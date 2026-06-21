@@ -47,6 +47,25 @@ Six skills are installed:
 
 To remove the skills: `ge uninstall-skills`
 
+### Installing skills with `gh skill`
+
+The skills are also installable directly from GitHub with [`gh skill`](https://cli.github.com/manual/gh_skill) — no `pip install` required (you only need [the GitHub CLI, `gh`](https://cli.github.com/)). Install any single skill into Claude Code with:
+
+```bash
+gh skill install thorwhalen/ge <name> --agent claude-code
+```
+
+For example, `gh skill install thorwhalen/ge ge --agent claude-code` installs the main workflow skill.
+
+| Skill | Description |
+|-------|-------------|
+| `ge` | Use when asked to work on a GitHub issue, PR, or discussion. Resolves flexible input (URL, folder, number), confirms with the user, prepares context, and guides the workflow. |
+| `ge-analyze` | Use when you need to check whether a GitHub issue or PR is still relevant, stale, or already resolved — without preparing full context or downloading media. |
+| `ge-context` | Use when you need to prepare, read, or refresh full context for a GitHub issue, PR, or discussion — fetching data, downloading media, and writing structured context documents. |
+| `ge-autonomous-execution` | Behavioural policy for running unattended. Use when launched in headless / auto-permission mode and there is no user available — converts every clarifying question into a logged decision so progress continues. |
+| `ge-roadmap-execution` | Execute a roadmap of tasks end-to-end using GitHub as durable memory. Take the next todo task, do it, verify it, mark it done, log decisions, and repeat. |
+| `ge-cross-repo-triage` | Triage and resolve a cross-repo issue backlog — Phase A classifies and orders issues; Phase B executes them one at a time (failing test → confirm red → fix → confirm green → open PR). |
+
 ## Autonomous execution
 
 `ge` can drive Claude Code through a long body of work **without interrupting you**. State lives in GitHub (issues, comments) so each session can exit, the runner relaunches a fresh one, and progress resumes — context exhaustion is no longer a failure mode.

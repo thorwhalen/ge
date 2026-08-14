@@ -34,8 +34,9 @@ import subprocess
 
 # Get current repo for bare-number resolution
 result = subprocess.run(
-    ['gh', 'repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'],
-    capture_output=True, text=True
+    ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
+    capture_output=True,
+    text=True,
 )
 current_repo = result.stdout.strip()  # e.g. "owner/repo"
 
@@ -94,7 +95,7 @@ Check how fresh it is — the file's `prepared_at` timestamp is in the JSON. If 
 Prepare fresh context:
 
 ```python
-ctx = ge.prepare(target['repo'], target['number'])
+ctx = ge.prepare(target["repo"], target["number"])
 # ctx['output_dir'] has the path to the context files
 ```
 
@@ -132,8 +133,9 @@ The context document includes downloaded images and — when `anthropic` is inst
    ```python
    from ge.media import describe_images
    import glob
-   imgs = sorted(glob.glob(target['context_dir'] + '/media/*.png'))
-   imgs += sorted(glob.glob(target['context_dir'] + '/media/*/*.jpg'))
+
+   imgs = sorted(glob.glob(target["context_dir"] + "/media/*.png"))
+   imgs += sorted(glob.glob(target["context_dir"] + "/media/*/*.jpg"))
    if imgs:
        description = describe_images(*imgs)
        print(description)
@@ -143,6 +145,7 @@ The context document includes downloaded images and — when `anthropic` is inst
 2. **Create a montage and ask the user to paste** (if ImageMagick is available):
    ```python
    from ge.media import copy_images_to_clipboard
+
    path = copy_images_to_clipboard(*imgs)
    ```
    Then tell the user: "A montage of N images has been copied to your clipboard. Please paste it here with Cmd+V so I can see the visual context."
@@ -172,9 +175,10 @@ If you just need to check whether an issue is worth working on (without preparin
 
 ```python
 import ge
-analysis = ge.analyze_issue('owner/repo', 42)
+
+analysis = ge.analyze_issue("owner/repo", 42)
 # or for a PR:
-analysis = ge.analyze_pr('owner/repo', 7)
+analysis = ge.analyze_pr("owner/repo", 7)
 ```
 
 For more details on interpreting analysis results, see the `ge-analyze` skill.

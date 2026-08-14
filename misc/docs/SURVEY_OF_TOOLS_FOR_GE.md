@@ -26,7 +26,8 @@ search. Also has a CLI mode.
 
 ```python
 from ghapi.all import GhApi
-api = GhApi(owner='thorwhalen', repo='dol', token=token)
+
+api = GhApi(owner="thorwhalen", repo="dol", token=token)
 issue = api.issues.get(42)
 comments = api.issues.list_comments(42)
 timeline = api.issues.list_events_for_timeline(42)
@@ -50,6 +51,7 @@ all response fields.
 
 ```python
 from githubkit import GitHub
+
 github = GitHub("<token>")
 resp = github.rest.issues.get("owner", "repo", 42)
 issue = resp.parsed_data  # fully typed Pydantic model
@@ -247,7 +249,8 @@ state rather than potentially multiple frames of the same state.
 
 ```python
 from scenedetect import detect, ContentDetector
-scene_list = detect('bug_video.mp4', ContentDetector())
+
+scene_list = detect("bug_video.mp4", ContentDetector())
 # scene_list is [(start_timecode, end_timecode), ...]
 # Extract one frame per scene at the midpoint
 ```
@@ -256,8 +259,9 @@ Can also save images directly and split videos:
 
 ```python
 from scenedetect import detect, ContentDetector, split_video_ffmpeg
-scene_list = detect('video.mp4', ContentDetector())
-split_video_ffmpeg('video.mp4', scene_list)
+
+scene_list = detect("video.mp4", ContentDetector())
+split_video_ffmpeg("video.mp4", scene_list)
 ```
 
 - PyPI: `pip install scenedetect[opencv]`
@@ -322,13 +326,16 @@ via a simple API call. No cloud dependency.
 
 ```python
 import ollama
+
 response = ollama.chat(
     model="llava",
-    messages=[{
-        'role': 'user',
-        'content': 'Describe this screenshot of a UI bug',
-        'images': ['media/screenshot.png'],
-    }]
+    messages=[
+        {
+            "role": "user",
+            "content": "Describe this screenshot of a UI bug",
+            "images": ["media/screenshot.png"],
+        }
+    ],
 )
 ```
 

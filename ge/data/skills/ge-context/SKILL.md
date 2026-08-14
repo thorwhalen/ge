@@ -22,16 +22,16 @@ Use this skill when you need to prepare or refresh a structured context document
 ```python
 import ge
 
-ctx = ge.prepare('https://github.com/owner/repo/issues/42')
+ctx = ge.prepare("https://github.com/owner/repo/issues/42")
 # Also works with PR and discussion URLs
 ```
 
 ### Explicit type
 
 ```python
-ctx = ge.prepare_issue('owner/repo', 42)
-ctx = ge.prepare_pr('owner/repo', 7, include_diff=True)
-ctx = ge.prepare_discussion('owner/repo', 5)
+ctx = ge.prepare_issue("owner/repo", 42)
+ctx = ge.prepare_pr("owner/repo", 7, include_diff=True)
+ctx = ge.prepare_discussion("owner/repo", 5)
 ```
 
 ### Parameters
@@ -116,9 +116,10 @@ Beyond automatic descriptions during `prepare_*`, two standalone tools are avail
 from ge.media import describe_images
 
 # Describe one or more images
-text = describe_images('screenshot.png', 'error.jpg')
-text = describe_images('frame1.jpg', 'frame2.jpg',
-                       prompt="What changed between these frames?")
+text = describe_images("screenshot.png", "error.jpg")
+text = describe_images(
+    "frame1.jpg", "frame2.jpg", prompt="What changed between these frames?"
+)
 ```
 
 ### Copy images to clipboard (montage)
@@ -127,7 +128,7 @@ text = describe_images('frame1.jpg', 'frame2.jpg',
 from ge.media import copy_images_to_clipboard
 
 # Create montage and copy to clipboard for pasting into Claude Code
-path = copy_images_to_clipboard('img1.png', 'img2.png', 'img3.png')
+path = copy_images_to_clipboard("img1.png", "img2.png", "img3.png")
 # Then Cmd+V in Claude Code
 ```
 
@@ -142,6 +143,6 @@ To download media from any markdown text (not just GitHub context):
 ```python
 from ge.media import process_all_media
 
-result = process_all_media(markdown_text, output_dir='/tmp/my_media')
+result = process_all_media(markdown_text, output_dir="/tmp/my_media")
 # Returns: {'images': [...], 'video_frames': {...}, 'manifest': [...], 'rewritten_markdown': '...'}
 ```

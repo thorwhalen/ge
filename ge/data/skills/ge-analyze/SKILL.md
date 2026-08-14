@@ -17,7 +17,7 @@ Use this skill for quick triage — checking whether an issue or PR is worth wor
 ```python
 import ge
 
-analysis = ge.analyze_issue('owner/repo', 42)
+analysis = ge.analyze_issue("owner/repo", 42)
 ```
 
 Returns a dict with:
@@ -43,7 +43,7 @@ Returns a dict with:
 ## PR Analysis
 
 ```python
-analysis = ge.analyze_pr('owner/repo', 7)
+analysis = ge.analyze_pr("owner/repo", 7)
 ```
 
 Returns a dict with:
@@ -77,7 +77,7 @@ Verify whether files mentioned in an issue still exist on the default branch:
 ```python
 from ge.analysis import check_referenced_files
 
-results = check_referenced_files('owner/repo', ['src/auth.py', 'config/settings.yaml'])
+results = check_referenced_files("owner/repo", ["src/auth.py", "config/settings.yaml"])
 # Returns list of dicts with 'path', 'exists', and 'ref' fields
 ```
 

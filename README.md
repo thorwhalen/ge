@@ -101,12 +101,14 @@ mall = ge.github_memory(
     triage_issue=9,
 )
 roadmap = mall["roadmap"]
-roadmap.next_todo()                  # next "- [ ]" task
-roadmap.append("New task")           # adds "- [ ] New task"
+roadmap.next_todo()  # next "- [ ]" task
+roadmap.append("New task")  # adds "- [ ] New task"
 
 mall["decisions"].append("Used X over Y", rationale="cheaper")
 mall["triage"]["owner/repoA#42"] = ge.TriageEntry(
-    ref="owner/repoA#42", verdict=ge.TriageVerdict.fixable, order=1,
+    ref="owner/repoA#42",
+    verdict=ge.TriageVerdict.fixable,
+    order=1,
 )
 ```
 
@@ -171,21 +173,22 @@ ge uninstall-skills                Remove ge skill symlinks
 import ge
 
 # Prepare full context
-ctx = ge.prepare('https://github.com/owner/repo/issues/42')
-ctx = ge.prepare_issue('owner/repo', 42)
-ctx = ge.prepare_pr('owner/repo', 7)
-ctx = ge.prepare_discussion('owner/repo', 5)
+ctx = ge.prepare("https://github.com/owner/repo/issues/42")
+ctx = ge.prepare_issue("owner/repo", 42)
+ctx = ge.prepare_pr("owner/repo", 7)
+ctx = ge.prepare_discussion("owner/repo", 5)
 
 # Just analysis (no download)
-analysis = ge.analyze_issue('owner/repo', 42)
+analysis = ge.analyze_issue("owner/repo", 42)
 
 # Resolve flexible input
-target = ge.resolve_target('#42', current_repo='owner/repo')
+target = ge.resolve_target("#42", current_repo="owner/repo")
 
 # Image tools
 from ge.media import describe_images, copy_images_to_clipboard
-text = describe_images('screenshot.png', 'error.jpg')
-path = copy_images_to_clipboard('img1.png', 'img2.png')
+
+text = describe_images("screenshot.png", "error.jpg")
+path = copy_images_to_clipboard("img1.png", "img2.png")
 ```
 
 ### Image analysis

@@ -1,7 +1,11 @@
 # GitHub as Agent Memory — a light report
 
 *Author: Thor Whalen*
-*Status: light report (a deeper research report has been commissioned separately)*
+*Status: light report. The deeper report it anticipated now exists —
+[Issues, Discussions, Projects, and Files](github-surfaces-allocation-report.md) — and
+supersedes this one on the allocation question specifically. Where the two disagree, prefer
+the deep report: its platform-capability claims are verified against live GraphQL
+introspection, and GitHub changed Issues substantially after this note was written.*
 
 ## What this space is called
 

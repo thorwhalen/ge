@@ -44,6 +44,7 @@ Six skills are installed:
 | `ge-autonomous-execution` | Behaviour policy for unattended runs (decide-and-log, don't ask) |
 | `ge-roadmap-execution` | Drive a roadmap issue end-to-end, one task per iteration |
 | `ge-cross-repo-triage` | Classify & resolve issues across repos (failing test → fix → PR) |
+| `ge-write-issue` | Authoring issues/comments people read — layering, asking, assigning |
 
 To remove the skills: `ge uninstall-skills`
 
@@ -65,6 +66,7 @@ For example, `gh skill install thorwhalen/ge ge --agent claude-code` installs th
 | `ge-autonomous-execution` | Behavioural policy for running unattended. Use when launched in headless / auto-permission mode and there is no user available — converts every clarifying question into a logged decision so progress continues. |
 | `ge-roadmap-execution` | Execute a roadmap of tasks end-to-end using GitHub as durable memory. Take the next todo task, do it, verify it, mark it done, log decisions, and repeat. |
 | `ge-cross-repo-triage` | Triage and resolve a cross-repo issue backlog — Phase A classifies and orders issues; Phase B executes them one at a time (failing test → confirm red → fix → confirm green → open PR). |
+| `ge-write-issue` | Use when AUTHORING a GitHub issue, comment, or report that a human will read — especially a non-technical stakeholder or client. Covers layering detail with `<details>`, asking a question that gets answered, and assigning so someone is on the hook. |
 
 ## Autonomous execution
 
@@ -229,5 +231,6 @@ ge/
     ├── ge-context/             # Context preparation skill
     ├── ge-autonomous-execution/  # Unattended-mode behaviour policy
     ├── ge-roadmap-execution/     # Drive a roadmap issue end-to-end
-    └── ge-cross-repo-triage/     # Multi-repo triage and resolution
+    ├── ge-cross-repo-triage/     # Multi-repo triage and resolution
+    └── ge-write-issue/           # Authoring issues for human readers
 ```

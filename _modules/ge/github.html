@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.github &mdash; ge 0.1.14 documentation</title>
+  <title>ge.github &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -83,12 +83,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ge.github</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;GitHub data fetching via gh CLI.</span>
+<span></span><span class="sd">"""GitHub data fetching via gh CLI.</span>
 
 <span class="sd">Provides functions to retrieve issues, PRs, comments, timeline events,</span>
 <span class="sd">related commits, and referenced code -- all through the gh CLI so that</span>
-<span class="sd">private repo access is handled by the user&#39;s existing gh auth.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">private repo access is handled by the user's existing gh auth.</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">gh_api</span><span class="p">,</span> <span class="n">parse_repo_spec</span>
 
@@ -101,37 +101,37 @@
 <div class="viewcode-block" id="get_issue">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_issue">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_issue</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a GitHub issue with body, labels, assignees, state, etc.</span>
+<span class="w">    </span><span class="sd">"""Fetch a GitHub issue with body, labels, assignees, state, etc.</span>
 
-<span class="sd">    &gt;&gt;&gt; # issue = get_issue(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # issue = get_issue('owner/repo', 42)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_pr">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_pr">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_pr</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a GitHub pull request with body, diff stats, merge state, etc.</span>
+<span class="w">    </span><span class="sd">"""Fetch a GitHub pull request with body, diff stats, merge state, etc.</span>
 
-<span class="sd">    &gt;&gt;&gt; # pr = get_pr(&#39;owner/repo&#39;, 7)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # pr = get_pr('owner/repo', 7)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_comments">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_comments">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_comments</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch all comments on an issue or PR.</span>
+<span class="w">    </span><span class="sd">"""Fetch all comments on an issue or PR.</span>
 
-<span class="sd">    &gt;&gt;&gt; # comments = get_comments(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # comments = get_comments('owner/repo', 42)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/comments&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/comments"</span><span class="p">,</span>
         <span class="n">paginate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -140,13 +140,13 @@
 <div class="viewcode-block" id="get_review_comments">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_review_comments">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_review_comments</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch inline review comments on a PR (code-level comments).</span>
+<span class="w">    </span><span class="sd">"""Fetch inline review comments on a PR (code-level comments).</span>
 
-<span class="sd">    &gt;&gt;&gt; # review_comments = get_review_comments(&#39;owner/repo&#39;, 7)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # review_comments = get_review_comments('owner/repo', 7)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/comments&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/comments"</span><span class="p">,</span>
         <span class="n">paginate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -155,13 +155,13 @@
 <div class="viewcode-block" id="get_reviews">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_reviews">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_reviews</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch PR reviews (approved, changes requested, etc.).</span>
+<span class="w">    </span><span class="sd">"""Fetch PR reviews (approved, changes requested, etc.).</span>
 
-<span class="sd">    &gt;&gt;&gt; # reviews = get_reviews(&#39;owner/repo&#39;, 7)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # reviews = get_reviews('owner/repo', 7)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/reviews&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/reviews"</span><span class="p">,</span>
         <span class="n">paginate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -170,16 +170,16 @@
 <div class="viewcode-block" id="get_timeline">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_timeline">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_timeline</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch the issue/PR timeline (events: referenced, closed, labeled, ...).</span>
+<span class="w">    </span><span class="sd">"""Fetch the issue/PR timeline (events: referenced, closed, labeled, ...).</span>
 
 <span class="sd">    This gives us cross-references, commits that mention the issue, etc.</span>
 
-<span class="sd">    &gt;&gt;&gt; # events = get_timeline(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # events = get_timeline('owner/repo', 42)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="c1"># Timeline API is in preview; gh handles the accept header for us</span>
     <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/timeline&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/timeline"</span><span class="p">,</span>
         <span class="n">paginate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -188,27 +188,27 @@
 <div class="viewcode-block" id="get_pr_diff">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_pr_diff">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_pr_diff</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch the raw diff of a PR.</span>
+<span class="w">    </span><span class="sd">"""Fetch the raw diff of a PR.</span>
 
-<span class="sd">    &gt;&gt;&gt; # diff = get_pr_diff(&#39;owner/repo&#39;, 7)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # diff = get_pr_diff('owner/repo', 7)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="c1"># gh api with accept header for diff format</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="s2">&quot;gh&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;api&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-H&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Accept: application/vnd.github.diff&quot;</span><span class="p">,</span>
+            <span class="s2">"gh"</span><span class="p">,</span>
+            <span class="s2">"api"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"-H"</span><span class="p">,</span>
+            <span class="s2">"Accept: application/vnd.github.diff"</span><span class="p">,</span>
         <span class="p">],</span>
         <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get PR diff: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to get PR diff: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span></div>
 
 
@@ -216,13 +216,13 @@
 <div class="viewcode-block" id="get_pr_files">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_pr_files">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_pr_files</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch the list of files changed in a PR.</span>
+<span class="w">    </span><span class="sd">"""Fetch the list of files changed in a PR.</span>
 
-<span class="sd">    &gt;&gt;&gt; # files = get_pr_files(&#39;owner/repo&#39;, 7)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # files = get_pr_files('owner/repo', 7)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/files&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/pulls/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/files"</span><span class="p">,</span>
         <span class="n">paginate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -236,13 +236,13 @@
 <div class="viewcode-block" id="find_related_prs">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.find_related_prs">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">find_related_prs</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue_number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find PRs that reference or close this issue.</span>
+<span class="w">    </span><span class="sd">"""Find PRs that reference or close this issue.</span>
 
 <span class="sd">    Uses the timeline API to find cross-referenced PRs, and also searches</span>
 <span class="sd">    for PRs mentioning the issue number.</span>
 
-<span class="sd">    &gt;&gt;&gt; # prs = find_related_prs(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # prs = find_related_prs('owner/repo', 42)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="n">related</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -254,16 +254,16 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="c1"># cross-referenced events link to PRs</span>
-            <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;cross-referenced&quot;</span><span class="p">:</span>
-                <span class="n">source</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;issue&quot;</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pull_request&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-                    <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"cross-referenced"</span><span class="p">:</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"source"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"issue"</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pull_request"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"number"</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="s2">"number"</span><span class="p">])</span>
                     <span class="n">related</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="p">{</span>
-                            <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                            <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                            <span class="s2">"number"</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="s2">"number"</span><span class="p">],</span>
+                            <span class="s2">"title"</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                            <span class="s2">"state"</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                            <span class="s2">"url"</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
                         <span class="p">}</span>
                     <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -272,20 +272,20 @@
     <span class="c1"># Search for PRs mentioning this issue</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span>
-            <span class="s2">&quot;search/issues&quot;</span><span class="p">,</span>
+            <span class="s2">"search/issues"</span><span class="p">,</span>
             <span class="n">params</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;repo:</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> type:pr </span><span class="si">{</span><span class="n">issue_number</span><span class="si">}</span><span class="s2"> in:body,comments&quot;</span><span class="p">,</span>
+                <span class="s2">"q"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"repo:</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> type:pr </span><span class="si">{</span><span class="n">issue_number</span><span class="si">}</span><span class="s2"> in:body,comments"</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">"number"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"number"</span><span class="p">])</span>
                 <span class="n">related</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                        <span class="s2">"number"</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"number"</span><span class="p">],</span>
+                        <span class="s2">"title"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                        <span class="s2">"state"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                        <span class="s2">"url"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -298,27 +298,27 @@
 <div class="viewcode-block" id="find_related_commits">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.find_related_commits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">find_related_commits</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">issue_number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find recent commits that reference this issue number.</span>
+<span class="w">    </span><span class="sd">"""Find recent commits that reference this issue number.</span>
 
-<span class="sd">    &gt;&gt;&gt; # commits = find_related_commits(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # commits = find_related_commits('owner/repo', 42)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span>
-            <span class="s2">&quot;search/commits&quot;</span><span class="p">,</span>
+            <span class="s2">"search/commits"</span><span class="p">,</span>
             <span class="n">params</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;repo:</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> #</span><span class="si">{</span><span class="n">issue_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;per_page&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">),</span>
+                <span class="s2">"q"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"repo:</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> #</span><span class="si">{</span><span class="n">issue_number</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"per_page"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">),</span>
             <span class="p">},</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;sha&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;sha&quot;</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;commit&quot;</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;commit&quot;</span><span class="p">][</span><span class="s2">&quot;author&quot;</span><span class="p">][</span><span class="s2">&quot;date&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;html_url&quot;</span><span class="p">],</span>
+                <span class="s2">"sha"</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"sha"</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"commit"</span><span class="p">][</span><span class="s2">"message"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">"date"</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"commit"</span><span class="p">][</span><span class="s2">"author"</span><span class="p">][</span><span class="s2">"date"</span><span class="p">],</span>
+                <span class="s2">"url"</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"html_url"</span><span class="p">],</span>
             <span class="p">}</span>
-            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="p">[])</span>
         <span class="p">]</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span></div>
@@ -327,57 +327,57 @@
 
 <div class="viewcode-block" id="get_file_at_ref">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_file_at_ref">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_file_at_ref</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a file&#39;s content at a specific git ref (branch, tag, sha).</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_file_at_ref</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="s2">"HEAD"</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Fetch a file's content at a specific git ref (branch, tag, sha).</span>
 
-<span class="sd">    &gt;&gt;&gt; # content = get_file_at_ref(&#39;owner/repo&#39;, &#39;src/main.py&#39;, ref=&#39;main&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # content = get_file_at_ref('owner/repo', 'src/main.py', ref='main')</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/contents/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">ref</span><span class="p">})</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;encoding&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;base64&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;replace&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/contents/</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">"ref"</span><span class="p">:</span> <span class="n">ref</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"encoding"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"base64"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_commit_status">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_commit_status">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_commit_status</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch the combined commit status (CI checks) for a git ref.</span>
+<span class="w">    </span><span class="sd">"""Fetch the combined commit status (CI checks) for a git ref.</span>
 
-<span class="sd">    &gt;&gt;&gt; # status = get_commit_status(&#39;owner/repo&#39;, &#39;abc123&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # status = get_commit_status('owner/repo', 'abc123')</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/commits/</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2">/status&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/commits/</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2">/status"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_default_branch">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_default_branch">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_default_branch</span><span class="p">(</span><span class="n">repo</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the default branch name for a repo.</span>
+<span class="w">    </span><span class="sd">"""Get the default branch name for a repo.</span>
 
-<span class="sd">    &gt;&gt;&gt; # branch = get_default_branch(&#39;owner/repo&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # branch = get_default_branch('owner/repo')</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;main&quot;</span><span class="p">)</span></div>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">gh_api</span><span class="p">(</span><span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"default_branch"</span><span class="p">,</span> <span class="s2">"main"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_discussion">
 <a class="viewcode-back" href="../../module_docs/ge/github.html#ge.get_discussion">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_discussion</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a GitHub Discussion via GraphQL (discussions aren&#39;t in REST API).</span>
+<span class="w">    </span><span class="sd">"""Fetch a GitHub Discussion via GraphQL (discussions aren't in REST API).</span>
 
-<span class="sd">    &gt;&gt;&gt; # disc = get_discussion(&#39;owner/repo&#39;, 5)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # disc = get_discussion('owner/repo', 5)</span>
+<span class="sd">    """</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 
-    <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">    query($owner: String!, $name: String!, $number: Int!) {</span>
 <span class="s2">      repository(owner: $owner, name: $name) {</span>
 <span class="s2">        discussion(number: $number) {</span>
@@ -396,30 +396,30 @@
 <span class="s2">        }</span>
 <span class="s2">      }</span>
 <span class="s2">    }</span>
-<span class="s2">    &quot;&quot;&quot;</span>
+<span class="s2">    """</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="s2">&quot;gh&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;api&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-f&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;query=</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-F&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;owner=</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-F&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;name=</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-F&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;number=</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">"gh"</span><span class="p">,</span>
+            <span class="s2">"api"</span><span class="p">,</span>
+            <span class="s2">"graphql"</span><span class="p">,</span>
+            <span class="s2">"-f"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"query=</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"-F"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"owner=</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"-F"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"name=</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"-F"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"number=</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="p">],</span>
         <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get discussion: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to get discussion: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;repository&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;discussion&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"data"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repository"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"discussion"</span><span class="p">)</span></div>
 
 </pre></div>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.context &mdash; ge 0.1.14 documentation</title>
+  <title>ge.context &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -83,11 +83,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ge.context</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Context assembly and rendering.</span>
+<span></span><span class="sd">"""Context assembly and rendering.</span>
 
 <span class="sd">Combines issue/PR data, comments, media, and analysis into a single</span>
 <span class="sd">structured context document that an AI agent can consume.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -107,22 +107,22 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ge.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_dir</span><span class="p">,</span> <span class="n">parse_repo_spec</span><span class="p">,</span> <span class="n">default_output_dir</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_describe_visual_files</span><span class="p">(</span><span class="n">visual_files</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;issue&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use Claude API to describe downloaded images, returning a text summary.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_describe_visual_files</span><span class="p">(</span><span class="n">visual_files</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">"issue"</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Use Claude API to describe downloaded images, returning a text summary.</span>
 
 <span class="sd">    Returns None if no images, anthropic is unavailable, or API call fails.</span>
 <span class="sd">    Failures are non-fatal — context preparation continues without descriptions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">image_exts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.gif&quot;</span><span class="p">,</span> <span class="s2">&quot;.webp&quot;</span><span class="p">}</span>
+<span class="sd">    """</span>
+    <span class="n">image_exts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">".png"</span><span class="p">,</span> <span class="s2">".jpg"</span><span class="p">,</span> <span class="s2">".jpeg"</span><span class="p">,</span> <span class="s2">".gif"</span><span class="p">,</span> <span class="s2">".webp"</span><span class="p">}</span>
     <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">visual_files</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">image_exts</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">images</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;These images were attached to a GitHub </span><span class="si">{</span><span class="n">kind_label</span><span class="si">}</span><span class="s2">. &quot;</span>
-            <span class="s2">&quot;Describe each image in detail. If they appear to be screenshots &quot;</span>
-            <span class="s2">&quot;of a bug, error, or UI issue, describe the problem visible. &quot;</span>
-            <span class="s2">&quot;If they are video frames, describe what changes across the sequence.&quot;</span>
+            <span class="sa">f</span><span class="s2">"These images were attached to a GitHub </span><span class="si">{</span><span class="n">kind_label</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="s2">"Describe each image in detail. If they appear to be screenshots "</span>
+            <span class="s2">"of a bug, error, or UI issue, describe the problem visible. "</span>
+            <span class="s2">"If they are video frames, describe what changes across the sequence."</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">describe_images</span><span class="p">(</span><span class="o">*</span><span class="n">images</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -134,7 +134,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">prepare_issue</span><span class="p">(</span>
     <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for working on a GitHub issue.</span>
+<span class="w">    </span><span class="sd">"""Prepare full context for working on a GitHub issue.</span>
 
 <span class="sd">    Fetches the issue, comments, media, and performs staleness analysis.</span>
 <span class="sd">    Writes a context document and manifest to output_dir.</span>
@@ -147,10 +147,10 @@
 
 <span class="sd">    Returns dict with all assembled context.</span>
 
-<span class="sd">    &gt;&gt;&gt; # ctx = prepare_issue(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = prepare_issue('owner/repo', 42)</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="s2">&quot;issue&quot;</span><span class="p">)</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="s2">"issue"</span><span class="p">)</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
 
@@ -159,67 +159,67 @@
     <span class="n">analysis</span> <span class="o">=</span> <span class="n">analyze_issue</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
 
     <span class="c1"># Collect all markdown text for media extraction</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">comment_bodies</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">]</span>
-    <span class="n">all_markdown</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">comment_bodies</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+    <span class="n">comment_bodies</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">]</span>
+    <span class="n">all_markdown</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">comment_bodies</span><span class="p">)</span>
 
     <span class="c1"># Download media</span>
     <span class="n">media_result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">download_media_flag</span><span class="p">:</span>
-        <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
+        <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">"media"</span><span class="p">)</span>
         <span class="n">media_result</span> <span class="o">=</span> <span class="n">process_all_media</span><span class="p">(</span><span class="n">all_markdown</span><span class="p">,</span> <span class="n">media_dir</span><span class="p">)</span>
 
     <span class="c1"># Describe images via Claude API (non-fatal if unavailable)</span>
     <span class="n">image_descriptions</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
         <span class="n">image_descriptions</span> <span class="o">=</span> <span class="n">_describe_visual_files</span><span class="p">(</span>
-            <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;issue&quot;</span>
+            <span class="n">media_result</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">"issue"</span>
         <span class="p">)</span>
 
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;issue&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;repo&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;updated_at&quot;</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="p">[])],</span>
-        <span class="s2">&quot;assignees&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;login&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;assignees&quot;</span><span class="p">,</span> <span class="p">[])],</span>
-        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;rewritten_markdown&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="n">body</span><span class="p">,</span>
-        <span class="s2">&quot;original_body&quot;</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
-        <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"issue"</span><span class="p">,</span>
+        <span class="s2">"repo"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"number"</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+        <span class="s2">"url"</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"state"</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_at"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"updated_at"</span><span class="p">:</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"updated_at"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"labels"</span><span class="p">:</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"labels"</span><span class="p">,</span> <span class="p">[])],</span>
+        <span class="s2">"assignees"</span><span class="p">:</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s2">"login"</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"assignees"</span><span class="p">,</span> <span class="p">[])],</span>
+        <span class="s2">"body"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"rewritten_markdown"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="n">body</span><span class="p">,</span>
+        <span class="s2">"original_body"</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
+        <span class="s2">"comments"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">"author"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_at"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"body"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span>
         <span class="p">],</span>
-        <span class="s2">&quot;analysis&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="p">,</span>
-        <span class="s2">&quot;media&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;manifest&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;video_frames&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;video_frames&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">{},</span>
-            <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]</span>
+        <span class="s2">"analysis"</span><span class="p">:</span> <span class="n">analysis</span><span class="p">,</span>
+        <span class="s2">"media"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"manifest"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"manifest"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">"images"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"images"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">"video_frames"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"video_frames"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">{},</span>
+            <span class="s2">"all_visual_files"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">media_result</span>
             <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;image_descriptions&quot;</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
+            <span class="s2">"image_descriptions"</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;prepared_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s2">"prepared_at"</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
     <span class="p">}</span>
 
-    <span class="n">context</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">context</span><span class="p">[</span><span class="s2">"output_dir"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
     <span class="c1"># Write context JSON</span>
-    <span class="n">context_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;issue_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.json&quot;</span>
+    <span class="n">context_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"issue_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.json"</span>
     <span class="n">context_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="c1"># Render human/agent-readable markdown</span>
     <span class="n">rendered</span> <span class="o">=</span> <span class="n">render_issue_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
-    <span class="n">md_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;issue_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.md&quot;</span>
+    <span class="n">md_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"issue_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.md"</span>
     <span class="n">md_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">context</span></div>
@@ -237,12 +237,12 @@
     <span class="n">include_diff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for working on or reviewing a GitHub PR.</span>
+<span class="w">    </span><span class="sd">"""Prepare full context for working on or reviewing a GitHub PR.</span>
 
-<span class="sd">    &gt;&gt;&gt; # ctx = prepare_pr(&#39;owner/repo&#39;, 7)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = prepare_pr('owner/repo', 7)</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="s2">&quot;pr&quot;</span><span class="p">)</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="s2">"pr"</span><span class="p">)</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
 
@@ -255,86 +255,86 @@
     <span class="n">diff</span> <span class="o">=</span> <span class="n">get_pr_diff</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span> <span class="k">if</span> <span class="n">include_diff</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="c1"># Collect all markdown for media extraction</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">all_bodies</span> <span class="o">=</span> <span class="p">[</span><span class="n">body</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">]</span>
-    <span class="n">all_bodies</span> <span class="o">+=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">review_comments</span><span class="p">]</span>
-    <span class="n">all_markdown</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">all_bodies</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+    <span class="n">all_bodies</span> <span class="o">=</span> <span class="p">[</span><span class="n">body</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">]</span>
+    <span class="n">all_bodies</span> <span class="o">+=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">review_comments</span><span class="p">]</span>
+    <span class="n">all_markdown</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">all_bodies</span><span class="p">)</span>
 
     <span class="n">media_result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">download_media_flag</span><span class="p">:</span>
-        <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
+        <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">"media"</span><span class="p">)</span>
         <span class="n">media_result</span> <span class="o">=</span> <span class="n">process_all_media</span><span class="p">(</span><span class="n">all_markdown</span><span class="p">,</span> <span class="n">media_dir</span><span class="p">)</span>
 
     <span class="c1"># Describe images via Claude API (non-fatal if unavailable)</span>
     <span class="n">image_descriptions</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
         <span class="n">image_descriptions</span> <span class="o">=</span> <span class="n">_describe_visual_files</span><span class="p">(</span>
-            <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;PR&quot;</span>
+            <span class="n">media_result</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">"PR"</span>
         <span class="p">)</span>
 
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;pr&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;repo&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;html_url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;merged&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;merged&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
-        <span class="s2">&quot;draft&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;draft&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
-        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;head_branch&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;head&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;base_branch&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;updated_at&quot;</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="p">[])],</span>
-        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;rewritten_markdown&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="n">body</span><span class="p">,</span>
-        <span class="s2">&quot;original_body&quot;</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
-        <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"pr"</span><span class="p">,</span>
+        <span class="s2">"repo"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"number"</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+        <span class="s2">"url"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"state"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"merged"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"merged"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">"draft"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"draft"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"head_branch"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"head"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"base_branch"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"base"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_at"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"updated_at"</span><span class="p">:</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"updated_at"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"labels"</span><span class="p">:</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"labels"</span><span class="p">,</span> <span class="p">[])],</span>
+        <span class="s2">"body"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"rewritten_markdown"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="n">body</span><span class="p">,</span>
+        <span class="s2">"original_body"</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
+        <span class="s2">"comments"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">"author"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_at"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"body"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span>
         <span class="p">],</span>
-        <span class="s2">&quot;review_comments&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"review_comments"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">"author"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"path"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"line"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"line"</span><span class="p">),</span>
+                <span class="s2">"body"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">review_comments</span>
         <span class="p">],</span>
-        <span class="s2">&quot;reviews&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"reviews"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">"author"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"state"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"body"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reviews</span>
         <span class="p">],</span>
-        <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="n">diff</span><span class="p">,</span>
-        <span class="s2">&quot;analysis&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="p">,</span>
-        <span class="s2">&quot;media&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;manifest&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;video_frames&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;video_frames&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">{},</span>
-            <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]</span>
+        <span class="s2">"diff"</span><span class="p">:</span> <span class="n">diff</span><span class="p">,</span>
+        <span class="s2">"analysis"</span><span class="p">:</span> <span class="n">analysis</span><span class="p">,</span>
+        <span class="s2">"media"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"manifest"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"manifest"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">"images"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"images"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">"video_frames"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"video_frames"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">{},</span>
+            <span class="s2">"all_visual_files"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">media_result</span>
             <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;image_descriptions&quot;</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
+            <span class="s2">"image_descriptions"</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;prepared_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s2">"prepared_at"</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
     <span class="p">}</span>
 
-    <span class="n">context</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">context</span><span class="p">[</span><span class="s2">"output_dir"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
-    <span class="n">context_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;pr_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.json&quot;</span>
+    <span class="n">context_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"pr_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.json"</span>
     <span class="n">context_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
 
     <span class="n">rendered</span> <span class="o">=</span> <span class="n">render_pr_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
-    <span class="n">md_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;pr_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.md&quot;</span>
+    <span class="n">md_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"pr_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.md"</span>
     <span class="n">md_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">context</span></div>
@@ -349,202 +349,202 @@
 <div class="viewcode-block" id="render_issue_context">
 <a class="viewcode-back" href="../../module_docs/ge/context.html#ge.render_issue_context">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_issue_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render issue context as a structured markdown document.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Render issue context as a structured markdown document."""</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">append</span>
 
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# Issue #</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Repo:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**URL:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**State:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Author:** @</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Created:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Labels:** </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;none&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"# Issue #</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Repo:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**URL:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**State:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'state'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Author:** @</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Created:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'created_at'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Labels:** </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'labels'</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'none'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Analysis / freshness</span>
-    <span class="n">analysis</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;analysis&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;signals&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Freshness Analysis&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Recommendation:** `</span><span class="si">{</span><span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;recommendation&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;signals&quot;</span><span class="p">]:</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">sig</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;related_prs&quot;</span><span class="p">):</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;**Related PRs:**&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;related_prs&quot;</span><span class="p">]:</span>
-                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- #</span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> — </span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;related_commits&quot;</span><span class="p">):</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;**Related commits:**&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;related_commits&quot;</span><span class="p">]:</span>
-                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;sha&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">` </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"analysis"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"signals"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Freshness Analysis"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Recommendation:** `</span><span class="si">{</span><span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'recommendation'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">`"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">"signals"</span><span class="p">]:</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">sig</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"related_prs"</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">"**Related PRs:**"</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">"related_prs"</span><span class="p">]:</span>
+                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- #</span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">'state'</span><span class="p">]</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2"> — </span><span class="si">{</span><span class="n">pr</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"related_commits"</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">"**Related commits:**"</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">"related_commits"</span><span class="p">]:</span>
+                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'sha'</span><span class="p">]</span><span class="si">}</span><span class="s2">` </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'message'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'date'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Body</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Issue Body&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;*empty*&quot;</span><span class="p">))</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Issue Body"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">"*empty*"</span><span class="p">))</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Comments</span>
-    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;comments&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;### Comment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> — @</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"comments"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'comments'</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s2">"comments"</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"### Comment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> — @</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'created_at'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">"body"</span><span class="p">])</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Media</span>
-    <span class="n">media</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;media&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Media Files&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The following visual files were downloaded from this issue.&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;video_frames&quot;</span><span class="p">):</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;Video frames extracted:&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">frames</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;video_frames&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">vid</span><span class="si">}</span><span class="s2">` → </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"media"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Media Files"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The following visual files were downloaded from this issue."</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">]:</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"video_frames"</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">"Video frames extracted:"</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">frames</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">"video_frames"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">vid</span><span class="si">}</span><span class="s2">` → </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Image descriptions (from Claude API vision analysis)</span>
-    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Image Descriptions (AI-generated)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"image_descriptions"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">"## Image Descriptions (AI-generated)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">"image_descriptions"</span><span class="p">])</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
         <span class="n">a</span><span class="p">(</span>
-            <span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
-            <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span>
+            <span class="s2">"*Image descriptions not available. To analyze images, install "</span>
+            <span class="s2">"the `anthropic` package and set `ANTHROPIC_API_KEY`.*"</span>
         <span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="render_pr_context">
 <a class="viewcode-back" href="../../module_docs/ge/context.html#ge.render_pr_context">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_pr_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render PR context as a structured markdown document.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Render PR context as a structured markdown document."""</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">append</span>
 
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# PR #</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Repo:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**URL:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"# PR #</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Repo:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**URL:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
     <span class="n">a</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;**State:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;(MERGED)&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;merged&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;(DRAFT)&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;draft&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">  &quot;</span>
+        <span class="sa">f</span><span class="s2">"**State:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'state'</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'(MERGED)'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'merged'</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'(DRAFT)'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'draft'</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2">  "</span>
     <span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Author:** @</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Author:** @</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
     <span class="n">a</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;**Branch:** `</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;head_branch&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">` → `</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;base_branch&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">`  &quot;</span>
+        <span class="sa">f</span><span class="s2">"**Branch:** `</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'head_branch'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">` → `</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'base_branch'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">`  "</span>
     <span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Created:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Labels:** </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;none&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Created:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'created_at'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Labels:** </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'labels'</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'none'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Analysis</span>
-    <span class="n">analysis</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;analysis&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;signals&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## PR Analysis&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Recommendation:** `</span><span class="si">{</span><span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;recommendation&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;signals&quot;</span><span class="p">]:</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">sig</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;linked_issues&quot;</span><span class="p">):</span>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"analysis"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"signals"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## PR Analysis"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Recommendation:** `</span><span class="si">{</span><span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'recommendation'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">`"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="n">analysis</span><span class="p">[</span><span class="s2">"signals"</span><span class="p">]:</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">sig</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"linked_issues"</span><span class="p">):</span>
             <span class="n">a</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;**Linked issues:** </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;linked_issues&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"**Linked issues:** </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">analysis</span><span class="p">[</span><span class="s1">'linked_issues'</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Body</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## PR Description&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;*empty*&quot;</span><span class="p">))</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## PR Description"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">"*empty*"</span><span class="p">))</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Reviews</span>
-    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reviews&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Reviews&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;reviews&quot;</span><span class="p">]:</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- **@</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">**: </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">):</span>
-                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  &gt; </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">][:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"reviews"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Reviews"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">"reviews"</span><span class="p">]:</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **@</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2">**: </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'state'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">):</span>
+                <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  &gt; </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'body'</span><span class="p">][:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Review comments (inline code comments)</span>
-    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;review_comments&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Inline Review Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;review_comments&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">rc</span> <span class="ow">in</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;review_comments&quot;</span><span class="p">]:</span>
-            <span class="n">line_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (line </span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">&#39;line&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">rc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**@</span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">** on `</span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">`</span><span class="si">{</span><span class="n">line_info</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt; </span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">][:</span><span class="mi">300</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"review_comments"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Inline Review Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'review_comments'</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rc</span> <span class="ow">in</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">"review_comments"</span><span class="p">]:</span>
+            <span class="n">line_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" (line </span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">'line'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">rc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"line"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**@</span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2">** on `</span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">'path'</span><span class="p">]</span><span class="si">}</span><span class="s2">`</span><span class="si">{</span><span class="n">line_info</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&gt; </span><span class="si">{</span><span class="n">rc</span><span class="p">[</span><span class="s1">'body'</span><span class="p">][:</span><span class="mi">300</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Comments</span>
-    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Discussion Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;comments&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;### Comment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> — @</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"comments"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Discussion Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'comments'</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s2">"comments"</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"### Comment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> — @</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'created_at'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">"body"</span><span class="p">])</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Diff (potentially large, include at end)</span>
-    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;diff&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Diff&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;```diff&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"diff"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Diff"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">"```diff"</span><span class="p">)</span>
         <span class="c1"># Truncate very large diffs</span>
-        <span class="n">diff</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;diff&quot;</span><span class="p">]</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">"diff"</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50_000</span><span class="p">:</span>
             <span class="n">a</span><span class="p">(</span><span class="n">diff</span><span class="p">[:</span><span class="mi">50_000</span><span class="p">])</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">... (truncated, full diff is </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span><span class="si">}</span><span class="s2"> chars)&quot;</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">... (truncated, full diff is </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span><span class="si">}</span><span class="s2"> chars)"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">a</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">"```"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Media</span>
-    <span class="n">media</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;media&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Media Files&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"media"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Media Files"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">]:</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Image descriptions (from Claude API vision analysis)</span>
-    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Image Descriptions (AI-generated)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"image_descriptions"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">"## Image Descriptions (AI-generated)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">"image_descriptions"</span><span class="p">])</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
         <span class="n">a</span><span class="p">(</span>
-            <span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
-            <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span>
+            <span class="s2">"*Image descriptions not available. To analyze images, install "</span>
+            <span class="s2">"the `anthropic` package and set `ANTHROPIC_API_KEY`.*"</span>
         <span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
 
 
@@ -553,76 +553,76 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">prepare_discussion</span><span class="p">(</span>
     <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download_media_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare full context for a GitHub Discussion.</span>
+<span class="w">    </span><span class="sd">"""Prepare full context for a GitHub Discussion.</span>
 
 <span class="sd">    Fetches the discussion and its comments via GraphQL, downloads media,</span>
 <span class="sd">    and writes a context document.</span>
 
-<span class="sd">    &gt;&gt;&gt; # ctx = prepare_discussion(&#39;owner/repo&#39;, 5)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = prepare_discussion('owner/repo', 5)</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="s2">&quot;discussion&quot;</span><span class="p">)</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">default_output_dir</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="s2">"discussion"</span><span class="p">)</span>
     <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parse_repo_spec</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
 
     <span class="n">disc</span> <span class="o">=</span> <span class="n">get_discussion</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">disc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Discussion #</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Discussion #</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="n">body</span> <span class="o">=</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">comment_nodes</span> <span class="o">=</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nodes&quot;</span><span class="p">,</span> <span class="p">[])</span>
-    <span class="n">comment_bodies</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comment_nodes</span><span class="p">]</span>
-    <span class="n">all_markdown</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">comment_bodies</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+    <span class="n">comment_nodes</span> <span class="o">=</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"comments"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nodes"</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">comment_bodies</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comment_nodes</span><span class="p">]</span>
+    <span class="n">all_markdown</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">comment_bodies</span><span class="p">)</span>
 
     <span class="n">media_result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">download_media_flag</span><span class="p">:</span>
-        <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
+        <span class="n">media_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="s2">"media"</span><span class="p">)</span>
         <span class="n">media_result</span> <span class="o">=</span> <span class="n">process_all_media</span><span class="p">(</span><span class="n">all_markdown</span><span class="p">,</span> <span class="n">media_dir</span><span class="p">)</span>
 
     <span class="c1"># Describe images via Claude API (non-fatal if unavailable)</span>
     <span class="n">image_descriptions</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">describe_media</span> <span class="ow">and</span> <span class="n">media_result</span> <span class="ow">and</span> <span class="n">media_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
         <span class="n">image_descriptions</span> <span class="o">=</span> <span class="n">_describe_visual_files</span><span class="p">(</span>
-            <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">&quot;discussion&quot;</span>
+            <span class="n">media_result</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">],</span> <span class="n">kind_label</span><span class="o">=</span><span class="s2">"discussion"</span>
         <span class="p">)</span>
 
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;discussion&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;repo&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;createdAt&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;rewritten_markdown&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="n">body</span><span class="p">,</span>
-        <span class="s2">&quot;original_body&quot;</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
-        <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"discussion"</span><span class="p">,</span>
+        <span class="s2">"repo"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"number"</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+        <span class="s2">"url"</span><span class="p">:</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="p">(</span><span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"author"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">disc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"createdAt"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"body"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"rewritten_markdown"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="n">body</span><span class="p">,</span>
+        <span class="s2">"original_body"</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
+        <span class="s2">"comments"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;login&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;createdAt&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">"author"</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"author"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"login"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"createdAt"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="s2">"body"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comment_nodes</span>
         <span class="p">],</span>
-        <span class="s2">&quot;media&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;manifest&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;video_frames&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;video_frames&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">{},</span>
-            <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]</span>
+        <span class="s2">"media"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"manifest"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"manifest"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">"images"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"images"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">"video_frames"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"video_frames"</span><span class="p">]</span> <span class="k">if</span> <span class="n">media_result</span> <span class="k">else</span> <span class="p">{},</span>
+            <span class="s2">"all_visual_files"</span><span class="p">:</span> <span class="n">media_result</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">media_result</span>
             <span class="k">else</span> <span class="p">[],</span>
-            <span class="s2">&quot;image_descriptions&quot;</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
+            <span class="s2">"image_descriptions"</span><span class="p">:</span> <span class="n">image_descriptions</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;prepared_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s2">"prepared_at"</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
     <span class="p">}</span>
 
-    <span class="n">context</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">context</span><span class="p">[</span><span class="s2">"output_dir"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
-    <span class="n">context_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;discussion_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.json&quot;</span>
+    <span class="n">context_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"discussion_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.json"</span>
     <span class="n">context_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="n">rendered</span> <span class="o">=</span> <span class="n">render_discussion_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
-    <span class="n">md_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;discussion_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.md&quot;</span>
+    <span class="n">md_file</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"discussion_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">_context.md"</span>
     <span class="n">md_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">context</span></div>
@@ -632,54 +632,54 @@
 <div class="viewcode-block" id="render_discussion_context">
 <a class="viewcode-back" href="../../module_docs/ge/context.html#ge.render_discussion_context">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_discussion_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render discussion context as a structured markdown document.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Render discussion context as a structured markdown document."""</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">append</span>
 
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# Discussion #</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Repo:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**URL:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Author:** @</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Created:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"# Discussion #</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Repo:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**URL:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Author:** @</span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2">  "</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Created:** </span><span class="si">{</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'created_at'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
-    <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Discussion Body&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">a</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;*empty*&quot;</span><span class="p">))</span>
-    <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="s2">"## Discussion Body"</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="s2">"*empty*"</span><span class="p">))</span>
+    <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;## Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">&#39;comments&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;### Comment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> — @</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">a</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-            <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"comments"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"## Comments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s1">'comments'</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctx</span><span class="p">[</span><span class="s2">"comments"</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"### Comment </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> — @</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'author'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'created_at'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">"body"</span><span class="p">])</span>
+            <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
-    <span class="n">media</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;media&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Media Files&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">]:</span>
-            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">media</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"media"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">"## Media Files"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">media</span><span class="p">[</span><span class="s2">"all_visual_files"</span><span class="p">]:</span>
+            <span class="n">a</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">`"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># Image descriptions (from Claude API vision analysis)</span>
-    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">):</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;## Image Descriptions (AI-generated)&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">&quot;image_descriptions&quot;</span><span class="p">])</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all_visual_files&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"image_descriptions"</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">"## Image Descriptions (AI-generated)"</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">media</span><span class="p">[</span><span class="s2">"image_descriptions"</span><span class="p">])</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">media</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all_visual_files"</span><span class="p">):</span>
         <span class="n">a</span><span class="p">(</span>
-            <span class="s2">&quot;*Image descriptions not available. To analyze images, install &quot;</span>
-            <span class="s2">&quot;the `anthropic` package and set `ANTHROPIC_API_KEY`.*&quot;</span>
+            <span class="s2">"*Image descriptions not available. To analyze images, install "</span>
+            <span class="s2">"the `anthropic` package and set `ANTHROPIC_API_KEY`.*"</span>
         <span class="p">)</span>
-        <span class="n">a</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
 </pre></div>
 

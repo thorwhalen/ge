@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.run &mdash; ge 0.1.14 documentation</title>
+  <title>ge.run &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -83,7 +83,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ge.run</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Autonomous-execution runner — Layer 3.</span>
+<span></span><span class="sd">"""Autonomous-execution runner — Layer 3.</span>
 
 <span class="sd">Launches ``claude`` in headless mode in a loop, one invocation per work</span>
 <span class="sd">unit. State persists between iterations *only* through GitHub-backed</span>
@@ -100,10 +100,10 @@
 <span class="sd">flag on ``claude``.</span>
 
 <span class="sd">Token / context exhaustion is *not* a failure: it ends the current</span>
-<span class="sd">session; the loop&#39;s next iteration just rehydrates and continues. A</span>
+<span class="sd">session; the loop's next iteration just rehydrates and continues. A</span>
 <span class="sd">session terminated by the permission-denial cap *is* a failure: the</span>
 <span class="sd">runner retries once and then escalates.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -132,8 +132,8 @@
 
 
 <span class="n">PERMISSION_MODES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;auto&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;--permission-mode&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;bypass&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;--dangerously-skip-permissions&quot;</span><span class="p">,),</span>
+    <span class="s2">"auto"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"--permission-mode"</span><span class="p">,</span> <span class="s2">"auto"</span><span class="p">),</span>
+    <span class="s2">"bypass"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"--dangerously-skip-permissions"</span><span class="p">,),</span>
 <span class="p">}</span>
 
 <span class="n">DEFAULT_MAX_SESSIONS</span> <span class="o">=</span> <span class="mi">50</span>
@@ -144,7 +144,7 @@
 <a class="viewcode-back" href="../../module_docs/ge/run.html#ge.run.SessionResult">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SessionResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Outcome of a single ``claude`` invocation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Outcome of a single ``claude`` invocation."""</span>
 
     <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">returncode</span><span class="p">:</span> <span class="nb">int</span>
@@ -154,12 +154,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">killed_by_denial_cap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Heuristic: did Claude Code terminate due to the denial cap?&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Heuristic: did Claude Code terminate due to the denial cap?"""</span>
         <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;consecutive denials&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;permission denied limit&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;denial cap&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tool_use was denied&quot;</span><span class="p">,</span>
+            <span class="s2">"consecutive denials"</span><span class="p">,</span>
+            <span class="s2">"permission denied limit"</span><span class="p">,</span>
+            <span class="s2">"denial cap"</span><span class="p">,</span>
+            <span class="s2">"tool_use was denied"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">m</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">)</span></div>
@@ -172,12 +172,12 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_claude_binary</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the path to the ``claude`` CLI, or raise EnvironmentError.&quot;&quot;&quot;</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;claude&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Return the path to the ``claude`` CLI, or raise EnvironmentError."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"claude"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
-            <span class="s2">&quot;claude CLI not found on PATH. Install Claude Code:</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;  https://docs.claude.com/claude-code&quot;</span>
+            <span class="s2">"claude CLI not found on PATH. Install Claude Code:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"  https://docs.claude.com/claude-code"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">path</span>
 
@@ -185,7 +185,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_permission_flags</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PERMISSION_MODES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unknown permission mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">. Use one of: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">PERMISSION_MODES</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unknown permission mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">. Use one of: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">PERMISSION_MODES</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">PERMISSION_MODES</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
 
@@ -193,15 +193,15 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_spawn_claude</span><span class="p">(</span>
     <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">extra_args</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_SESSION_TIMEOUT_SEC</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SessionResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a single headless ``claude -p`` invocation and capture its output.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Run a single headless ``claude -p`` invocation and capture its output."""</span>
     <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">_claude_binary</span><span class="p">(),</span>
-        <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
+        <span class="s2">"-p"</span><span class="p">,</span>
         <span class="n">prompt</span><span class="p">,</span>
         <span class="o">*</span><span class="n">_permission_flags</span><span class="p">(</span><span class="n">mode</span><span class="p">),</span>
         <span class="o">*</span><span class="n">extra_args</span><span class="p">,</span>
@@ -226,9 +226,9 @@
         <span class="k">return</span> <span class="n">SessionResult</span><span class="p">(</span>
             <span class="n">iteration</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">returncode</span><span class="o">=</span><span class="mi">124</span><span class="p">,</span>
-            <span class="n">stdout</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">stderr</span><span class="o">=</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[runner] session exceeded </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s timeout&quot;</span><span class="p">,</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">[runner] session exceeded </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s timeout"</span><span class="p">,</span>
             <span class="n">duration_sec</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -241,18 +241,18 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">decisions</span> <span class="o">=</span> <span class="n">decisions_target</span> <span class="k">if</span> <span class="n">decisions_target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">roadmap_issue</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="s2">&quot;You are running unattended via the ge autonomous runner. &quot;</span>
-        <span class="s2">&quot;Load and follow the `ge-autonomous-execution` and `ge-roadmap-execution` &quot;</span>
-        <span class="s2">&quot;skills. Do not stop to ask questions; decide-and-log instead.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;REPO = </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;ROADMAP_ISSUE = </span><span class="si">{</span><span class="n">roadmap_issue</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;DECISIONS_TARGET = </span><span class="si">{</span><span class="n">decisions</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Perform exactly one roadmap iteration as described in the &quot;</span>
-        <span class="s2">&quot;`ge-roadmap-execution` skill: pick the next todo task, mark it doing, &quot;</span>
-        <span class="s2">&quot;complete it (with verification), mark it done, and exit. If there &quot;</span>
-        <span class="s2">&quot;are no todo tasks left, exit immediately. Token/context exhaustion &quot;</span>
-        <span class="s2">&quot;is not a failure — the outer runner relaunches with a fresh &quot;</span>
-        <span class="s2">&quot;context for the next iteration.&quot;</span>
+        <span class="s2">"You are running unattended via the ge autonomous runner. "</span>
+        <span class="s2">"Load and follow the `ge-autonomous-execution` and `ge-roadmap-execution` "</span>
+        <span class="s2">"skills. Do not stop to ask questions; decide-and-log instead.</span><span class="se">\n\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"REPO = </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"ROADMAP_ISSUE = </span><span class="si">{</span><span class="n">roadmap_issue</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"DECISIONS_TARGET = </span><span class="si">{</span><span class="n">decisions</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">"</span>
+        <span class="s2">"Perform exactly one roadmap iteration as described in the "</span>
+        <span class="s2">"`ge-roadmap-execution` skill: pick the next todo task, mark it doing, "</span>
+        <span class="s2">"complete it (with verification), mark it done, and exit. If there "</span>
+        <span class="s2">"are no todo tasks left, exit immediately. Token/context exhaustion "</span>
+        <span class="s2">"is not a failure — the outer runner relaunches with a fresh "</span>
+        <span class="s2">"context for the next iteration."</span>
     <span class="p">)</span>
 
 
@@ -264,19 +264,19 @@
     <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="s2">&quot;You are running unattended via the ge autonomous runner. &quot;</span>
-        <span class="s2">&quot;Load and follow the `ge-autonomous-execution` and `ge-cross-repo-triage` &quot;</span>
-        <span class="s2">&quot;skills. Do not stop to ask questions; decide-and-log instead.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;REPOS = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">repos</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;TRACKING_REPO = </span><span class="si">{</span><span class="n">tracking_repo</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;TRACKING_ISSUE = </span><span class="si">{</span><span class="n">tracking_issue</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;PHASE = </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Phase A: classify and order open issues across REPOS into the &quot;</span>
-        <span class="s2">&quot;TriageBacklog at TRACKING_REPO#TRACKING_ISSUE, then exit.</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Phase B: take the next unactioned backlog entry in order. For a &quot;</span>
-        <span class="s2">&quot;fixable entry, write a failing test, confirm it fails, fix the &quot;</span>
-        <span class="s2">&quot;bug, confirm it passes, open a draft PR (referencing the issue), &quot;</span>
-        <span class="s2">&quot;and exit. Stop at PR — do not merge.&quot;</span>
+        <span class="s2">"You are running unattended via the ge autonomous runner. "</span>
+        <span class="s2">"Load and follow the `ge-autonomous-execution` and `ge-cross-repo-triage` "</span>
+        <span class="s2">"skills. Do not stop to ask questions; decide-and-log instead.</span><span class="se">\n\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"REPOS = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">repos</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"TRACKING_REPO = </span><span class="si">{</span><span class="n">tracking_repo</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"TRACKING_ISSUE = </span><span class="si">{</span><span class="n">tracking_issue</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"PHASE = </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">"</span>
+        <span class="s2">"Phase A: classify and order open issues across REPOS into the "</span>
+        <span class="s2">"TriageBacklog at TRACKING_REPO#TRACKING_ISSUE, then exit.</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"Phase B: take the next unactioned backlog entry in order. For a "</span>
+        <span class="s2">"fixable entry, write a failing test, confirm it fails, fix the "</span>
+        <span class="s2">"bug, confirm it passes, open a draft PR (referencing the issue), "</span>
+        <span class="s2">"and exit. Stop at PR — do not merge."</span>
     <span class="p">)</span>
 
 
@@ -300,17 +300,17 @@
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">on_session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic outer loop: spawn → check → repeat until done or escalate.</span>
+<span class="w">    </span><span class="sd">"""Generic outer loop: spawn → check → repeat until done or escalate.</span>
 
 <span class="sd">    ``is_done`` returns True when there is no more work. ``build_prompt``</span>
 <span class="sd">    returns the headless prompt for one iteration. ``on_session`` is an</span>
 <span class="sd">    optional callback for telemetry.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">retries_used</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">iteration</span> <span class="o">&lt;</span> <span class="n">max_sessions</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">is_done</span><span class="p">():</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;completed&quot;</span><span class="p">,</span> <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"completed"</span><span class="p">,</span> <span class="s2">"iterations"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">}</span>
         <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">prompt</span> <span class="o">=</span> <span class="n">build_prompt</span><span class="p">()</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">_spawn_claude</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">cwd</span><span class="p">)</span>
@@ -327,15 +327,15 @@
                 <span class="n">retries_used</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">decisions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="s2">&quot;Session killed by permission-denial cap; retrying once&quot;</span><span class="p">,</span>
+                        <span class="s2">"Session killed by permission-denial cap; retrying once"</span><span class="p">,</span>
                         <span class="n">rationale</span><span class="o">=</span><span class="p">(</span>
-                            <span class="s2">&quot;The headless agent hit Claude Code&#39;s denial &quot;</span>
-                            <span class="s2">&quot;cap on iteration &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">. Retrying with a fresh context.&quot;</span>
+                            <span class="s2">"The headless agent hit Claude Code's denial "</span>
+                            <span class="s2">"cap on iteration "</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">. Retrying with a fresh context."</span>
                         <span class="p">),</span>
                         <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
-                            <span class="s2">&quot;iteration&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
-                            <span class="s2">&quot;returncode&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
+                            <span class="s2">"iteration"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
+                            <span class="s2">"returncode"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
                         <span class="p">},</span>
                     <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -343,41 +343,41 @@
                 <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">decisions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="s2">&quot;Stopping: denial cap hit twice in a row&quot;</span><span class="p">,</span>
-                    <span class="n">rationale</span><span class="o">=</span><span class="s2">&quot;Two consecutive headless sessions terminated by &quot;</span>
-                    <span class="s2">&quot;the permission-denial cap. Escalating to user.&quot;</span><span class="p">,</span>
-                    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;iteration&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">},</span>
+                    <span class="s2">"Stopping: denial cap hit twice in a row"</span><span class="p">,</span>
+                    <span class="n">rationale</span><span class="o">=</span><span class="s2">"Two consecutive headless sessions terminated by "</span>
+                    <span class="s2">"the permission-denial cap. Escalating to user."</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">"iteration"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">},</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="k">return</span> <span class="p">{</span>
-                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;escalated_denial_cap&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
-                <span class="s2">&quot;last_stderr&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="o">-</span><span class="mi">2000</span><span class="p">:],</span>
+                <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"escalated_denial_cap"</span><span class="p">,</span>
+                <span class="s2">"iterations"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">"last_stderr"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="o">-</span><span class="mi">2000</span><span class="p">:],</span>
             <span class="p">}</span>
 
         <span class="c1"># Non-zero exit for some other reason — escalate.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">decisions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Stopping: claude exited with code </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">rationale</span><span class="o">=</span><span class="s2">&quot;Non-clean exit from headless claude session &quot;</span>
-                <span class="s2">&quot;outside the denial-cap pattern. Escalating.&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"Stopping: claude exited with code </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">rationale</span><span class="o">=</span><span class="s2">"Non-clean exit from headless claude session "</span>
+                <span class="s2">"outside the denial-cap pattern. Escalating."</span><span class="p">,</span>
                 <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
-                    <span class="s2">&quot;iteration&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
-                    <span class="s2">&quot;returncode&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
-                    <span class="s2">&quot;stderr_tail&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="o">-</span><span class="mi">500</span><span class="p">:],</span>
+                    <span class="s2">"iteration"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
+                    <span class="s2">"returncode"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
+                    <span class="s2">"stderr_tail"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="o">-</span><span class="mi">500</span><span class="p">:],</span>
                 <span class="p">},</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;escalated_error&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
-            <span class="s2">&quot;returncode&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
-            <span class="s2">&quot;last_stderr&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="o">-</span><span class="mi">2000</span><span class="p">:],</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"escalated_error"</span><span class="p">,</span>
+            <span class="s2">"iterations"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span>
+            <span class="s2">"returncode"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span>
+            <span class="s2">"last_stderr"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="o">-</span><span class="mi">2000</span><span class="p">:],</span>
         <span class="p">}</span>
 
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;max_sessions_reached&quot;</span><span class="p">,</span> <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"max_sessions_reached"</span><span class="p">,</span> <span class="s2">"iterations"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="run_roadmap">
@@ -386,33 +386,33 @@
     <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">roadmap_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
     <span class="n">decisions_target</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_MAX_SESSIONS</span><span class="p">,</span>
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">on_session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drive a roadmap issue to completion.</span>
+<span class="w">    </span><span class="sd">"""Drive a roadmap issue to completion.</span>
 
 <span class="sd">    Each iteration is one headless ``claude`` invocation that performs</span>
 <span class="sd">    exactly one roadmap step. The loop terminates when:</span>
 
-<span class="sd">    - no todo tasks remain (``status=&#39;completed&#39;``),</span>
-<span class="sd">    - two consecutive sessions hit the denial cap (``status=&#39;escalated_denial_cap&#39;``),</span>
-<span class="sd">    - a session exits non-zero for another reason (``status=&#39;escalated_error&#39;``),</span>
+<span class="sd">    - no todo tasks remain (``status='completed'``),</span>
+<span class="sd">    - two consecutive sessions hit the denial cap (``status='escalated_denial_cap'``),</span>
+<span class="sd">    - a session exits non-zero for another reason (``status='escalated_error'``),</span>
 <span class="sd">    - or ``max_sessions`` is reached.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        repo: ``&quot;owner/repo&quot;`` containing the roadmap issue.</span>
+<span class="sd">        repo: ``"owner/repo"`` containing the roadmap issue.</span>
 <span class="sd">        roadmap_issue: the roadmap issue number.</span>
-<span class="sd">        mode: ``&quot;auto&quot;`` (default) or ``&quot;bypass&quot;``.</span>
+<span class="sd">        mode: ``"auto"`` (default) or ``"bypass"``.</span>
 <span class="sd">        decisions_target: issue/PR number to log decisions on. Defaults</span>
 <span class="sd">            to ``roadmap_issue``.</span>
 <span class="sd">        max_sessions: safety ceiling on total iterations.</span>
 <span class="sd">        cwd: working directory for the spawned ``claude`` (typically the</span>
-<span class="sd">            target repo&#39;s local checkout).</span>
+<span class="sd">            target repo's local checkout).</span>
 <span class="sd">        on_session: optional callable invoked with each :class:`SessionResult`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">check_requirements</span><span class="p">()</span>
     <span class="n">roadmap</span> <span class="o">=</span> <span class="n">RoadmapStore</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">roadmap_issue</span><span class="p">)</span>
     <span class="n">decisions</span> <span class="o">=</span> <span class="n">DecisionLog</span><span class="p">(</span>
@@ -443,41 +443,41 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">tracking_repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">tracking_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;analyze&quot;</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"analyze"</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
     <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_MAX_SESSIONS</span><span class="p">,</span>
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">on_session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drive a cross-repo triage backlog.</span>
+<span class="w">    </span><span class="sd">"""Drive a cross-repo triage backlog.</span>
 
-<span class="sd">    ``phase=&#39;analyze&#39;`` runs Phase A (classify + order); a single</span>
-<span class="sd">    iteration is normally enough. ``phase=&#39;execute&#39;`` runs Phase B</span>
+<span class="sd">    ``phase='analyze'`` runs Phase A (classify + order); a single</span>
+<span class="sd">    iteration is normally enough. ``phase='execute'`` runs Phase B</span>
 <span class="sd">    (one fix-and-PR per iteration); the loop terminates when no</span>
 <span class="sd">    unactioned ``fixable`` entries remain.</span>
 
 <span class="sd">    The triage backlog lives in ``tracking_repo#tracking_issue`` (see</span>
 <span class="sd">    :class:`ge.memory.TriageBacklog`).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">phase</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;analyze&quot;</span><span class="p">,</span> <span class="s2">&quot;execute&quot;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;phase must be &#39;analyze&#39; or &#39;execute&#39;, got </span><span class="si">{</span><span class="n">phase</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"analyze"</span><span class="p">,</span> <span class="s2">"execute"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"phase must be 'analyze' or 'execute', got </span><span class="si">{</span><span class="n">phase</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">check_requirements</span><span class="p">()</span>
     <span class="n">backlog</span> <span class="o">=</span> <span class="n">TriageBacklog</span><span class="p">(</span><span class="n">tracking_repo</span><span class="p">,</span> <span class="n">tracking_issue</span><span class="p">)</span>
     <span class="n">decisions</span> <span class="o">=</span> <span class="n">DecisionLog</span><span class="p">(</span><span class="n">tracking_repo</span><span class="p">,</span> <span class="n">tracking_issue</span><span class="p">)</span>
     <span class="n">cwd_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span> <span class="k">if</span> <span class="n">cwd</span> <span class="k">else</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;analyze&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">"analyze"</span><span class="p">:</span>
         <span class="c1"># Phase A: typically one iteration. We still gate via the same</span>
         <span class="c1"># outer loop so denial-cap retry logic applies.</span>
-        <span class="n">ran</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;flag&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="n">ran</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"flag"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">is_done</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">ran</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ran</span><span class="p">[</span><span class="s2">"flag"</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">():</span>
-            <span class="n">ran</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">ran</span><span class="p">[</span><span class="s2">"flag"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">_build_triage_prompt</span><span class="p">(</span>
                 <span class="n">repos</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">repos</span><span class="p">),</span>
                 <span class="n">tracking_repo</span><span class="o">=</span><span class="n">tracking_repo</span><span class="p">,</span>
@@ -504,8 +504,8 @@
             <span class="n">entry</span> <span class="o">=</span> <span class="n">backlog</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">verdict</span> <span class="o">!=</span> <span class="n">TriageVerdict</span><span class="o">.</span><span class="n">fixable</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="c1"># Heuristic: &#39;pr_url&#39; metadata absent = unactioned.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pr_url&quot;</span><span class="p">):</span>
+            <span class="c1"># Heuristic: 'pr_url' metadata absent = unactioned.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pr_url"</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">entry</span>
         <span class="k">return</span> <span class="kc">None</span>
 
@@ -536,17 +536,17 @@
     <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">roadmap_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
     <span class="n">decisions_target</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_MAX_SESSIONS</span><span class="p">,</span>
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the roadmap loop (CLI wrapper). Prints a per-iteration summary.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Run the roadmap loop (CLI wrapper). Prints a per-iteration summary."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_print_session</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="n">SessionResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;[ge] iter=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> rc=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;duration=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">duration_sec</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"[ge] iter=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> rc=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"duration=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">duration_sec</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 
@@ -569,18 +569,18 @@
     <span class="n">tracking_issue</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">repos</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;analyze&quot;</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"analyze"</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
     <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_MAX_SESSIONS</span><span class="p">,</span>
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the triage loop (CLI wrapper). ``repos`` is comma-separated.&quot;&quot;&quot;</span>
-    <span class="n">repo_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">repos</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+<span class="w">    </span><span class="sd">"""Run the triage loop (CLI wrapper). ``repos`` is comma-separated."""</span>
+    <span class="n">repo_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">repos</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_print_session</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="n">SessionResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;[ge] iter=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> rc=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;duration=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">duration_sec</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"[ge] iter=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> rc=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"duration=</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">duration_sec</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 
@@ -598,9 +598,9 @@
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;SessionResult&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;run_roadmap&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;run_triage&quot;</span><span class="p">,</span>
+    <span class="s2">"SessionResult"</span><span class="p">,</span>
+    <span class="s2">"run_roadmap"</span><span class="p">,</span>
+    <span class="s2">"run_triage"</span><span class="p">,</span>
 <span class="p">]</span>
 </pre></div>
 

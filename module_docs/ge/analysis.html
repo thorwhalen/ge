@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.analysis &mdash; ge 0.1.14 documentation</title>
+  <title>ge.analysis &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -112,7 +112,7 @@ or needs further investigation before work begins.</p>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_issue(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_issue('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -122,7 +122,7 @@ or needs further investigation before work begins.</p>
 <span class="sig-prename descclassname"><span class="pre">ge.analysis.</span></span><span class="sig-name descname"><span class="pre">analyze_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/analysis.html#analyze_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.analysis.analyze_pr" title="Link to this definition"></a></dt>
 <dd><p>Analyze a PR for review context and merge readiness.</p>
 <p>Returns a dict with state, review status, CI signals, conflicts, etc.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_pr(&#39;owner/repo&#39;, 7)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_pr('owner/repo', 7)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -132,7 +132,7 @@ or needs further investigation before work begins.</p>
 <span class="sig-prename descclassname"><span class="pre">ge.analysis.</span></span><span class="sig-name descname"><span class="pre">check_referenced_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_paths</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ge/analysis.html#check_referenced_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.analysis.check_referenced_files" title="Link to this definition"></a></dt>
 <dd><p>Check if files mentioned in an issue still exist on the default branch.</p>
 <p>Returns dict mapping path -&gt; {‘exists’: bool, ‘snippet’: str | None}.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># status = check_referenced_files(&#39;owner/repo&#39;, [&#39;src/main.py&#39;])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># status = check_referenced_files('owner/repo', ['src/main.py'])</span>
 </pre></div>
 </div>
 </dd></dl>

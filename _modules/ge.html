@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge &mdash; ge 0.1.14 documentation</title>
+  <title>ge &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -82,7 +82,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ge</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;ge: GitHub Engineering tools for AI agents.</span>
+<span></span><span class="sd">"""ge: GitHub Engineering tools for AI agents.</span>
 
 <span class="sd">Reduces boilerplate when working on GitHub issues and PRs with AI coding agents.</span>
 <span class="sd">Fetches context, downloads media, checks freshness, and assembles everything</span>
@@ -93,14 +93,14 @@
 <span class="sd">    import ge</span>
 
 <span class="sd">    # Prepare full context for an issue</span>
-<span class="sd">    ctx = ge.prepare_issue(&#39;owner/repo&#39;, 42)</span>
+<span class="sd">    ctx = ge.prepare_issue('owner/repo', 42)</span>
 
 <span class="sd">    # Prepare full context for a PR</span>
-<span class="sd">    ctx = ge.prepare_pr(&#39;owner/repo&#39;, 7)</span>
+<span class="sd">    ctx = ge.prepare_pr('owner/repo', 7)</span>
 
 <span class="sd">    # Or from a full URL</span>
-<span class="sd">    ctx = ge.prepare(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ctx = ge.prepare('https://github.com/owner/repo/issues/42')</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">_Path</span>
 
@@ -141,32 +141,32 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span>
     <span class="n">url_or_spec</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">describe_media</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare context from a GitHub URL or repo+number.</span>
+<span class="w">    </span><span class="sd">"""Prepare context from a GitHub URL or repo+number.</span>
 
-<span class="sd">    Automatically detects whether it&#39;s an issue, PR, or discussion.</span>
+<span class="sd">    Automatically detects whether it's an issue, PR, or discussion.</span>
 
 <span class="sd">    When ``describe_media`` is True (default) and the ``anthropic`` package</span>
 <span class="sd">    is available, downloaded images are described via the Claude API so</span>
 <span class="sd">    the agent gets visual context without manual image pasting.</span>
 
-<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare(&#39;owner/repo&#39;, 42)</span>
-<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare(&#39;https://github.com/owner/repo/discussions/5&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare('https://github.com/owner/repo/issues/42')</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare('owner/repo', 42)</span>
+<span class="sd">    &gt;&gt;&gt; # ctx = ge.prepare('https://github.com/owner/repo/discussions/5')</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Parse from URL</span>
         <span class="n">owner</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">kind</span> <span class="o">=</span> <span class="n">parse_github_url</span><span class="p">(</span><span class="n">url_or_spec</span><span class="p">)</span>
-        <span class="n">repo_spec</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">repo_spec</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">repo_spec</span> <span class="o">=</span> <span class="n">url_or_spec</span>
-        <span class="c1"># Probe whether it&#39;s a PR or issue</span>
+        <span class="c1"># Probe whether it's a PR or issue</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">get_pr</span><span class="p">(</span><span class="n">repo_spec</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;pr&quot;</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="s2">"pr"</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;issue&quot;</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="s2">"issue"</span>
 
-    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;pr&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"pr"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">prepare_pr</span><span class="p">(</span>
             <span class="n">repo_spec</span><span class="p">,</span>
             <span class="n">number</span><span class="p">,</span>
@@ -174,7 +174,7 @@
             <span class="n">describe_media</span><span class="o">=</span><span class="n">describe_media</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;discussion&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"discussion"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">prepare_discussion</span><span class="p">(</span>
             <span class="n">repo_spec</span><span class="p">,</span>
             <span class="n">number</span><span class="p">,</span>
@@ -193,13 +193,13 @@
 
 
 
-<span class="n">_SKILLS_DIR</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
+<span class="n">_SKILLS_DIR</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"skills"</span>
 
 
 <div class="viewcode-block" id="install_skills">
 <a class="viewcode-back" href="../module_docs/ge.html#ge.install_skills">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Symlink ge skills into ~/.claude/skills/ for global discovery.</span>
+<span class="w">    </span><span class="sd">"""Symlink ge skills into ~/.claude/skills/ for global discovery.</span>
 
 <span class="sd">    Creates symlinks from ``target_dir/&lt;skill&gt;`` to the skill folders bundled</span>
 <span class="sd">    with the ge package.  Existing correct symlinks are left alone; a warning</span>
@@ -207,9 +207,9 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        target_dir: Destination directory.  Defaults to ``~/.claude/skills/``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">target_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"skills"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="n">target_dir</span><span class="p">)</span>
 
@@ -221,46 +221,46 @@
         <span class="n">link</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (already installed)&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ✓ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (already installed)"</span><span class="p">)</span>
                 <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;  ⚠ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: symlink exists but points to &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">, expected </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">. Skipping.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"  ⚠ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: symlink exists but points to "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">, expected </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">. Skipping."</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
         <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;  ⚠ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s2"> already exists and is not a &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;symlink. Skipping.&quot;</span>
+                <span class="sa">f</span><span class="s2">"  ⚠ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s2"> already exists and is not a "</span>
+                <span class="sa">f</span><span class="s2">"symlink. Skipping."</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="n">link</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ✓ </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Skills installed to </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Skills installed to </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="uninstall_skills">
 <a class="viewcode-back" href="../module_docs/ge.html#ge.uninstall_skills">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">uninstall_skills</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove ge skill symlinks from ~/.claude/skills/.</span>
+<span class="w">    </span><span class="sd">"""Remove ge skill symlinks from ~/.claude/skills/.</span>
 
-<span class="sd">    Only removes symlinks that point back into the ge package&#39;s skill</span>
+<span class="sd">    Only removes symlinks that point back into the ge package's skill</span>
 <span class="sd">    directory.  Non-symlinks and symlinks owned by other packages are</span>
 <span class="sd">    left untouched.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        target_dir: Directory to remove from.  Defaults to ``~/.claude/skills/``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">target_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"skills"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">target_dir</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">(</span><span class="n">target_dir</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">target_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing to uninstall (target directory does not exist).&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Nothing to uninstall (target directory does not exist)."</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="n">removed</span> <span class="o">=</span> <span class="mi">0</span>
@@ -270,55 +270,55 @@
         <span class="n">link</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">and</span> <span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">():</span>
             <span class="n">link</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ Removed </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ✓ Removed </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">removed</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;  · Skipped </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (symlink points to &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">, not owned by ge)&quot;</span>
+                <span class="sa">f</span><span class="s2">"  · Skipped </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (symlink points to "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">, not owned by ge)"</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  · Skipped </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (not a symlink, not owned by ge)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  · Skipped </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (not a symlink, not owned by ge)"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">removed</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">removed</span><span class="si">}</span><span class="s2"> skill(s) uninstalled from </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">removed</span><span class="si">}</span><span class="s2"> skill(s) uninstalled from </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No ge skills found to uninstall.&quot;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">No ge skills found to uninstall."</span><span class="p">)</span></div>
 
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;prepare&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;prepare_issue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;prepare_pr&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;prepare_discussion&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;analyze_issue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;analyze_pr&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_issue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_pr&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_comments&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_pr_diff&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_discussion&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;find_related_prs&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;find_related_commits&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;process_all_media&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;extract_video_frames&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;describe_images&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;copy_images_to_clipboard&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;resolve_target&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;install_skills&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;uninstall_skills&quot;</span><span class="p">,</span>
+    <span class="s2">"prepare"</span><span class="p">,</span>
+    <span class="s2">"prepare_issue"</span><span class="p">,</span>
+    <span class="s2">"prepare_pr"</span><span class="p">,</span>
+    <span class="s2">"prepare_discussion"</span><span class="p">,</span>
+    <span class="s2">"analyze_issue"</span><span class="p">,</span>
+    <span class="s2">"analyze_pr"</span><span class="p">,</span>
+    <span class="s2">"get_issue"</span><span class="p">,</span>
+    <span class="s2">"get_pr"</span><span class="p">,</span>
+    <span class="s2">"get_comments"</span><span class="p">,</span>
+    <span class="s2">"get_pr_diff"</span><span class="p">,</span>
+    <span class="s2">"get_discussion"</span><span class="p">,</span>
+    <span class="s2">"find_related_prs"</span><span class="p">,</span>
+    <span class="s2">"find_related_commits"</span><span class="p">,</span>
+    <span class="s2">"process_all_media"</span><span class="p">,</span>
+    <span class="s2">"extract_video_frames"</span><span class="p">,</span>
+    <span class="s2">"describe_images"</span><span class="p">,</span>
+    <span class="s2">"copy_images_to_clipboard"</span><span class="p">,</span>
+    <span class="s2">"resolve_target"</span><span class="p">,</span>
+    <span class="s2">"install_skills"</span><span class="p">,</span>
+    <span class="s2">"uninstall_skills"</span><span class="p">,</span>
     <span class="c1"># Memory layer (autonomous execution)</span>
-    <span class="s2">&quot;RoadmapStore&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;DecisionLog&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TriageBacklog&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TaskState&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TaskRecord&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TriageVerdict&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TriageEntry&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Decision&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;github_memory&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;check_requirements&quot;</span><span class="p">,</span>
+    <span class="s2">"RoadmapStore"</span><span class="p">,</span>
+    <span class="s2">"DecisionLog"</span><span class="p">,</span>
+    <span class="s2">"TriageBacklog"</span><span class="p">,</span>
+    <span class="s2">"TaskState"</span><span class="p">,</span>
+    <span class="s2">"TaskRecord"</span><span class="p">,</span>
+    <span class="s2">"TriageVerdict"</span><span class="p">,</span>
+    <span class="s2">"TriageEntry"</span><span class="p">,</span>
+    <span class="s2">"Decision"</span><span class="p">,</span>
+    <span class="s2">"github_memory"</span><span class="p">,</span>
+    <span class="s2">"check_requirements"</span><span class="p">,</span>
 <span class="p">]</span>
 </pre></div>
 

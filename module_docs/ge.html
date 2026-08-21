@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge &mdash; ge 0.1.14 documentation</title>
+  <title>ge &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -134,13 +134,13 @@ into a structured document the agent can consume.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ge</span>
 
 <span class="c1"># Prepare full context for an issue</span>
-<span class="n">ctx</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">prepare_issue</span><span class="p">(</span><span class="s1">&#39;owner/repo&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">prepare_issue</span><span class="p">(</span><span class="s1">'owner/repo'</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
 
 <span class="c1"># Prepare full context for a PR</span>
-<span class="n">ctx</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">prepare_pr</span><span class="p">(</span><span class="s1">&#39;owner/repo&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">prepare_pr</span><span class="p">(</span><span class="s1">'owner/repo'</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
 
 <span class="c1"># Or from a full URL</span>
-<span class="n">ctx</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="s1">&#39;https://github.com/owner/repo/issues/42&#39;</span><span class="p">)</span>
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="s1">'https://github.com/owner/repo/issues/42'</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="py class">
@@ -265,7 +265,7 @@ I/O methods; the public interface stays the same.</p>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_issue(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_issue('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -275,7 +275,7 @@ I/O methods; the public interface stays the same.</p>
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">analyze_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/analysis.html#analyze_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.analyze_pr" title="Link to this definition"></a></dt>
 <dd><p>Analyze a PR for review context and merge readiness.</p>
 <p>Returns a dict with state, review status, CI signals, conflicts, etc.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_pr(&#39;owner/repo&#39;, 7)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># analysis = analyze_pr('owner/repo', 7)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -315,7 +315,7 @@ paste it into Claude Code with Cmd+V.</p>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># path = copy_images_to_clipboard(&#39;img1.png&#39;, &#39;img2.png&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># path = copy_images_to_clipboard('img1.png', 'img2.png')</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -341,7 +341,7 @@ paste it into Claude Code with Cmd+V.</p>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># description = describe_images(&#39;screenshot.png&#39;, &#39;error.jpg&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># description = describe_images('screenshot.png', 'error.jpg')</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -360,8 +360,8 @@ Falls back to ‘uniform’ if scene detection yields no frames.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">mode='uniform'</span></code>: Extracts <code class="docutils literal notranslate"><span class="pre">n_frames</span></code> evenly-spaced frames.</p></li>
 </ul>
 <p>Returns list of paths to extracted frame images (JPEG).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># frames = extract_video_frames(&#39;demo.mp4&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># frames = extract_video_frames(&#39;demo.mp4&#39;, mode=&#39;uniform&#39;, n_frames=5)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># frames = extract_video_frames('demo.mp4')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># frames = extract_video_frames('demo.mp4', mode='uniform', n_frames=5)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -370,7 +370,7 @@ Falls back to ‘uniform’ if scene detection yields no frames.</p></li>
 <dt class="sig sig-object py" id="ge.find_related_commits">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">find_related_commits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_number</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/github.html#find_related_commits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.find_related_commits" title="Link to this definition"></a></dt>
 <dd><p>Find recent commits that reference this issue number.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># commits = find_related_commits(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># commits = find_related_commits('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -381,7 +381,7 @@ Falls back to ‘uniform’ if scene detection yields no frames.</p></li>
 <dd><p>Find PRs that reference or close this issue.</p>
 <p>Uses the timeline API to find cross-referenced PRs, and also searches
 for PRs mentioning the issue number.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># prs = find_related_prs(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># prs = find_related_prs('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -390,7 +390,7 @@ for PRs mentioning the issue number.</p>
 <dt class="sig sig-object py" id="ge.get_comments">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">get_comments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/github.html#get_comments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.get_comments" title="Link to this definition"></a></dt>
 <dd><p>Fetch all comments on an issue or PR.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># comments = get_comments(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># comments = get_comments('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -399,7 +399,7 @@ for PRs mentioning the issue number.</p>
 <dt class="sig sig-object py" id="ge.get_discussion">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">get_discussion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/github.html#get_discussion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.get_discussion" title="Link to this definition"></a></dt>
 <dd><p>Fetch a GitHub Discussion via GraphQL (discussions aren’t in REST API).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># disc = get_discussion(&#39;owner/repo&#39;, 5)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># disc = get_discussion('owner/repo', 5)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -408,7 +408,7 @@ for PRs mentioning the issue number.</p>
 <dt class="sig sig-object py" id="ge.get_issue">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">get_issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/github.html#get_issue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.get_issue" title="Link to this definition"></a></dt>
 <dd><p>Fetch a GitHub issue with body, labels, assignees, state, etc.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># issue = get_issue(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># issue = get_issue('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -417,7 +417,7 @@ for PRs mentioning the issue number.</p>
 <dt class="sig sig-object py" id="ge.get_pr">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">get_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/github.html#get_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.get_pr" title="Link to this definition"></a></dt>
 <dd><p>Fetch a GitHub pull request with body, diff stats, merge state, etc.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># pr = get_pr(&#39;owner/repo&#39;, 7)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># pr = get_pr('owner/repo', 7)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -426,7 +426,7 @@ for PRs mentioning the issue number.</p>
 <dt class="sig sig-object py" id="ge.get_pr_diff">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">get_pr_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/github.html#get_pr_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.get_pr_diff" title="Link to this definition"></a></dt>
 <dd><p>Fetch the raw diff of a PR.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># diff = get_pr_diff(&#39;owner/repo&#39;, 7)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># diff = get_pr_diff('owner/repo', 7)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -439,7 +439,7 @@ for PRs mentioning the issue number.</p>
 requires <code class="docutils literal notranslate"><span class="pre">roadmap_issue</span></code>; <code class="docutils literal notranslate"><span class="pre">decisions</span></code> requires <code class="docutils literal notranslate"><span class="pre">decisions_target</span></code>
 (the issue or PR number where decisions are logged); <code class="docutils literal notranslate"><span class="pre">triage</span></code>
 requires <code class="docutils literal notranslate"><span class="pre">triage_issue</span></code> (the tracking issue holding the JSON block).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># mall = github_memory(&#39;owner/repo&#39;, roadmap_issue=1, decisions_target=1)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># mall = github_memory('owner/repo', roadmap_issue=1, decisions_target=1)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -466,9 +466,9 @@ is printed if a symlink points elsewhere.</p>
 <p>When <code class="docutils literal notranslate"><span class="pre">describe_media</span></code> is True (default) and the <code class="docutils literal notranslate"><span class="pre">anthropic</span></code> package
 is available, downloaded images are described via the Claude API so
 the agent gets visual context without manual image pasting.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare(&#39;https://github.com/owner/repo/issues/42&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare(&#39;owner/repo&#39;, 42)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare(&#39;https://github.com/owner/repo/discussions/5&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare('https://github.com/owner/repo/issues/42')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare('owner/repo', 42)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = ge.prepare('https://github.com/owner/repo/discussions/5')</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -479,7 +479,7 @@ the agent gets visual context without manual image pasting.</p>
 <dd><p>Prepare full context for a GitHub Discussion.</p>
 <p>Fetches the discussion and its comments via GraphQL, downloads media,
 and writes a context document.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_discussion(&#39;owner/repo&#39;, 5)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_discussion('owner/repo', 5)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -496,7 +496,7 @@ to the Claude API for automated description.  The description is included
 in the context document so the agent has visual context without manual
 image pasting.</p>
 <p>Returns dict with all assembled context.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_issue(&#39;owner/repo&#39;, 42)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_issue('owner/repo', 42)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -505,7 +505,7 @@ image pasting.</p>
 <dt class="sig sig-object py" id="ge.prepare_pr">
 <span class="sig-prename descclassname"><span class="pre">ge.</span></span><span class="sig-name descname"><span class="pre">prepare_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_media_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">describe_media</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ge/context.html#prepare_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ge.prepare_pr" title="Link to this definition"></a></dt>
 <dd><p>Prepare full context for working on or reviewing a GitHub PR.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_pr(&#39;owner/repo&#39;, 7)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># ctx = prepare_pr('owner/repo', 7)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -553,19 +553,19 @@ image pasting.</p>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">&#39;https://github.com/owner/repo/issues/42&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
-<span class="go">(&#39;owner/repo&#39;, 42, &#39;issue&#39;, &#39;url&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">'https://github.com/owner/repo/issues/42'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'number'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'kind'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'source'</span><span class="p">]</span>
+<span class="go">('owner/repo', 42, 'issue', 'url')</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">&#39;#42&#39;</span><span class="p">,</span> <span class="n">current_repo</span><span class="o">=</span><span class="s1">&#39;owner/repo&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
-<span class="go">(&#39;owner/repo&#39;, 42, &#39;number&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">'#42'</span><span class="p">,</span> <span class="n">current_repo</span><span class="o">=</span><span class="s1">'owner/repo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'number'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'source'</span><span class="p">]</span>
+<span class="go">('owner/repo', 42, 'number')</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">&#39;owner/repo#42&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span>
-<span class="go">(&#39;owner/repo&#39;, 42, &#39;repo_number&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">resolve_target</span><span class="p">(</span><span class="s1">'owner/repo#42'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'number'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'source'</span><span class="p">]</span>
+<span class="go">('owner/repo', 42, 'repo_number')</span>
 </pre></div>
 </div>
 </dd></dl>

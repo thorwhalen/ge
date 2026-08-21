@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ge.media &mdash; ge 0.1.14 documentation</title>
+  <title>ge.media &mdash; ge 0.1.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=468bc497"></script>
+      <script src="../../_static/documentation_options.js?v=e2f3408e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -83,12 +83,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ge.media</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Media download and video frame extraction.</span>
+<span></span><span class="sd">"""Media download and video frame extraction.</span>
 
 <span class="sd">Downloads images and videos from GitHub issues/PRs, handling private repo</span>
 <span class="sd">auth via gh token. Extracts representative frames from videos using ffmpeg.</span>
 <span class="sd">Provides AI-powered image description and clipboard montage utilities.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
@@ -107,71 +107,71 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_media_type</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect media type from file magic bytes.</span>
+<span class="w">    </span><span class="sd">"""Detect media type from file magic bytes.</span>
 
-<span class="sd">    Returns (kind, extension) where kind is &#39;image&#39; or &#39;video&#39;,</span>
+<span class="sd">    Returns (kind, extension) where kind is 'image' or 'video',</span>
 <span class="sd">    or (None, None) if unrecognized.</span>
 
 <span class="sd">    &gt;&gt;&gt; import tempfile, os</span>
-<span class="sd">    &gt;&gt;&gt; f = os.path.join(tempfile.mkdtemp(), &#39;test&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; _ = open(f, &#39;wb&#39;).write(b&#39;\\x89PNG\\r\\n\\x1a\\n&#39; + b&#39;\\x00&#39; * 20)</span>
+<span class="sd">    &gt;&gt;&gt; f = os.path.join(tempfile.mkdtemp(), 'test')</span>
+<span class="sd">    &gt;&gt;&gt; _ = open(f, 'wb').write(b'\\x89PNG\\r\\n\\x1a\\n' + b'\\x00' * 20)</span>
 <span class="sd">    &gt;&gt;&gt; _detect_media_type(f)</span>
-<span class="sd">    (&#39;image&#39;, &#39;.png&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    ('image', '.png')</span>
+<span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">header</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x89</span><span class="s2">PNG</span><span class="se">\r\n\x1a\n</span><span class="s2">&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span>
-    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xd8\xff</span><span class="s2">&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span>
-    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;GIF8&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;.gif&quot;</span>
-    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;RIFF&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">header</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;WEBP&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;.webp&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">header</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;ftyp&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;video&quot;</span><span class="p">,</span> <span class="s2">&quot;.mp4&quot;</span>
-    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x1a\x45\xdf\xa3</span><span class="s2">&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;video&quot;</span><span class="p">,</span> <span class="s2">&quot;.webm&quot;</span>
-    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;RIFF&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">header</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;AVI &quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;video&quot;</span><span class="p">,</span> <span class="s2">&quot;.avi&quot;</span>
+    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\x89</span><span class="s2">PNG</span><span class="se">\r\n\x1a\n</span><span class="s2">"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"image"</span><span class="p">,</span> <span class="s2">".png"</span>
+    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\xff\xd8\xff</span><span class="s2">"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"image"</span><span class="p">,</span> <span class="s2">".jpg"</span>
+    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"GIF8"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"image"</span><span class="p">,</span> <span class="s2">".gif"</span>
+    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"RIFF"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">header</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"WEBP"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"image"</span><span class="p">,</span> <span class="s2">".webp"</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">header</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"ftyp"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"video"</span><span class="p">,</span> <span class="s2">".mp4"</span>
+    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\x1a\x45\xdf\xa3</span><span class="s2">"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"video"</span><span class="p">,</span> <span class="s2">".webm"</span>
+    <span class="k">if</span> <span class="n">header</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"RIFF"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">header</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"AVI "</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"video"</span><span class="p">,</span> <span class="s2">".avi"</span>
     <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_sanitize_filename</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a safe filename from a URL, preserving extension.</span>
+<span class="w">    </span><span class="sd">"""Derive a safe filename from a URL, preserving extension.</span>
 
-<span class="sd">    &gt;&gt;&gt; _sanitize_filename(&#39;https://github.com/user/repo/assets/123/screenshot.png&#39;)</span>
-<span class="sd">    &#39;screenshot.png&#39;</span>
-<span class="sd">    &gt;&gt;&gt; _sanitize_filename(&#39;https://example.com/img?v=2&#39;)</span>
-<span class="sd">    &#39;img&#39;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; _sanitize_filename('https://github.com/user/repo/assets/123/screenshot.png')</span>
+<span class="sd">    'screenshot.png'</span>
+<span class="sd">    &gt;&gt;&gt; _sanitize_filename('https://example.com/img?v=2')</span>
+<span class="sd">    'img'</span>
+<span class="sd">    """</span>
     <span class="c1"># Strip query params</span>
-    <span class="n">clean</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">clean</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">clean</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"?"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">clean</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="c1"># Remove unsafe chars</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^\w.\-]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">name</span> <span class="ow">or</span> <span class="s2">&quot;unnamed&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^\w.\-]"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span> <span class="ow">or</span> <span class="s2">"unnamed"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download a file, using gh auth token for GitHub URLs.</span>
+<span class="w">    </span><span class="sd">"""Download a file, using gh auth token for GitHub URLs.</span>
 
 <span class="sd">    Returns True on success, False on failure.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="s2">&quot;github&quot;</span> <span class="ow">in</span> <span class="n">url</span> <span class="ow">or</span> <span class="s2">&quot;githubusercontent&quot;</span> <span class="ow">in</span> <span class="n">url</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">"github"</span> <span class="ow">in</span> <span class="n">url</span> <span class="ow">or</span> <span class="s2">"githubusercontent"</span> <span class="ow">in</span> <span class="n">url</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">token</span> <span class="o">=</span> <span class="n">gh_auth_token</span><span class="p">()</span>
-            <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-H&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Authorization: token </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"-H"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Authorization: token </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>  <span class="c1"># Try without auth</span>
 
-    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;curl&quot;</span><span class="p">,</span> <span class="s2">&quot;-sL&quot;</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest_path</span><span class="p">),</span> <span class="s2">&quot;--max-time&quot;</span><span class="p">,</span> <span class="s2">&quot;30&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">headers</span> <span class="o">+</span> <span class="p">[</span><span class="n">url</span><span class="p">]</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"curl"</span><span class="p">,</span> <span class="s2">"-sL"</span><span class="p">,</span> <span class="s2">"-o"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest_path</span><span class="p">),</span> <span class="s2">"--max-time"</span><span class="p">,</span> <span class="s2">"30"</span><span class="p">]</span> <span class="o">+</span> <span class="n">headers</span> <span class="o">+</span> <span class="p">[</span><span class="n">url</span><span class="p">]</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
@@ -192,17 +192,17 @@
     <span class="n">download_images</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">download_videos</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download all media referenced in markdown to a local directory.</span>
+<span class="w">    </span><span class="sd">"""Download all media referenced in markdown to a local directory.</span>
 
 <span class="sd">    Returns a dict with:</span>
 <span class="sd">      - url_map: {original_url: local_path} for successful downloads</span>
 <span class="sd">      - manifest: list of dicts with url, local_path, kind, alt, status</span>
 <span class="sd">      - rewritten_markdown: markdown with URLs replaced by local paths</span>
 
-<span class="sd">    &gt;&gt;&gt; # result = download_media(&#39;![img](https://example.com/a.png)&#39;, &#39;/tmp/media&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # result = download_media('![img](https://example.com/a.png)', '/tmp/media')</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.cache&quot;</span> <span class="o">/</span> <span class="s2">&quot;ge&quot;</span> <span class="o">/</span> <span class="s2">&quot;media&quot;</span><span class="p">)</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".cache"</span> <span class="o">/</span> <span class="s2">"ge"</span> <span class="o">/</span> <span class="s2">"media"</span><span class="p">)</span>
     <span class="n">media</span> <span class="o">=</span> <span class="n">extract_media_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
 
@@ -213,13 +213,13 @@
     <span class="n">used_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">media</span><span class="p">:</span>
-        <span class="n">kind</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">download_images</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"image"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">download_images</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;video&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">download_videos</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"video"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">download_videos</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">url</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"url"</span><span class="p">]</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">_sanitize_filename</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
         <span class="c1"># Ensure unique filename</span>
@@ -228,7 +228,7 @@
         <span class="k">while</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">used_names</span><span class="p">:</span>
             <span class="n">stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">counter</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">counter</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">used_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
@@ -246,11 +246,11 @@
                 <span class="n">dest</span> <span class="o">=</span> <span class="n">new_dest</span>
 
         <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
-            <span class="s2">&quot;local_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
-            <span class="s2">&quot;alt&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;alt&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+            <span class="s2">"local_path"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
+            <span class="s2">"alt"</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"alt"</span><span class="p">],</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"ok"</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="s2">"failed"</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">manifest</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
@@ -258,9 +258,9 @@
 
     <span class="n">rewritten</span> <span class="o">=</span> <span class="n">rewrite_media_refs</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">url_map</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;url_map&quot;</span><span class="p">:</span> <span class="n">url_map</span><span class="p">,</span>
-        <span class="s2">&quot;manifest&quot;</span><span class="p">:</span> <span class="n">manifest</span><span class="p">,</span>
-        <span class="s2">&quot;rewritten_markdown&quot;</span><span class="p">:</span> <span class="n">rewritten</span><span class="p">,</span>
+        <span class="s2">"url_map"</span><span class="p">:</span> <span class="n">url_map</span><span class="p">,</span>
+        <span class="s2">"manifest"</span><span class="p">:</span> <span class="n">manifest</span><span class="p">,</span>
+        <span class="s2">"rewritten_markdown"</span><span class="p">:</span> <span class="n">rewritten</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -272,36 +272,36 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">n_frames</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;scene&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">"scene"</span><span class="p">,</span>
     <span class="n">scene_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract representative frames from a video file using ffmpeg.</span>
+<span class="w">    </span><span class="sd">"""Extract representative frames from a video file using ffmpeg.</span>
 
 <span class="sd">    Two modes are available:</span>
 
-<span class="sd">    - ``mode=&#39;scene&#39;`` (default): Uses ffmpeg&#39;s scene change detection filter</span>
+<span class="sd">    - ``mode='scene'`` (default): Uses ffmpeg's scene change detection filter</span>
 <span class="sd">      to extract frames where visual content actually changes. Better for bug</span>
 <span class="sd">      reproduction videos where you want one frame per distinct UI state.</span>
 <span class="sd">      ``scene_threshold`` controls sensitivity (0.0–1.0, lower = more frames).</span>
-<span class="sd">      Falls back to &#39;uniform&#39; if scene detection yields no frames.</span>
+<span class="sd">      Falls back to 'uniform' if scene detection yields no frames.</span>
 
-<span class="sd">    - ``mode=&#39;uniform&#39;``: Extracts ``n_frames`` evenly-spaced frames.</span>
+<span class="sd">    - ``mode='uniform'``: Extracts ``n_frames`` evenly-spaced frames.</span>
 
 <span class="sd">    Returns list of paths to extracted frame images (JPEG).</span>
 
-<span class="sd">    &gt;&gt;&gt; # frames = extract_video_frames(&#39;demo.mp4&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; # frames = extract_video_frames(&#39;demo.mp4&#39;, mode=&#39;uniform&#39;, n_frames=5)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # frames = extract_video_frames('demo.mp4')</span>
+<span class="sd">    &gt;&gt;&gt; # frames = extract_video_frames('demo.mp4', mode='uniform', n_frames=5)</span>
+<span class="sd">    """</span>
     <span class="n">check_ffmpeg</span><span class="p">()</span>
     <span class="n">video_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">video_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Video not found: </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Video not found: </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">video_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">video_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_frames&quot;</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">video_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">video_path</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_frames"</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">ensure_dir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;scene&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"scene"</span><span class="p">:</span>
         <span class="n">frames</span> <span class="o">=</span> <span class="n">_extract_scene_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">scene_threshold</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">frames</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frames</span>
@@ -312,25 +312,25 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_extract_scene_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract frames at scene changes using ffmpeg&#39;s scene filter.</span>
+<span class="w">    </span><span class="sd">"""Extract frames at scene changes using ffmpeg's scene filter.</span>
 
-<span class="sd">    Uses ``-vf &quot;select=gt(scene\\,THRESHOLD)&quot;`` to pick frames where the</span>
+<span class="sd">    Uses ``-vf "select=gt(scene\\,THRESHOLD)"`` to pick frames where the</span>
 <span class="sd">    visual content changes significantly. This is zero extra dependency</span>
 <span class="sd">    beyond ffmpeg itself.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">pattern</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scene_</span><span class="si">%03d</span><span class="s2">.jpg&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">"scene_</span><span class="si">%03d</span><span class="s2">.jpg"</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="s2">&quot;ffmpeg&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-y&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-i&quot;</span><span class="p">,</span>
+            <span class="s2">"ffmpeg"</span><span class="p">,</span>
+            <span class="s2">"-y"</span><span class="p">,</span>
+            <span class="s2">"-i"</span><span class="p">,</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">video_path</span><span class="p">),</span>
-            <span class="s2">&quot;-vf&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;select=gt(scene</span><span class="se">\\</span><span class="s2">,</span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-vsync&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;vfr&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-q:v&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+            <span class="s2">"-vf"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"select=gt(scene</span><span class="se">\\</span><span class="s2">,</span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+            <span class="s2">"-vsync"</span><span class="p">,</span>
+            <span class="s2">"vfr"</span><span class="p">,</span>
+            <span class="s2">"-q:v"</span><span class="p">,</span>
+            <span class="s2">"2"</span><span class="p">,</span>
             <span class="n">pattern</span><span class="p">,</span>
         <span class="p">],</span>
         <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -341,23 +341,23 @@
 
     <span class="c1"># Collect generated frames</span>
     <span class="n">frame_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-        <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;scene_*.jpg&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"scene_*.jpg"</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">frame_paths</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_extract_uniform_frames</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">n_frames</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract n evenly-spaced frames from a video.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Extract n evenly-spaced frames from a video."""</span>
     <span class="c1"># Get video duration</span>
     <span class="n">probe</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="s2">&quot;ffprobe&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-v&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-show_entries&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;format=duration&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-of&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;csv=p=0&quot;</span><span class="p">,</span>
+            <span class="s2">"ffprobe"</span><span class="p">,</span>
+            <span class="s2">"-v"</span><span class="p">,</span>
+            <span class="s2">"error"</span><span class="p">,</span>
+            <span class="s2">"-show_entries"</span><span class="p">,</span>
+            <span class="s2">"format=duration"</span><span class="p">,</span>
+            <span class="s2">"-of"</span><span class="p">,</span>
+            <span class="s2">"csv=p=0"</span><span class="p">,</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">video_path</span><span class="p">),</span>
         <span class="p">],</span>
         <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -375,20 +375,20 @@
 
     <span class="n">frame_paths</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
-        <span class="n">frame_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;frame_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">ts</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s.jpg&quot;</span>
+        <span class="n">frame_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"frame_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">ts</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s.jpg"</span>
         <span class="n">frame_path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">frame_name</span>
         <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="s2">&quot;ffmpeg&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;-y&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;-ss&quot;</span><span class="p">,</span>
+                <span class="s2">"ffmpeg"</span><span class="p">,</span>
+                <span class="s2">"-y"</span><span class="p">,</span>
+                <span class="s2">"-ss"</span><span class="p">,</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span>
-                <span class="s2">&quot;-i&quot;</span><span class="p">,</span>
+                <span class="s2">"-i"</span><span class="p">,</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">video_path</span><span class="p">),</span>
-                <span class="s2">&quot;-frames:v&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;1&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;-q:v&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+                <span class="s2">"-frames:v"</span><span class="p">,</span>
+                <span class="s2">"1"</span><span class="p">,</span>
+                <span class="s2">"-q:v"</span><span class="p">,</span>
+                <span class="s2">"2"</span><span class="p">,</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">frame_path</span><span class="p">),</span>
             <span class="p">],</span>
             <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -403,7 +403,7 @@
 <div class="viewcode-block" id="process_all_media">
 <a class="viewcode-back" href="../../module_docs/ge/media.html#ge.process_all_media">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">process_all_media</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download all media and extract video frames.</span>
+<span class="w">    </span><span class="sd">"""Download all media and extract video frames.</span>
 
 <span class="sd">    Returns a dict with:</span>
 <span class="sd">      - url_map, manifest, rewritten_markdown (from download_media)</span>
@@ -412,38 +412,38 @@
 <span class="sd">      - all_visual_files: combined list of images + video frames</span>
 
 <span class="sd">    &gt;&gt;&gt; # result = process_all_media(issue_body)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">dl</span> <span class="o">=</span> <span class="n">download_media</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
     <span class="n">video_frames</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">all_images</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">dl</span><span class="p">[</span><span class="s2">&quot;manifest&quot;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;ok&quot;</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">dl</span><span class="p">[</span><span class="s2">"manifest"</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"ok"</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="n">local</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;local_path&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;video&quot;</span><span class="p">:</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"local_path"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"video"</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">video_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
-                <span class="c1"># Frames go into a directory named after the video&#39;s stem (UUID)</span>
+                <span class="c1"># Frames go into a directory named after the video's stem (UUID)</span>
                 <span class="n">frame_dir</span> <span class="o">=</span> <span class="n">video_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">video_path</span><span class="o">.</span><span class="n">stem</span>
                 <span class="n">frames</span> <span class="o">=</span> <span class="n">extract_video_frames</span><span class="p">(</span><span class="n">local</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">frame_dir</span><span class="p">))</span>
                 <span class="n">video_frames</span><span class="p">[</span><span class="n">local</span><span class="p">]</span> <span class="o">=</span> <span class="n">frames</span>
                 <span class="n">all_images</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">video_frames</span><span class="p">[</span><span class="n">local</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;frame_extraction_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s2">"frame_extraction_error"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">all_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span>
         <span class="o">**</span><span class="n">dl</span><span class="p">,</span>
-        <span class="s2">&quot;video_frames&quot;</span><span class="p">:</span> <span class="n">video_frames</span><span class="p">,</span>
-        <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"video_frames"</span><span class="p">:</span> <span class="n">video_frames</span><span class="p">,</span>
+        <span class="s2">"images"</span><span class="p">:</span> <span class="p">[</span>
             <span class="n">p</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_images</span>
-            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.gif&quot;</span><span class="p">,</span> <span class="s2">&quot;.webp&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">".png"</span><span class="p">,</span> <span class="s2">".jpg"</span><span class="p">,</span> <span class="s2">".jpeg"</span><span class="p">,</span> <span class="s2">".gif"</span><span class="p">,</span> <span class="s2">".webp"</span><span class="p">))</span>
         <span class="p">],</span>
-        <span class="s2">&quot;all_visual_files&quot;</span><span class="p">:</span> <span class="n">all_images</span><span class="p">,</span>
+        <span class="s2">"all_visual_files"</span><span class="p">:</span> <span class="n">all_images</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -453,27 +453,27 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 <span class="n">_IMAGE_MEDIA_TYPES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;.png&quot;</span><span class="p">:</span> <span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.jpg&quot;</span><span class="p">:</span> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.jpeg&quot;</span><span class="p">:</span> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.gif&quot;</span><span class="p">:</span> <span class="s2">&quot;image/gif&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.webp&quot;</span><span class="p">:</span> <span class="s2">&quot;image/webp&quot;</span><span class="p">,</span>
+    <span class="s2">".png"</span><span class="p">:</span> <span class="s2">"image/png"</span><span class="p">,</span>
+    <span class="s2">".jpg"</span><span class="p">:</span> <span class="s2">"image/jpeg"</span><span class="p">,</span>
+    <span class="s2">".jpeg"</span><span class="p">:</span> <span class="s2">"image/jpeg"</span><span class="p">,</span>
+    <span class="s2">".gif"</span><span class="p">:</span> <span class="s2">"image/gif"</span><span class="p">,</span>
+    <span class="s2">".webp"</span><span class="p">:</span> <span class="s2">"image/webp"</span><span class="p">,</span>
 <span class="p">}</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_encode_image</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read an image file and return (base64_data, media_type).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Read an image file and return (base64_data, media_type)."""</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="n">ext</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="n">media_type</span> <span class="o">=</span> <span class="n">_IMAGE_MEDIA_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">media_type</span><span class="p">:</span>
         <span class="c1"># Try detecting from magic bytes</span>
         <span class="n">kind</span><span class="p">,</span> <span class="n">detected_ext</span> <span class="o">=</span> <span class="n">_detect_media_type</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span> <span class="ow">and</span> <span class="n">detected_ext</span><span class="p">:</span>
-            <span class="n">media_type</span> <span class="o">=</span> <span class="n">_IMAGE_MEDIA_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">detected_ext</span><span class="p">,</span> <span class="s2">&quot;image/png&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"image"</span> <span class="ow">and</span> <span class="n">detected_ext</span><span class="p">:</span>
+            <span class="n">media_type</span> <span class="o">=</span> <span class="n">_IMAGE_MEDIA_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">detected_ext</span><span class="p">,</span> <span class="s2">"image/png"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">media_type</span> <span class="o">=</span> <span class="s2">&quot;image/png&quot;</span>  <span class="c1"># fallback</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">media_type</span> <span class="o">=</span> <span class="s2">"image/png"</span>  <span class="c1"># fallback</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">standard_b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">media_type</span>
 
@@ -482,11 +482,11 @@
 <a class="viewcode-back" href="../../module_docs/ge/media.html#ge.describe_images">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">describe_images</span><span class="p">(</span>
     <span class="o">*</span><span class="n">image_paths</span><span class="p">,</span>
-    <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;Describe what you see in these images in detail. If they appear to be screenshots of a bug or UI issue, describe the problem visible.&quot;</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-sonnet-4-5-20250514&quot;</span><span class="p">,</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="s2">"Describe what you see in these images in detail. If they appear to be screenshots of a bug or UI issue, describe the problem visible."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"claude-sonnet-4-5-20250514"</span><span class="p">,</span>
     <span class="n">max_tokens</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use the Claude API to describe images, returning a text description.</span>
+<span class="w">    </span><span class="sd">"""Use the Claude API to describe images, returning a text description.</span>
 
 <span class="sd">    Requires the ``anthropic`` package and a valid ``ANTHROPIC_API_KEY``.</span>
 
@@ -497,17 +497,17 @@
 <span class="sd">        max_tokens: Maximum tokens in the response.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        str: The model&#39;s textual description of the images.</span>
+<span class="sd">        str: The model's textual description of the images.</span>
 
-<span class="sd">    &gt;&gt;&gt; # description = describe_images(&#39;screenshot.png&#39;, &#39;error.jpg&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # description = describe_images('screenshot.png', 'error.jpg')</span>
+<span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">anthropic</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-            <span class="s2">&quot;The &#39;anthropic&#39; package is required for image description.</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;Install it with: pip install anthropic</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;Then set ANTHROPIC_API_KEY in your environment.&quot;</span>
+            <span class="s2">"The 'anthropic' package is required for image description.</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"Install it with: pip install anthropic</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"Then set ANTHROPIC_API_KEY in your environment."</span>
         <span class="p">)</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">anthropic</span><span class="o">.</span><span class="n">Anthropic</span><span class="p">()</span>
@@ -515,20 +515,20 @@
     <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">:</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Image not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">media_type</span> <span class="o">=</span> <span class="n">_encode_image</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
         <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">{</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;base64&quot;</span><span class="p">,</span> <span class="s2">&quot;media_type&quot;</span><span class="p">:</span> <span class="n">media_type</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"image"</span><span class="p">,</span>
+                <span class="s2">"source"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"base64"</span><span class="p">,</span> <span class="s2">"media_type"</span><span class="p">:</span> <span class="n">media_type</span><span class="p">,</span> <span class="s2">"data"</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="p">)</span>
-    <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
+    <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"text"</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
 
     <span class="n">msg</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">max_tokens</span><span class="o">=</span><span class="n">max_tokens</span><span class="p">,</span>
-        <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">}],</span>
+        <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">content</span><span class="p">}],</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span></div>
 
@@ -540,14 +540,14 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_check_imagemagick</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if ImageMagick&#39;s ``magick`` command is available.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;magick&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Check if ImageMagick's ``magick`` command is available."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"magick"</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
-            <span class="s2">&quot;ImageMagick not found (needed for image montage).</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;Install it with:</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;  brew install imagemagick       # macOS</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;  sudo apt install imagemagick   # Debian/Ubuntu</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;  https://imagemagick.org        # other platforms&quot;</span>
+            <span class="s2">"ImageMagick not found (needed for image montage).</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"Install it with:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"  brew install imagemagick       # macOS</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"  sudo apt install imagemagick   # Debian/Ubuntu</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"  https://imagemagick.org        # other platforms"</span>
         <span class="p">)</span>
 
 
@@ -555,11 +555,11 @@
 <a class="viewcode-back" href="../../module_docs/ge/media.html#ge.copy_images_to_clipboard">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">copy_images_to_clipboard</span><span class="p">(</span>
     <span class="o">*</span><span class="n">image_paths</span><span class="p">,</span>
-    <span class="n">tile</span><span class="o">=</span><span class="s2">&quot;3x&quot;</span><span class="p">,</span>
-    <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;800x600+10+10&quot;</span><span class="p">,</span>
+    <span class="n">tile</span><span class="o">=</span><span class="s2">"3x"</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="s2">"800x600+10+10"</span><span class="p">,</span>
     <span class="n">montage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a montage of images and copy it to the macOS clipboard.</span>
+<span class="w">    </span><span class="sd">"""Create a montage of images and copy it to the macOS clipboard.</span>
 
 <span class="sd">    Combines multiple images into a single grid image using ImageMagick,</span>
 <span class="sd">    then copies it to the clipboard via ``osascript`` so the user can</span>
@@ -567,7 +567,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        *image_paths: Paths to image files to combine.</span>
-<span class="sd">        tile: Montage tile layout (e.g. &#39;3x&#39; for 3 columns).</span>
+<span class="sd">        tile: Montage tile layout (e.g. '3x' for 3 columns).</span>
 <span class="sd">        geometry: Tile geometry (size+padding).</span>
 <span class="sd">        montage_path: Where to save the montage file. Defaults to</span>
 <span class="sd">            ``/tmp/ge_montage.png``.</span>
@@ -575,47 +575,47 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Path to the montage file.</span>
 
-<span class="sd">    &gt;&gt;&gt; # path = copy_images_to_clipboard(&#39;img1.png&#39;, &#39;img2.png&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # path = copy_images_to_clipboard('img1.png', 'img2.png')</span>
+<span class="sd">    """</span>
     <span class="n">_check_imagemagick</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">image_paths</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one image path is required.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"At least one image path is required."</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">montage_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">montage_path</span> <span class="o">=</span> <span class="s2">&quot;/tmp/ge_montage.png&quot;</span>
+        <span class="n">montage_path</span> <span class="o">=</span> <span class="s2">"/tmp/ge_montage.png"</span>
     <span class="n">montage_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">montage_path</span><span class="p">)</span>
 
     <span class="c1"># Validate all paths exist</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image not found: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Image not found: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># Create montage</span>
     <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;magick&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;montage&quot;</span><span class="p">,</span>
+        <span class="s2">"magick"</span><span class="p">,</span>
+        <span class="s2">"montage"</span><span class="p">,</span>
         <span class="o">*</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">image_paths</span><span class="p">],</span>
-        <span class="s2">&quot;-geometry&quot;</span><span class="p">,</span>
+        <span class="s2">"-geometry"</span><span class="p">,</span>
         <span class="n">geometry</span><span class="p">,</span>
-        <span class="s2">&quot;-tile&quot;</span><span class="p">,</span>
+        <span class="s2">"-tile"</span><span class="p">,</span>
         <span class="n">tile</span><span class="p">,</span>
         <span class="n">montage_path</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;montage failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"montage failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># Copy to clipboard (macOS only)</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">"darwin"</span><span class="p">:</span>
         <span class="n">copy_cmd</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;osascript&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-e&quot;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;set the clipboard to &quot;</span>
-            <span class="sa">f</span><span class="s1">&#39;(read (POSIX file &quot;</span><span class="si">{</span><span class="n">montage_path</span><span class="si">}</span><span class="s1">&quot;) as JPEG picture)&#39;</span><span class="p">,</span>
+            <span class="s2">"osascript"</span><span class="p">,</span>
+            <span class="s2">"-e"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"set the clipboard to "</span>
+            <span class="sa">f</span><span class="s1">'(read (POSIX file "</span><span class="si">{</span><span class="n">montage_path</span><span class="si">}</span><span class="s1">") as JPEG picture)'</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to copy to clipboard: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to copy to clipboard: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">montage_path</span></div>
 

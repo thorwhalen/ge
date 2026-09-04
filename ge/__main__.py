@@ -10,7 +10,7 @@ Usage::
 
 import json
 
-import argh
+import cw
 
 
 def prepare(
@@ -482,9 +482,9 @@ _cli_commands = [
 
 
 def main():
-    """Dispatch CLI commands via argh."""
-    argh.dispatch_commands(_cli_commands)
+    """Dispatch CLI commands via cw."""
+    return cw.dispatch(_cli_commands)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

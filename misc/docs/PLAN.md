@@ -11,7 +11,7 @@ This document is for Claude Code (or any AI agent) to understand the project goa
 ```
 ge/
 ├── __init__.py      # Facade: prepare(), prepare_issue(), prepare_pr()
-├── __main__.py      # CLI via argh (SSOT: _cli_commands list)
+├── __main__.py      # CLI via cw (SSOT: _cli_commands list)
 ├── github.py        # GitHub API via `gh` CLI subprocess
 ├── media.py         # Image download + video frame extraction (ffmpeg)
 ├── analysis.py      # Staleness/freshness/relevance analysis
@@ -33,7 +33,7 @@ misc/docs/
 - All GitHub access via `gh` CLI (handles auth, works with private repos)
 - Functional style with small focused functions
 - Progressive disclosure: `ge.prepare(url)` is the simple entry point; individual functions available for advanced use
-- CLI mirrors Python API via argh dispatch
+- CLI mirrors Python API via cw dispatch
 
 ## Current State: Working core
 
@@ -51,7 +51,7 @@ tested, and more useful.
 ### 1. Package setup: restore pyproject.toml
 
 The pyproject.toml was deleted. Restore it with proper `[project.scripts]`
-entry point (`ge = "ge.__main__:main"`) and `argh` as a dependency.
+entry point (`ge = "ge.__main__:main"`) and `cw` as a dependency.
 
 ### 2. Tests
 

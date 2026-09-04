@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Version Control :: Git",
 ]
-dependencies = ["argh"]
+dependencies = ["cw>=0.1.1,<0.2"]
 
 [project.urls]
 Homepage = "https://thorwhalen.github.io/ge/"

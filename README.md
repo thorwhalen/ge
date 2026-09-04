@@ -217,7 +217,7 @@ ge copy-images screenshot1.png screenshot2.png   # montage + clipboard (macOS)
 ```
 ge/
 ├── __init__.py      # Facade: prepare(), resolve_target(), install_skills(), etc.
-├── __main__.py      # CLI via argh (SSOT: _cli_commands list)
+├── __main__.py      # CLI via cw (SSOT: _cli_commands list)
 ├── github.py        # GitHub API via `gh` CLI subprocess
 ├── media.py         # Image download, video frames, describe_images, clipboard montage
 ├── analysis.py      # Staleness/freshness/relevance analysis

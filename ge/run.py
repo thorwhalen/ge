@@ -18,8 +18,8 @@ What a spawned session can see is decided here too (:class:`SessionScope`):
 the cwd picks which ``CLAUDE.md`` files load (the cwd's and its ancestors'), an
 ``--add-dir`` contributes its skills but never its ``CLAUDE.md``, and each one
 widens the skill listing toward the budget past which descriptions are dropped
-silently. So the runner defaults the cwd to the package root, adds directories
-only when asked, puts any add-dir's ``CLAUDE.md`` and the requested routing
+silently. So the runner warns when the cwd is outside every package checkout,
+adds directories only when asked, puts any add-dir's ``CLAUDE.md`` and the requested routing
 documents into the prompt as the first Read, names the skills to load, and
 returns the scope with the run so a later diagnosis can see it.
 
@@ -85,32 +85,40 @@ def _git_root(path: Path) -> Optional[Path]:
     return Path(top) if proc.returncode == 0 and top else None
 
 
-def package_root(path: str | Path | None = None) -> Path:
-    """The package root to start a session in: the git checkout holding *path*
-    (default: the current directory), else *path* itself.
+def package_root(path: str | Path | None = None) -> Optional[Path]:
+    """The git checkout holding *path* (default: the current directory), or ``None``.
 
-    A session's ``CLAUDE.md`` comes from its cwd and the cwd's ancestors, so a
-    subdirectory would still load the package's, but a projects root above every
-    package loads none of them: the checkout's top is the one that is right.
+    A session's ``CLAUDE.md`` comes from its cwd and the cwd's ancestors, so any
+    directory inside a package checkout loads the package's instructions (and a
+    subdirectory adds its own). A directory outside every checkout, such as a
+    projects root or a scratch folder, loads none of the work's.
     """
     here = Path(path if path is not None else os.getcwd()).expanduser().resolve()
-    return _git_root(here) or here
+    return _git_root(here)
+
+
+#: Why a scope's cwd may not load the work's instructions.
+OUTSIDE_A_CHECKOUT = (
+    "the session's cwd {cwd} is not inside a git checkout, so no package's CLAUDE.md "
+    "loads (a projects root or a scratch folder loads none of the work's): pass the "
+    "package root as cwd"
+)
 
 
 @dataclass(frozen=True)
 class SessionScope:
     """What one spawned ``claude`` session can see, decided by the runner.
 
-    - ``cwd``: where the session starts, so whose ``CLAUDE.md`` loads (see
-      :func:`package_root` for the default).
+    - ``cwd``: where the session starts, so whose ``CLAUDE.md`` loads.
     - ``add_dirs``: further directories the run must *edit*, passed as
       ``--add-dir``. Each one adds its skills to the listing; none adds its
       ``CLAUDE.md``, which is why those become first Reads.
     - ``read_first``: routing documents the prompt tells the session to Read
-      before anything else (paths, absolute or relative to ``cwd``).
+      before anything else (absolute paths).
     - ``skills``: skills to load by name, beyond the runner's own. A skill named
       in the prompt is invocable even when the listing shows it name-only.
     - ``model`` / ``effort``: ``claude --model`` / ``--effort``, when set.
+    - ``warnings``: why this scope may not load the work's instructions.
 
     >>> scope = SessionScope(cwd=Path("/w/pkg"), add_dirs=(Path("/w/lib"),), model="opus")
     >>> scope.cli_args()
@@ -123,6 +131,7 @@ class SessionScope:
     skills: tuple[str, ...] = ()
     model: Optional[str] = None
     effort: Optional[str] = None
+    warnings: tuple[str, ...] = ()
 
     def __post_init__(self):
         if self.effort is not None and self.effort not in EFFORT_LEVELS:
@@ -139,23 +148,33 @@ class SessionScope:
         model: Optional[str] = None,
         effort: Optional[str] = None,
     ) -> "SessionScope":
-        """A scope from loose arguments: the cwd resolved (:func:`package_root`
-        when ``None``, as given otherwise), add-dirs resolved, every add-dir's
-        instruction file added to ``read_first``."""
-        root = package_root() if cwd is None else Path(cwd).expanduser().resolve()
+        """A scope from loose arguments, checked before anything is spawned.
+
+        ``cwd`` defaults to the current directory. Directories must exist; relative
+        add-dirs resolve against the current directory, relative ``read_first``
+        paths against the scope's cwd (both become absolute). Every add-dir's
+        instruction file is added to ``read_first``. A cwd outside every git
+        checkout is kept, with a warning (:data:`OUTSIDE_A_CHECKOUT`).
+        """
+        root = Path(cwd if cwd is not None else os.getcwd()).expanduser().resolve()
         dirs = tuple(dict.fromkeys(Path(d).expanduser().resolve() for d in add_dirs))
         dirs = tuple(d for d in dirs if d != root)
+        missing = [str(d) for d in (root, *dirs) if not d.is_dir()]
+        if missing:
+            raise ValueError(f"not a directory: {', '.join(missing)}")
         unloaded = [
             str(d / name) for d in dirs for name in INSTRUCTION_FILES if (d / name).is_file()
         ]
-        reads = tuple(dict.fromkeys([*unloaded, *(r for r in read_first if r)]))
+        given = [str((root / Path(r).expanduser()).resolve()) for r in read_first if r]
+        warnings = () if package_root(root) else (OUTSIDE_A_CHECKOUT.format(cwd=root),)
         return cls(
             cwd=root,
             add_dirs=dirs,
-            read_first=reads,
+            read_first=tuple(dict.fromkeys([*unloaded, *given])),
             skills=tuple(dict.fromkeys(s for s in skills if s)),
             model=model or None,
             effort=effort or None,
+            warnings=warnings,
         )
 
     def cli_args(self) -> tuple[str, ...]:
@@ -191,6 +210,7 @@ class SessionScope:
             "skills": list(self.skills),
             "model": self.model,
             "effort": self.effort,
+            "warnings": list(self.warnings),
         }
 
 
@@ -358,6 +378,8 @@ def _run_loop(
     it and its flags and cwd start the session. ``on_session`` is an optional
     callback for telemetry. Every result carries ``scope``.
     """
+    for warning in scope.warnings:
+        sys.stderr.write(f"[ge] warning: {warning}\n")
     result_dict = _loop(
         decisions=decisions,
         is_done=is_done,
@@ -412,7 +434,6 @@ def _loop(
                         metadata={
                             "iteration": iteration,
                             "returncode": result.returncode,
-                            "scope": scope.as_dict(),
                         },
                     )
                 except Exception:
@@ -423,7 +444,7 @@ def _loop(
                     "Stopping: denial cap hit twice in a row",
                     rationale="Two consecutive headless sessions terminated by "
                     "the permission-denial cap. Escalating to user.",
-                    metadata={"iteration": iteration, "scope": scope.as_dict()},
+                    metadata={"iteration": iteration},
                 )
             except Exception:
                 pass
@@ -443,7 +464,6 @@ def _loop(
                     "iteration": iteration,
                     "returncode": result.returncode,
                     "stderr_tail": result.stderr[-500:],
-                    "scope": scope.as_dict(),
                 },
             )
         except Exception:
@@ -491,8 +511,9 @@ def run_roadmap(
             to ``roadmap_issue``.
         max_sessions: safety ceiling on total iterations.
         cwd: where the spawned ``claude`` starts, so whose ``CLAUDE.md`` it
-            loads. Defaults to the package root (the git checkout) of the
-            current directory: never pass a projects root holding many packages.
+            loads. Defaults to the current directory. A cwd outside every git
+            checkout (a projects root, a scratch folder) loads no package's
+            instructions: it is kept, and named in the scope's ``warnings``.
         add_dirs: directories the run must edit besides ``cwd`` (``--add-dir``);
             their ``CLAUDE.md`` files become first Reads, since an add-dir's
             never loads.
@@ -505,11 +526,6 @@ def run_roadmap(
     The result carries ``scope`` (:meth:`SessionScope.as_dict`), so a later
     diagnosis can see what the sessions could see.
     """
-    check_requirements()
-    roadmap = RoadmapStore(repo, roadmap_issue)
-    decisions = DecisionLog(
-        repo, decisions_target if decisions_target is not None else roadmap_issue
-    )
     scope = SessionScope.build(
         cwd=cwd,
         add_dirs=add_dirs,
@@ -517,6 +533,11 @@ def run_roadmap(
         skills=skills,
         model=model,
         effort=effort,
+    )
+    check_requirements()
+    roadmap = RoadmapStore(repo, roadmap_issue)
+    decisions = DecisionLog(
+        repo, decisions_target if decisions_target is not None else roadmap_issue
     )
     return _run_loop(
         repo=repo,
@@ -564,9 +585,6 @@ def run_triage(
     """
     if phase not in ("analyze", "execute"):
         raise ValueError(f"phase must be 'analyze' or 'execute', got {phase!r}")
-    check_requirements()
-    backlog = TriageBacklog(tracking_repo, tracking_issue)
-    decisions = DecisionLog(tracking_repo, tracking_issue)
     scope = SessionScope.build(
         cwd=cwd,
         add_dirs=add_dirs,
@@ -575,6 +593,9 @@ def run_triage(
         model=model,
         effort=effort,
     )
+    check_requirements()
+    backlog = TriageBacklog(tracking_repo, tracking_issue)
+    decisions = DecisionLog(tracking_repo, tracking_issue)
 
     if phase == "analyze":
         # Phase A: typically one iteration. We still gate via the same

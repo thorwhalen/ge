@@ -393,11 +393,13 @@ def run_roadmap(
         ge run-roadmap owner/repo 1 --mode bypass --max-sessions 20
         ge run-roadmap owner/repo 1 --cwd ~/proj/pkg --skills pkg-dev --model sonnet
 
-    Scope (what each spawned session sees): `--cwd` defaults to the package
-    root (git checkout) of the current directory, whose CLAUDE.md loads;
-    `--add-dirs` (comma-separated) are extra directories to edit, whose
-    CLAUDE.md files become first Reads; `--read-first` and `--skills`
-    (comma-separated) go into the prompt; `--model` and `--effort` pass
+    Scope (what each spawned session sees): `--cwd` (default: the current
+    directory) decides whose CLAUDE.md loads, so give a package's checkout
+    (a warning names a cwd outside every checkout);
+    `--add-dirs` (comma-separated, relative to the current directory) are
+    extra directories to edit, whose CLAUDE.md files become first Reads;
+    `--read-first` (relative to the cwd) and `--skills` (comma-separated) go
+    into the prompt; `--model` and `--effort` pass
     through. The JSON result carries the scope.
     """
     from ge.run import cli_run_roadmap
@@ -444,11 +446,13 @@ def run_triage(
         ge run-triage owner/track 9 "a/b,c/d" --phase analyze
         ge run-triage owner/track 9 "a/b,c/d" --phase execute --mode bypass
 
-    Scope (what each spawned session sees): `--cwd` defaults to the package
-    root (git checkout) of the current directory, whose CLAUDE.md loads;
-    `--add-dirs` (comma-separated) are extra directories to edit, whose
-    CLAUDE.md files become first Reads; `--read-first` and `--skills`
-    (comma-separated) go into the prompt; `--model` and `--effort` pass
+    Scope (what each spawned session sees): `--cwd` (default: the current
+    directory) decides whose CLAUDE.md loads, so give a package's checkout
+    (a warning names a cwd outside every checkout);
+    `--add-dirs` (comma-separated, relative to the current directory) are
+    extra directories to edit, whose CLAUDE.md files become first Reads;
+    `--read-first` (relative to the cwd) and `--skills` (comma-separated) go
+    into the prompt; `--model` and `--effort` pass
     through. The JSON result carries the scope.
     """
     from ge.run import cli_run_triage

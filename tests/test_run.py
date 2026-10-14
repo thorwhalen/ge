@@ -183,15 +183,25 @@ def _git_repo(path):
 
 
 class TestSessionScope:
-    def test_cwd_defaults_to_the_package_root_not_a_subdirectory(self, tmp_path, monkeypatch):
+    def test_cwd_defaults_to_the_current_directory(self, tmp_path, monkeypatch):
+        """A subdirectory keeps its own .claude/ (and still loads the package's)."""
         pkg = _git_repo(tmp_path / "proj" / "t" / "pkg")
-        (pkg / "pkg" / "sub").mkdir(parents=True)
-        monkeypatch.chdir(pkg / "pkg" / "sub")
-        assert package_root() == pkg.resolve()
-        assert SessionScope.build().cwd == pkg.resolve()
+        sub = pkg / "apps" / "one"
+        sub.mkdir(parents=True)
+        monkeypatch.chdir(sub)
+        scope = SessionScope.build()
+        assert scope.cwd == sub.resolve() and scope.warnings == ()
+        assert package_root(sub) == pkg.resolve()
 
-    def test_outside_a_checkout_the_directory_itself(self, tmp_path):
-        assert package_root(tmp_path) == tmp_path.resolve()
+    def test_a_cwd_outside_every_checkout_is_kept_with_a_warning(self, tmp_path):
+        assert package_root(tmp_path) is None
+        scope = SessionScope.build(cwd=tmp_path)
+        assert scope.cwd == tmp_path.resolve()
+        assert "not inside a git checkout" in scope.warnings[0]
+
+    def test_directories_must_exist(self, tmp_path):
+        with pytest.raises(ValueError, match="not a directory"):
+            SessionScope.build(cwd=tmp_path, add_dirs=[tmp_path / "absent"])
 
     def test_an_add_dirs_claude_md_becomes_a_first_read(self, tmp_path):
         pkg, lib, data = tmp_path / "pkg", tmp_path / "lib", tmp_path / "data"
@@ -205,7 +215,10 @@ class TestSessionScope:
             skills=["pkg-dev", "pkg-dev"],
         )
         assert scope.add_dirs == (lib.resolve(), data.resolve())
-        assert scope.read_first == (str(lib.resolve() / "CLAUDE.md"), "docs/overview.md")
+        assert scope.read_first == (
+            str(lib.resolve() / "CLAUDE.md"),
+            str(pkg.resolve() / "docs" / "overview.md"),  # relative to the scope's cwd
+        )
         assert scope.skills == ("pkg-dev",)
         preamble = scope.prompt_preamble()
         assert preamble.startswith("Before anything else, Read: ")
@@ -227,6 +240,8 @@ class TestSessionScope:
         calls = []
 
         def fake_run(cmd, **kw):
+            if cmd[0] == "git":  # package_root's probe: answer "not a checkout"
+                return _subprocess.CompletedProcess(cmd, 128, "", "not a git repository")
             calls.append((cmd, kw.get("cwd")))
             return _subprocess.CompletedProcess(cmd, 0, "", "")
 
@@ -260,4 +275,18 @@ class TestSessionScope:
             "skills": ["pkg-dev"],
             "model": "sonnet",
             "effort": "high",
+            "warnings": [res["scope"]["warnings"][0]],  # tmp_path is no checkout
         }
+
+
+def test_decision_comments_never_carry_the_scope(tmp_path):
+    """They may land on a public repo, and the scope holds local paths."""
+    logged = []
+    with patch("ge.run.check_requirements", return_value={"ok": True}), \
+         patch("ge.run.RoadmapStore.next_todo", lambda self: _DummyTask("a")), \
+         patch("ge.run.DecisionLog.append", lambda self, *a, **k: logged.append(k)), \
+         patch("ge.run._spawn_claude", return_value=SessionResult(0, 1, "", "boom", 0.1)):
+        res = run_roadmap("owner/repo", 1, cwd=tmp_path, max_sessions=2)
+    assert res["status"] == "escalated_error" and logged
+    assert all("scope" not in (k.get("metadata") or {}) for k in logged)
+    assert str(tmp_path) not in repr(logged)

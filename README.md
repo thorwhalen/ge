@@ -83,6 +83,12 @@ ge run-triage <TRACKING_REPO> <TRACKING_ISSUE> "owner/a,owner/b" --phase execute
 
 The runner launches `claude` with `--permission-mode auto` by default; pass `--mode bypass` if you have explicitly authorised `--dangerously-skip-permissions`. Between iterations the session is *gone* — the next one rehydrates state from GitHub.
 
+Each spawned session sees what the runner scopes for it. It starts in `--cwd` (default: the current directory), and that directory decides whose `CLAUDE.md` loads: give a package's checkout. A cwd outside every git checkout (a projects root, a scratch working folder) loads none of the work's instructions, so the runner warns about it. `--add-dirs a,b` adds directories the run must edit: their skills join the listing, but their `CLAUDE.md` files do not load, so the runner tells the session to Read them first. `--read-first` names further routing documents (relative to the cwd), `--skills` the skills to load by name, and `--model` / `--effort` pass through to `claude`. The JSON result carries the scope, for diagnosing a run later.
+
+```bash
+ge run-roadmap owner/repo 12 --cwd ~/proj/pkg --add-dirs ~/proj/lib --skills pkg-dev --model sonnet --effort high
+```
+
 ### The memory model
 
 | Store | Backing | Use for |

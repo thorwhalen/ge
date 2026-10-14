@@ -372,6 +372,11 @@ def run_roadmap(
     decisions_target: int = None,
     max_sessions: int = 50,
     cwd: str = None,
+    add_dirs: str = None,
+    read_first: str = None,
+    skills: str = None,
+    model: str = None,
+    effort: str = None,
 ):
     """Launch claude in a loop to drive a roadmap issue to completion.
 
@@ -386,6 +391,16 @@ def run_roadmap(
     Examples:
         ge run-roadmap owner/repo 1
         ge run-roadmap owner/repo 1 --mode bypass --max-sessions 20
+        ge run-roadmap owner/repo 1 --cwd ~/proj/pkg --skills pkg-dev --model sonnet
+
+    Scope (what each spawned session sees): `--cwd` (default: the current
+    directory) decides whose CLAUDE.md loads, so give a package's checkout
+    (a warning names a cwd outside every checkout);
+    `--add-dirs` (comma-separated, relative to the current directory) are
+    extra directories to edit, whose CLAUDE.md files become first Reads;
+    `--read-first` (relative to the cwd) and `--skills` (comma-separated) go
+    into the prompt; `--model` and `--effort` pass
+    through. The JSON result carries the scope.
     """
     from ge.run import cli_run_roadmap
 
@@ -397,6 +412,11 @@ def run_roadmap(
             decisions_target=decisions_target,
             max_sessions=max_sessions,
             cwd=cwd,
+            add_dirs=add_dirs,
+            read_first=read_first,
+            skills=skills,
+            model=model,
+            effort=effort,
         )
     )
 
@@ -410,6 +430,11 @@ def run_triage(
     mode: str = "auto",
     max_sessions: int = 50,
     cwd: str = None,
+    add_dirs: str = None,
+    read_first: str = None,
+    skills: str = None,
+    model: str = None,
+    effort: str = None,
 ):
     """Launch claude in a loop to drive a cross-repo triage backlog.
 
@@ -420,6 +445,15 @@ def run_triage(
     Examples:
         ge run-triage owner/track 9 "a/b,c/d" --phase analyze
         ge run-triage owner/track 9 "a/b,c/d" --phase execute --mode bypass
+
+    Scope (what each spawned session sees): `--cwd` (default: the current
+    directory) decides whose CLAUDE.md loads, so give a package's checkout
+    (a warning names a cwd outside every checkout);
+    `--add-dirs` (comma-separated, relative to the current directory) are
+    extra directories to edit, whose CLAUDE.md files become first Reads;
+    `--read-first` (relative to the cwd) and `--skills` (comma-separated) go
+    into the prompt; `--model` and `--effort` pass
+    through. The JSON result carries the scope.
     """
     from ge.run import cli_run_triage
 
@@ -432,6 +466,11 @@ def run_triage(
             mode=mode,
             max_sessions=max_sessions,
             cwd=cwd,
+            add_dirs=add_dirs,
+            read_first=read_first,
+            skills=skills,
+            model=model,
+            effort=effort,
         )
     )
 

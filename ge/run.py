@@ -135,7 +135,9 @@ class SessionScope:
 
     def __post_init__(self):
         if self.effort is not None and self.effort not in EFFORT_LEVELS:
-            raise ValueError(f"effort must be one of {EFFORT_LEVELS}, not {self.effort!r}")
+            raise ValueError(
+                f"effort must be one of {EFFORT_LEVELS}, not {self.effort!r}"
+            )
 
     @classmethod
     def build(
@@ -163,7 +165,10 @@ class SessionScope:
         if missing:
             raise ValueError(f"not a directory: {', '.join(missing)}")
         unloaded = [
-            str(d / name) for d in dirs for name in INSTRUCTION_FILES if (d / name).is_file()
+            str(d / name)
+            for d in dirs
+            for name in INSTRUCTION_FILES
+            if (d / name).is_file()
         ]
         given = [str((root / Path(r).expanduser()).resolve()) for r in read_first if r]
         warnings = () if package_root(root) else (OUTSIDE_A_CHECKOUT.format(cwd=root),)
@@ -193,11 +198,15 @@ class SessionScope:
         lines = []
         if self.read_first:
             lines.append(
-                "Before anything else, Read: " + ", ".join(f"`{r}`" for r in self.read_first) + "."
+                "Before anything else, Read: "
+                + ", ".join(f"`{r}`" for r in self.read_first)
+                + "."
             )
         if self.skills:
             lines.append(
-                "Also load these skills by name: " + ", ".join(f"`{k}`" for k in self.skills) + "."
+                "Also load these skills by name: "
+                + ", ".join(f"`{k}`" for k in self.skills)
+                + "."
             )
         return "\n".join(lines) + ("\n\n" if lines else "")
 

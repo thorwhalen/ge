@@ -1,0 +1,17 @@
+ge.context
+==========
+
+.. automodule:: ge.context
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      prepare_discussion
+      prepare_issue
+      prepare_pr
+      render_discussion_context
+      render_issue_context
+      render_pr_context
+   

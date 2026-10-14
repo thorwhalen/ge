@@ -1,4 +1,0 @@
-ge.util
-=======
-.. automodule:: ge.util
-   :members:

@@ -1,0 +1,21 @@
+ge.run
+======
+
+.. automodule:: ge.run
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      package_root
+      run_roadmap
+      run_triage
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SessionResult
+      SessionScope
+   

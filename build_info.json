@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "built_at": "2026-10-14T06:08:02Z",
+  "package": {
+    "name": "ge",
+    "version": "0.1.18",
+    "display_name": "ge",
+    "source": "pyproject.toml"
+  },
+  "git": {
+    "available": true,
+    "commit": "639fe26d9b2c7ff4e242690c01619d6adcfcdd36",
+    "short_commit": "639fe26",
+    "branch": "main",
+    "tags": [
+      "0.1.18"
+    ],
+    "dirty": false,
+    "remote_url": "https://github.com/thorwhalen/ge",
+    "commit_url": "https://github.com/thorwhalen/ge/commit/639fe26d9b2c7ff4e242690c01619d6adcfcdd36",
+    "error": null
+  },
+  "ci": {
+    "provider": "github",
+    "repository": "thorwhalen/ge",
+    "sha": "b25aaa6daab2feef0cb6077922496b2758073bb1",
+    "sha_in_history": true,
+    "ref": "refs/heads/main",
+    "ref_name": "main",
+    "run_id": "38520282592",
+    "run_url": "https://github.com/thorwhalen/ge/actions/runs/38520282592",
+    "server_url": "https://github.com"
+  },
+  "tools": {
+    "epythet": "0.2.17",
+    "sphinx": "9.1.0",
+    "docutils": "0.22.4",
+    "python": "3.12.15"
+  },
+  "config": {
+    "theme": "auto",
+    "html_theme": "sphinxawesome_theme",
+    "accent": "#356708",
+    "mode": "auto",
+    "api_generator": "autosummary",
+    "ignore": [
+      "tests/",
+      "scrap/",
+      "examples/"
+    ],
+    "agent_outputs": true,
+    "aggregates": [
+      "md"
+    ],
+    "ai_artifacts": true,
+    "provenance": true,
+    "docs_dir": "docsrc"
+  },
+  "site": {
+    "modules_documented": 8,
+    "objects_documented": 97
+  },
+  "pypi": {
+    "checked": true,
+    "latest": "0.1.18",
+    "relation": "same",
+    "error": null
+  },
+  "reproduce": "git clone https://github.com/thorwhalen/ge && cd ge\ngit checkout 639fe26d9b2c7ff4e242690c01619d6adcfcdd36\npip install \"epythet==0.2.17\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "warnings": [],
+  "alignment": {
+    "aligned": true,
+    "notes": []
+  }
+}

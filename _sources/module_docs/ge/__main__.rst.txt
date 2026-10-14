@@ -1,4 +1,0 @@
-ge.__main__
-===========
-.. automodule:: ge.__main__
-   :members:

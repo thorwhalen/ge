@@ -1,4 +1,0 @@
-ge
-==
-.. automodule:: ge
-   :members:

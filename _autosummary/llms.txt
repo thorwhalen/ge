@@ -1,0 +1,19 @@
+# ge
+
+> Github Expert - Agentic tools for github
+
+
+## Pages in this subsection
+
+- [ge](ge.html.md): ge: GitHub Engineering tools for AI agents.
+- [ge.analysis](ge.analysis.html.md): Issue and PR analysis: staleness, relevance, and state assessment.
+- [ge.context](ge.context.html.md): Context assembly and rendering.
+- [ge.github](ge.github.html.md): GitHub data fetching via gh CLI.
+- [ge.media](ge.media.html.md): Media download and video frame extraction.
+- [ge.memory](ge.memory.html.md): GitHub-backed durable memory for autonomous agent execution.
+- [ge.run](ge.run.html.md): Autonomous-execution runner — Layer 3.
+- [ge.util](ge.util.html.md): Internal utilities: gh CLI wrapper, subprocess helpers, URL parsing.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

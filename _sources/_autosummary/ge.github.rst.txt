@@ -1,0 +1,25 @@
+ge.github
+=========
+
+.. automodule:: ge.github
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      find_related_commits
+      find_related_prs
+      get_comments
+      get_commit_status
+      get_default_branch
+      get_discussion
+      get_file_at_ref
+      get_issue
+      get_pr
+      get_pr_diff
+      get_pr_files
+      get_review_comments
+      get_reviews
+      get_timeline
+   

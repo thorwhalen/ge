@@ -1,0 +1,59 @@
+﻿ge
+==
+
+.. automodule:: ge
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      prepare
+      prepare_issue
+      prepare_pr
+      prepare_discussion
+      analyze_issue
+      analyze_pr
+      get_issue
+      get_pr
+      get_comments
+      get_pr_diff
+      get_discussion
+      find_related_prs
+      find_related_commits
+      process_all_media
+      extract_video_frames
+      describe_images
+      copy_images_to_clipboard
+      resolve_target
+      install_skills
+      uninstall_skills
+      github_memory
+      check_requirements
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      RoadmapStore
+      DecisionLog
+      TriageBacklog
+      TaskState
+      TaskRecord
+      TriageVerdict
+      TriageEntry
+      Decision
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   analysis
+   context
+   github
+   media
+   memory
+   run
+   util

@@ -1,4 +1,0 @@
-ge.context
-==========
-.. automodule:: ge.context
-   :members:

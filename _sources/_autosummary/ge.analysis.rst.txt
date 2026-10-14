@@ -1,0 +1,14 @@
+ge.analysis
+===========
+
+.. automodule:: ge.analysis
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      analyze_issue
+      analyze_pr
+      check_referenced_files
+   

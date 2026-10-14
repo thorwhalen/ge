@@ -14,7 +14,7 @@
 - **`ge/__init__.py`** — Public facade (`prepare()`, `resolve_target()`, etc.)
 - **`ge/__main__.py`** — CLI via argh. SSOT: `_cli_commands` list
 - **`ge/memory.py`** — GitHub-backed durable memory: `RoadmapStore`, `DecisionLog`, `TriageBacklog` (Mapping/Iterable facades over `gh`); `github_memory()` factory; local `.ge/cache/` snapshot.
-- **`ge/run.py`** — Autonomous runner. `run_roadmap()` / `run_triage()` launch headless `claude -p` in a loop; permission mode (`auto` / `bypass`) is set here, not in any skill.
+- **`ge/run.py`** — Autonomous runner. `run_roadmap()` / `run_triage()` launch headless `claude -p` in a loop; permission mode (`auto` / `bypass`) is set here, not in any skill. So is each spawned session's scope (`SessionScope`: cwd defaulting to the package root, `--add-dir`s only for what the run edits, their `CLAUDE.md` files and any routing documents as first Reads, skills named in the prompt, `--model`/`--effort`); the run's result carries it (#9).
 - **`ge/data/skills/`** — Claude Code skills (symlinked into `.claude/skills/`). Includes `ge-autonomous-execution`, `ge-roadmap-execution`, and `ge-cross-repo-triage` for unattended runs.
 
 ## Conventions

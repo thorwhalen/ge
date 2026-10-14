@@ -14,6 +14,15 @@ The permission-mode choice (``auto`` vs ``bypass``) lives here because
 SKILL.md files cannot set ``--permission-mode`` — that is a launch-time
 flag on ``claude``.
 
+What a spawned session can see is decided here too (:class:`SessionScope`):
+the cwd picks which ``CLAUDE.md`` files load (the cwd's and its ancestors'), an
+``--add-dir`` contributes its skills but never its ``CLAUDE.md``, and each one
+widens the skill listing toward the budget past which descriptions are dropped
+silently. So the runner defaults the cwd to the package root, adds directories
+only when asked, puts any add-dir's ``CLAUDE.md`` and the requested routing
+documents into the prompt as the first Read, names the skills to load, and
+returns the scope with the run so a later diagnosis can see it.
+
 Token / context exhaustion is *not* a failure: it ends the current
 session; the loop's next iteration just rehydrates and continues. A
 session terminated by the permission-denial cap *is* a failure: the
@@ -53,6 +62,136 @@ PERMISSION_MODES = {
 
 DEFAULT_MAX_SESSIONS = 50
 DEFAULT_SESSION_TIMEOUT_SEC = 60 * 60 * 2  # 2h hard ceiling per session
+
+#: The instruction files a cwd loads; an add-dir's are listed for the first Read.
+INSTRUCTION_FILES = ("CLAUDE.md", ".claude/CLAUDE.md")
+
+#: ``claude --effort`` levels.
+EFFORT_LEVELS = ("low", "medium", "high", "xhigh", "max")
+
+
+def _git_root(path: Path) -> Optional[Path]:
+    """The top of the git checkout holding *path*, or ``None``."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    top = proc.stdout.strip()
+    return Path(top) if proc.returncode == 0 and top else None
+
+
+def package_root(path: str | Path | None = None) -> Path:
+    """The package root to start a session in: the git checkout holding *path*
+    (default: the current directory), else *path* itself.
+
+    A session's ``CLAUDE.md`` comes from its cwd and the cwd's ancestors, so a
+    subdirectory would still load the package's, but a projects root above every
+    package loads none of them: the checkout's top is the one that is right.
+    """
+    here = Path(path if path is not None else os.getcwd()).expanduser().resolve()
+    return _git_root(here) or here
+
+
+@dataclass(frozen=True)
+class SessionScope:
+    """What one spawned ``claude`` session can see, decided by the runner.
+
+    - ``cwd``: where the session starts, so whose ``CLAUDE.md`` loads (see
+      :func:`package_root` for the default).
+    - ``add_dirs``: further directories the run must *edit*, passed as
+      ``--add-dir``. Each one adds its skills to the listing; none adds its
+      ``CLAUDE.md``, which is why those become first Reads.
+    - ``read_first``: routing documents the prompt tells the session to Read
+      before anything else (paths, absolute or relative to ``cwd``).
+    - ``skills``: skills to load by name, beyond the runner's own. A skill named
+      in the prompt is invocable even when the listing shows it name-only.
+    - ``model`` / ``effort``: ``claude --model`` / ``--effort``, when set.
+
+    >>> scope = SessionScope(cwd=Path("/w/pkg"), add_dirs=(Path("/w/lib"),), model="opus")
+    >>> scope.cli_args()
+    ('--add-dir', '/w/lib', '--model', 'opus')
+    """
+
+    cwd: Path
+    add_dirs: tuple[Path, ...] = ()
+    read_first: tuple[str, ...] = ()
+    skills: tuple[str, ...] = ()
+    model: Optional[str] = None
+    effort: Optional[str] = None
+
+    def __post_init__(self):
+        if self.effort is not None and self.effort not in EFFORT_LEVELS:
+            raise ValueError(f"effort must be one of {EFFORT_LEVELS}, not {self.effort!r}")
+
+    @classmethod
+    def build(
+        cls,
+        *,
+        cwd: str | Path | None = None,
+        add_dirs: Iterable[str | Path] = (),
+        read_first: Iterable[str] = (),
+        skills: Iterable[str] = (),
+        model: Optional[str] = None,
+        effort: Optional[str] = None,
+    ) -> "SessionScope":
+        """A scope from loose arguments: the cwd resolved (:func:`package_root`
+        when ``None``, as given otherwise), add-dirs resolved, every add-dir's
+        instruction file added to ``read_first``."""
+        root = package_root() if cwd is None else Path(cwd).expanduser().resolve()
+        dirs = tuple(dict.fromkeys(Path(d).expanduser().resolve() for d in add_dirs))
+        dirs = tuple(d for d in dirs if d != root)
+        unloaded = [
+            str(d / name) for d in dirs for name in INSTRUCTION_FILES if (d / name).is_file()
+        ]
+        reads = tuple(dict.fromkeys([*unloaded, *(r for r in read_first if r)]))
+        return cls(
+            cwd=root,
+            add_dirs=dirs,
+            read_first=reads,
+            skills=tuple(dict.fromkeys(s for s in skills if s)),
+            model=model or None,
+            effort=effort or None,
+        )
+
+    def cli_args(self) -> tuple[str, ...]:
+        """The ``claude`` flags this scope adds (after ``-p`` and the permission flags)."""
+        args: list[str] = []
+        for d in self.add_dirs:
+            args += ["--add-dir", str(d)]
+        if self.model:
+            args += ["--model", self.model]
+        if self.effort:
+            args += ["--effort", self.effort]
+        return tuple(args)
+
+    def prompt_preamble(self) -> str:
+        """The lines that open the prompt: the first Reads, then the skills to load."""
+        lines = []
+        if self.read_first:
+            lines.append(
+                "Before anything else, Read: " + ", ".join(f"`{r}`" for r in self.read_first) + "."
+            )
+        if self.skills:
+            lines.append(
+                "Also load these skills by name: " + ", ".join(f"`{k}`" for k in self.skills) + "."
+            )
+        return "\n".join(lines) + ("\n\n" if lines else "")
+
+    def as_dict(self) -> dict:
+        """JSON-ready, for the run's result and its decision log."""
+        return {
+            "cwd": str(self.cwd),
+            "add_dirs": [str(d) for d in self.add_dirs],
+            "read_first": list(self.read_first),
+            "skills": list(self.skills),
+            "model": self.model,
+            "effort": self.effort,
+        }
 
 
 @dataclass
@@ -209,15 +348,38 @@ def _run_loop(
     build_prompt,
     mode: str,
     max_sessions: int,
-    cwd: Optional[Path],
+    scope: SessionScope,
     on_session=None,
 ) -> dict:
     """Generic outer loop: spawn → check → repeat until done or escalate.
 
     ``is_done`` returns True when there is no more work. ``build_prompt``
-    returns the headless prompt for one iteration. ``on_session`` is an
-    optional callback for telemetry.
+    returns the headless prompt for one iteration; ``scope``'s preamble opens
+    it and its flags and cwd start the session. ``on_session`` is an optional
+    callback for telemetry. Every result carries ``scope``.
     """
+    result_dict = _loop(
+        decisions=decisions,
+        is_done=is_done,
+        build_prompt=lambda: scope.prompt_preamble() + build_prompt(),
+        mode=mode,
+        max_sessions=max_sessions,
+        scope=scope,
+        on_session=on_session,
+    )
+    return {**result_dict, "scope": scope.as_dict()}
+
+
+def _loop(
+    *,
+    decisions: DecisionLog,
+    is_done,
+    build_prompt,
+    mode: str,
+    max_sessions: int,
+    scope: SessionScope,
+    on_session=None,
+) -> dict:
     iteration = 0
     retries_used = 0
     while iteration < max_sessions:
@@ -225,7 +387,9 @@ def _run_loop(
             return {"status": "completed", "iterations": iteration}
         iteration += 1
         prompt = build_prompt()
-        result = _spawn_claude(prompt, mode=mode, cwd=cwd)
+        result = _spawn_claude(
+            prompt, mode=mode, cwd=scope.cwd, extra_args=scope.cli_args()
+        )
         result.iteration = iteration
         if on_session is not None:
             on_session(result)
@@ -248,6 +412,7 @@ def _run_loop(
                         metadata={
                             "iteration": iteration,
                             "returncode": result.returncode,
+                            "scope": scope.as_dict(),
                         },
                     )
                 except Exception:
@@ -258,7 +423,7 @@ def _run_loop(
                     "Stopping: denial cap hit twice in a row",
                     rationale="Two consecutive headless sessions terminated by "
                     "the permission-denial cap. Escalating to user.",
-                    metadata={"iteration": iteration},
+                    metadata={"iteration": iteration, "scope": scope.as_dict()},
                 )
             except Exception:
                 pass
@@ -278,6 +443,7 @@ def _run_loop(
                     "iteration": iteration,
                     "returncode": result.returncode,
                     "stderr_tail": result.stderr[-500:],
+                    "scope": scope.as_dict(),
                 },
             )
         except Exception:
@@ -300,6 +466,11 @@ def run_roadmap(
     decisions_target: Optional[int] = None,
     max_sessions: int = DEFAULT_MAX_SESSIONS,
     cwd: Optional[str | Path] = None,
+    add_dirs: Iterable[str | Path] = (),
+    read_first: Iterable[str] = (),
+    skills: Iterable[str] = (),
+    model: Optional[str] = None,
+    effort: Optional[str] = None,
     on_session=None,
 ) -> dict:
     """Drive a roadmap issue to completion.
@@ -319,16 +490,34 @@ def run_roadmap(
         decisions_target: issue/PR number to log decisions on. Defaults
             to ``roadmap_issue``.
         max_sessions: safety ceiling on total iterations.
-        cwd: working directory for the spawned ``claude`` (typically the
-            target repo's local checkout).
+        cwd: where the spawned ``claude`` starts, so whose ``CLAUDE.md`` it
+            loads. Defaults to the package root (the git checkout) of the
+            current directory: never pass a projects root holding many packages.
+        add_dirs: directories the run must edit besides ``cwd`` (``--add-dir``);
+            their ``CLAUDE.md`` files become first Reads, since an add-dir's
+            never loads.
+        read_first: routing documents the session must Read first.
+        skills: skills to load by name, beyond ``ge-autonomous-execution`` and
+            ``ge-roadmap-execution``.
+        model, effort: ``claude --model`` / ``--effort``.
         on_session: optional callable invoked with each :class:`SessionResult`.
+
+    The result carries ``scope`` (:meth:`SessionScope.as_dict`), so a later
+    diagnosis can see what the sessions could see.
     """
     check_requirements()
     roadmap = RoadmapStore(repo, roadmap_issue)
     decisions = DecisionLog(
         repo, decisions_target if decisions_target is not None else roadmap_issue
     )
-    cwd_path = Path(cwd) if cwd else None
+    scope = SessionScope.build(
+        cwd=cwd,
+        add_dirs=add_dirs,
+        read_first=read_first,
+        skills=skills,
+        model=model,
+        effort=effort,
+    )
     return _run_loop(
         repo=repo,
         decisions=decisions,
@@ -340,7 +529,7 @@ def run_roadmap(
         ),
         mode=mode,
         max_sessions=max_sessions,
-        cwd=cwd_path,
+        scope=scope,
         on_session=on_session,
     )
 
@@ -354,6 +543,11 @@ def run_triage(
     mode: str = "auto",
     max_sessions: int = DEFAULT_MAX_SESSIONS,
     cwd: Optional[str | Path] = None,
+    add_dirs: Iterable[str | Path] = (),
+    read_first: Iterable[str] = (),
+    skills: Iterable[str] = (),
+    model: Optional[str] = None,
+    effort: Optional[str] = None,
     on_session=None,
 ) -> dict:
     """Drive a cross-repo triage backlog.
@@ -364,14 +558,23 @@ def run_triage(
     unactioned ``fixable`` entries remain.
 
     The triage backlog lives in ``tracking_repo#tracking_issue`` (see
-    :class:`ge.memory.TriageBacklog`).
+    :class:`ge.memory.TriageBacklog`). ``cwd``, ``add_dirs``, ``read_first``,
+    ``skills``, ``model`` and ``effort`` scope each spawned session, as for
+    :func:`run_roadmap`; the result carries ``scope``.
     """
     if phase not in ("analyze", "execute"):
         raise ValueError(f"phase must be 'analyze' or 'execute', got {phase!r}")
     check_requirements()
     backlog = TriageBacklog(tracking_repo, tracking_issue)
     decisions = DecisionLog(tracking_repo, tracking_issue)
-    cwd_path = Path(cwd) if cwd else None
+    scope = SessionScope.build(
+        cwd=cwd,
+        add_dirs=add_dirs,
+        read_first=read_first,
+        skills=skills,
+        model=model,
+        effort=effort,
+    )
 
     if phase == "analyze":
         # Phase A: typically one iteration. We still gate via the same
@@ -399,7 +602,7 @@ def run_triage(
             build_prompt=build,
             mode=mode,
             max_sessions=max_sessions,
-            cwd=cwd_path,
+            scope=scope,
             on_session=on_session,
         )
 
@@ -428,7 +631,7 @@ def run_triage(
         ),
         mode=mode,
         max_sessions=max_sessions,
-        cwd=cwd_path,
+        scope=scope,
         on_session=on_session,
     )
 
@@ -436,6 +639,11 @@ def run_triage(
 # ---------------------------------------------------------------------------
 # CLI dispatch entry points (wired in ge.__main__)
 # ---------------------------------------------------------------------------
+
+
+def _csv(text: Optional[str]) -> list[str]:
+    """A comma-separated CLI value as a list (``None`` or blank: empty)."""
+    return [part.strip() for part in (text or "").split(",") if part.strip()]
 
 
 def cli_run_roadmap(
@@ -446,6 +654,11 @@ def cli_run_roadmap(
     decisions_target: Optional[int] = None,
     max_sessions: int = DEFAULT_MAX_SESSIONS,
     cwd: Optional[str] = None,
+    add_dirs: Optional[str] = None,
+    read_first: Optional[str] = None,
+    skills: Optional[str] = None,
+    model: Optional[str] = None,
+    effort: Optional[str] = None,
 ) -> str:
     """Run the roadmap loop (CLI wrapper). Prints a per-iteration summary."""
 
@@ -465,6 +678,11 @@ def cli_run_roadmap(
         else int(decisions_target),
         max_sessions=int(max_sessions),
         cwd=cwd,
+        add_dirs=_csv(add_dirs),
+        read_first=_csv(read_first),
+        skills=_csv(skills),
+        model=model,
+        effort=effort,
         on_session=_print_session,
     )
     return json.dumps(res, indent=2)
@@ -479,6 +697,11 @@ def cli_run_triage(
     mode: str = "auto",
     max_sessions: int = DEFAULT_MAX_SESSIONS,
     cwd: Optional[str] = None,
+    add_dirs: Optional[str] = None,
+    read_first: Optional[str] = None,
+    skills: Optional[str] = None,
+    model: Optional[str] = None,
+    effort: Optional[str] = None,
 ) -> str:
     """Run the triage loop (CLI wrapper). ``repos`` is comma-separated."""
     repo_list = [r.strip() for r in repos.split(",") if r.strip()]
@@ -498,6 +721,11 @@ def cli_run_triage(
         mode=mode,
         max_sessions=int(max_sessions),
         cwd=cwd,
+        add_dirs=_csv(add_dirs),
+        read_first=_csv(read_first),
+        skills=_csv(skills),
+        model=model,
+        effort=effort,
         on_session=_print_session,
     )
     return json.dumps(res, indent=2)
@@ -505,6 +733,8 @@ def cli_run_triage(
 
 __all__ = [
     "SessionResult",
+    "SessionScope",
+    "package_root",
     "run_roadmap",
     "run_triage",
 ]

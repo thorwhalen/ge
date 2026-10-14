@@ -96,15 +96,16 @@ class TestRunRoadmap:
         states = [_DummyTask("a"), _DummyTask("b")]
         # next_todo will be called once per iteration check; provide enough
         results = [(0, ""), (0, "")]
-        for ctx in _patch_env(states, claude_results=results):
+        patchers = _patch_env(states, claude_results=results)
+        for ctx in patchers:
             ctx.start()
         try:
             res = run_roadmap("owner/repo", 1, max_sessions=10)
             assert res["status"] == "completed"
             assert res["iterations"] == 2
         finally:
-            for ctx in _patch_env(states, claude_results=results):
-                ctx.stop()  # best-effort cleanup; mock.patch is local-scoped
+            for ctx in patchers:  # the started ones: fresh patchers would leak these
+                ctx.stop()
 
     def test_denial_cap_retry_then_escalate(self):
         # Iter 1: kill. Iter 2 (retry): kill again. Escalate.
@@ -163,3 +164,100 @@ class TestRunTriage:
                 tracking_issue=1,
                 phase="nope",
             )
+
+
+# ---------------------------------------------------------------------------
+# Session scope (#9): the argv and cwd a spawn would use. Nothing is spawned.
+# ---------------------------------------------------------------------------
+
+import subprocess as _subprocess
+from pathlib import Path as _Path
+
+from ge.run import SessionScope, package_root
+
+
+def _git_repo(path):
+    path.mkdir(parents=True, exist_ok=True)
+    _subprocess.run(["git", "init", "-q", str(path)], check=True)
+    return path
+
+
+class TestSessionScope:
+    def test_cwd_defaults_to_the_package_root_not_a_subdirectory(self, tmp_path, monkeypatch):
+        pkg = _git_repo(tmp_path / "proj" / "t" / "pkg")
+        (pkg / "pkg" / "sub").mkdir(parents=True)
+        monkeypatch.chdir(pkg / "pkg" / "sub")
+        assert package_root() == pkg.resolve()
+        assert SessionScope.build().cwd == pkg.resolve()
+
+    def test_outside_a_checkout_the_directory_itself(self, tmp_path):
+        assert package_root(tmp_path) == tmp_path.resolve()
+
+    def test_an_add_dirs_claude_md_becomes_a_first_read(self, tmp_path):
+        pkg, lib, data = tmp_path / "pkg", tmp_path / "lib", tmp_path / "data"
+        for d in (pkg, lib, data):
+            d.mkdir()
+        (lib / "CLAUDE.md").write_text("routing")
+        scope = SessionScope.build(
+            cwd=pkg,
+            add_dirs=[lib, data, pkg],  # the cwd itself is not an add-dir
+            read_first=["docs/overview.md"],
+            skills=["pkg-dev", "pkg-dev"],
+        )
+        assert scope.add_dirs == (lib.resolve(), data.resolve())
+        assert scope.read_first == (str(lib.resolve() / "CLAUDE.md"), "docs/overview.md")
+        assert scope.skills == ("pkg-dev",)
+        preamble = scope.prompt_preamble()
+        assert preamble.startswith("Before anything else, Read: ")
+        assert "`pkg-dev`" in preamble
+
+    def test_an_empty_scope_adds_no_flags_and_no_preamble(self, tmp_path):
+        scope = SessionScope.build(cwd=tmp_path)
+        assert scope.cli_args() == () and scope.prompt_preamble() == ""
+
+    def test_effort_is_checked(self, tmp_path):
+        with pytest.raises(ValueError, match="effort"):
+            SessionScope.build(cwd=tmp_path, effort="huge")
+
+    def test_the_spawn_argv_and_cwd(self, tmp_path):
+        """What run_roadmap would exec, captured at subprocess.run: never spawned."""
+        lib = tmp_path / "lib"
+        lib.mkdir()
+        (lib / "CLAUDE.md").write_text("routing")
+        calls = []
+
+        def fake_run(cmd, **kw):
+            calls.append((cmd, kw.get("cwd")))
+            return _subprocess.CompletedProcess(cmd, 0, "", "")
+
+        todo = iter([_DummyTask("a")])
+        with patch("ge.run.check_requirements", return_value={"ok": True}), \
+             patch("ge.run.RoadmapStore.next_todo", lambda self: next(todo, None)), \
+             patch("ge.run.DecisionLog.append", lambda self, *a, **k: None), \
+             patch("ge.run._claude_binary", return_value="/fake/claude"), \
+             patch("ge.run.subprocess.run", side_effect=fake_run):
+            res = run_roadmap(
+                "owner/repo", 1, cwd=tmp_path, add_dirs=[lib],
+                skills=["pkg-dev"], model="sonnet", effort="high", max_sessions=3,
+            )
+        assert res["status"] == "completed" and len(calls) == 1
+        (cmd, cwd), = calls
+        assert cwd == str(tmp_path.resolve())
+        assert cmd[:2] == ["/fake/claude", "-p"]
+        prompt = cmd[2]
+        assert prompt.startswith(f"Before anything else, Read: `{lib.resolve() / 'CLAUDE.md'}`.")
+        assert "`pkg-dev`" in prompt and "ge-roadmap-execution" in prompt
+        assert cmd[3:] == [
+            "--permission-mode", "auto",
+            "--add-dir", str(lib.resolve()),
+            "--model", "sonnet",
+            "--effort", "high",
+        ]
+        assert res["scope"] == {
+            "cwd": str(tmp_path.resolve()),
+            "add_dirs": [str(lib.resolve())],
+            "read_first": [str(lib.resolve() / "CLAUDE.md")],
+            "skills": ["pkg-dev"],
+            "model": "sonnet",
+            "effort": "high",
+        }

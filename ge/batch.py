@@ -75,7 +75,9 @@ def render_body(body: str, numbers: Mapping[str, int]) -> str:
     >>> render_body("after {#A}, before {#B}, literal {{#A}}", {"A": 7})
     'after #7, before {#B}, literal {#A}'
     """
-    text = REF_PATTERN.sub(lambda m: f"#{numbers[m[1]]}" if m[1] in numbers else m[0], body or "")
+    text = REF_PATTERN.sub(
+        lambda m: f"#{numbers[m[1]]}" if m[1] in numbers else m[0], body or ""
+    )
     return _ESCAPED_REF.sub(r"\1", text)
 
 
@@ -120,22 +122,35 @@ def validate(records: Iterable[Mapping]) -> list[str]:
             problems.append(f"{name}: 'body' must be a string")
         for field in _LIST_FIELDS:
             v = r.get(field, [])
-            if not isinstance(v, list) or any(isinstance(x, bool) or not isinstance(x, (str, int)) for x in v):
-                problems.append(f"{name}: {field!r} must be a list of strings or numbers, got {v!r}")
+            if not isinstance(v, list) or any(
+                isinstance(x, bool) or not isinstance(x, (str, int)) for x in v
+            ):
+                problems.append(
+                    f"{name}: {field!r} must be a list of strings or numbers, got {v!r}"
+                )
         m = r.get("milestone")
         if m is not None and (isinstance(m, bool) or not isinstance(m, int)):
-            problems.append(f"{name}: 'milestone' must be a milestone number, got {m!r}")
+            problems.append(
+                f"{name}: 'milestone' must be a milestone number, got {m!r}"
+            )
     if problems:  # the checks below assume well-typed records
         raise ValueError("invalid batch:\n  " + "\n  ".join(problems))
     for r in records:
         for dep in r.get("depends_on", ()):
             if str(dep) not in seen and not EXISTING_ISSUE.match(str(dep)):
-                problems.append(f"{r['key']}: depends_on {dep!r} is neither a key nor an issue")
+                problems.append(
+                    f"{r['key']}: depends_on {dep!r} is neither a key nor an issue"
+                )
         for ref in _refs(r.get("body", "")) - seen:
-            problems.append(f"{r['key']}: body refers to unknown key {{#{ref}}} (write {{{{#{ref}}}}} for a literal)")
+            problems.append(
+                f"{r['key']}: body refers to unknown key {{#{ref}}} (write {{{{#{ref}}}}} for a literal)"
+            )
     if problems:
         raise ValueError("invalid batch:\n  " + "\n  ".join(problems))
-    graph = {r["key"]: [str(d) for d in r.get("depends_on", ()) if str(d) in seen] for r in records}
+    graph = {
+        r["key"]: [str(d) for d in r.get("depends_on", ()) if str(d) in seen]
+        for r in records
+    }
     try:
         TopologicalSorter(graph).prepare()
     except CycleError as e:
@@ -158,11 +173,19 @@ def _normalize_repo(repo: str) -> str:
 
 
 def _load_map(path: Path | None, repo: str) -> dict:
-    state = {"repo": repo, "issues": {}, "edges": [], "edge_errors": [], "body_conflicts": []}
+    state = {
+        "repo": repo,
+        "issues": {},
+        "edges": [],
+        "edge_errors": [],
+        "body_conflicts": [],
+    }
     if path and path.exists():
         state.update(json.loads(path.read_text()))
         if state["repo"].lower() != repo.lower():
-            raise ValueError(f"{path} records a batch filed in {state['repo']}, not {repo}")
+            raise ValueError(
+                f"{path} records a batch filed in {state['repo']}, not {repo}"
+            )
     return state
 
 
@@ -208,7 +231,11 @@ def file_issues(
         return {k: v["number"] for k, v in issues.items()}
 
     def final_body(key):
-        return render_body(records[key].get("body", ""), numbers()) + "\n\n" + marker(records[key], batch)
+        return (
+            render_body(records[key].get("body", ""), numbers())
+            + "\n\n"
+            + marker(records[key], batch)
+        )
 
     def write(endpoint, method, body):
         out = api(endpoint, method=method, body=body)
@@ -216,7 +243,12 @@ def file_issues(
         return out
 
     def record_issue(key, issue, body_sha):
-        issues[key] = {"number": issue["number"], "url": issue["html_url"], "id": issue["id"], "body_sha": body_sha}
+        issues[key] = {
+            "number": issue["number"],
+            "url": issue["html_url"],
+            "id": issue["id"],
+            "body_sha": body_sha,
+        }
         _save_map(path, state)
         log(f"{key}  #{issue['number']}  {issue['html_url']}")
 
@@ -226,7 +258,9 @@ def file_issues(
     for page in range(1, adopt_pages + 1):
         if not missing:
             break
-        recent = api(f"repos/{repo}/issues?state=all&sort=created&direction=desc&per_page=100&page={page}")
+        recent = api(
+            f"repos/{repo}/issues?state=all&sort=created&direction=desc&per_page=100&page={page}"
+        )
         for issue in recent:
             for mark, key in list(missing.items()):
                 if mark in (issue.get("body") or "") and "pull_request" not in issue:
@@ -261,14 +295,20 @@ def file_issues(
             issues[key]["body_sha"] = _sha((made or {}).get("body") or body)
         else:  # someone edited it on GitHub: never overwrite silently
             conflicts.append(key)
-            log(f"{key}: #{issues[key]['number']} was edited on GitHub; not updated (force=True overwrites)")
+            log(
+                f"{key}: #{issues[key]['number']} was edited on GitHub; not updated (force=True overwrites)"
+            )
         _save_map(path, state)
     state["body_conflicts"] = conflicts
     _save_map(path, state)
 
     wanted = {(k, str(d)) for k in order for d in records[k].get("depends_on", ())}
-    state["edges"] = [e for e in state["edges"] if (e["blocked"], e["blocker"]) in wanted]
-    state["edge_errors"] = [e for e in state["edge_errors"] if (e["blocked"], e["blocker"]) in wanted]
+    state["edges"] = [
+        e for e in state["edges"] if (e["blocked"], e["blocker"]) in wanted
+    ]
+    state["edge_errors"] = [
+        e for e in state["edge_errors"] if (e["blocked"], e["blocker"]) in wanted
+    ]
     done = {(e["blocked"], e["blocker"]) for e in state["edges"]}
     for key in order:  # 3. dependency edges
         number = issues[key]["number"]
@@ -277,20 +317,28 @@ def file_issues(
         for dep in map(str, records[key].get("depends_on", ())):
             if (key, dep) in done:
                 continue
-            state["edge_errors"] = [e for e in state["edge_errors"] if (e["blocked"], e["blocker"]) != (key, dep)]
+            state["edge_errors"] = [
+                e
+                for e in state["edge_errors"]
+                if (e["blocked"], e["blocker"]) != (key, dep)
+            ]
             try:
                 if dep in issues:
                     blocker = issues[dep]["id"]
                 else:
                     m = EXISTING_ISSUE.match(dep)
-                    blocker = api(f"repos/{m['repo'] or repo}/issues/{m['number']}")["id"]
+                    blocker = api(f"repos/{m['repo'] or repo}/issues/{m['number']}")[
+                        "id"
+                    ]
                 if existing is None:
                     existing = {i["id"] for i in api(f"{endpoint}?per_page=100")}
                 if blocker not in existing:
                     write(endpoint, "POST", {"issue_id": blocker})
                     existing.add(blocker)
             except RuntimeError as e:
-                state["edge_errors"].append({"blocked": key, "blocker": dep, "error": str(e)})
+                state["edge_errors"].append(
+                    {"blocked": key, "blocker": dep, "error": str(e)}
+                )
                 _save_map(path, state)
                 log(f"{key}: blocked_by {dep} failed: {e}")
                 continue
@@ -308,10 +356,14 @@ def load_records(path: str | Path) -> list[dict]:
         try:
             import yaml
         except ImportError:
-            raise ImportError(f"{path} is YAML: pip install pyyaml, or give a .json file") from None
+            raise ImportError(
+                f"{path} is YAML: pip install pyyaml, or give a .json file"
+            ) from None
         data = yaml.safe_load(text)
     else:
         data = json.loads(text)
     if not isinstance(data, list):
-        raise ValueError(f"{path} must hold a list of records, got {type(data).__name__}")
+        raise ValueError(
+            f"{path} must hold a list of records, got {type(data).__name__}"
+        )
     return data

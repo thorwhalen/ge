@@ -48,7 +48,9 @@ def gh_api(
         raise ValueError("gh_api: pass params or body, not both")
     _check_gh()
     cmd = ["gh", "api", endpoint]
-    if method != "GET" or body is not None:  # gh would turn a GET with input into a POST
+    if (
+        method != "GET" or body is not None
+    ):  # gh would turn a GET with input into a POST
         cmd.extend(["-X", method])
     if paginate:
         cmd.append("--paginate")
@@ -60,7 +62,9 @@ def gh_api(
         stdin = json.dumps(body)
     result = subprocess.run(cmd, capture_output=True, text=True, input=stdin)
     if result.returncode != 0:
-        detail = " ".join(x for x in (result.stderr.strip(), result.stdout.strip()[:500]) if x)
+        detail = " ".join(
+            x for x in (result.stderr.strip(), result.stdout.strip()[:500]) if x
+        )
         raise RuntimeError(f"gh api {endpoint} failed: {detail}")
     if raw:
         return result.stdout

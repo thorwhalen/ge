@@ -312,11 +312,15 @@ def file_batch(
         force=force,
         pause=DEFAULT_PAUSE if pause is None else pause,
     )
-    print(f"\n{len(state['issues'])} issues, {len(state['edges'])} edges; map: {map_path}")
+    print(
+        f"\n{len(state['issues'])} issues, {len(state['edges'])} edges; map: {map_path}"
+    )
     for e in state["edge_errors"]:
         print(f"edge failed: {e['blocked']} blocked by {e['blocker']}: {e['error']}")
     for key in state["body_conflicts"]:
-        print(f"not updated (edited on GitHub; --force overwrites): {key} {state['issues'][key]['url']}")
+        print(
+            f"not updated (edited on GitHub; --force overwrites): {key} {state['issues'][key]['url']}"
+        )
     if state["edge_errors"] or state["body_conflicts"]:
         raise SystemExit(1)
 

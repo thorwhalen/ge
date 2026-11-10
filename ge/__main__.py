@@ -272,6 +272,7 @@ def file_batch(
     *,
     map_file: str = None,
     dry_run: bool = False,
+    force: bool = False,
     pause: float = None,
 ):
     """File a batch of related issues from a JSON (or YAML) list of records.
@@ -282,8 +283,10 @@ def file_batch(
     12, '#12', 'owner/repo#12'). Files them in dependency order, resolves
     {#KEY} to issue numbers, creates the blocked_by edges, and writes a map
     file (default: RECORDS.filed.json) that makes a rerun resume, re-send
-    edited bodies, and never file twice. --dry-run validates and prints the
-    order. Pause between writes: 1 second unless --pause is given.
+    edited records, and never file twice. A body edited on GitHub since it
+    was sent is not overwritten (listed, exit 1) unless --force. --dry-run
+    validates and prints the order. Pause between writes: 1 second unless
+    --pause is given.
 
     Examples:
         ge file-batch slices.json owner/repo
@@ -302,12 +305,19 @@ def file_batch(
         return
     map_path = map_file or str(Path(records).with_suffix(".filed.json"))
     state = file_issues(
-        recs, repo, map_path=map_path, pause=DEFAULT_PAUSE if pause is None else pause
+        recs,
+        repo,
+        map_path=map_path,
+        batch=Path(records).stem,
+        force=force,
+        pause=DEFAULT_PAUSE if pause is None else pause,
     )
     print(f"\n{len(state['issues'])} issues, {len(state['edges'])} edges; map: {map_path}")
     for e in state["edge_errors"]:
         print(f"edge failed: {e['blocked']} blocked by {e['blocker']}: {e['error']}")
-    if state["edge_errors"]:
+    for key in state["body_conflicts"]:
+        print(f"not updated (edited on GitHub; --force overwrites): {key} {state['issues'][key]['url']}")
+    if state["edge_errors"] or state["body_conflicts"]:
         raise SystemExit(1)
 
 

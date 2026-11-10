@@ -95,7 +95,8 @@ back into the body — the body is the artifact, the thread is the history.
   and run `ge file-batch records.json OWNER/REPO` (`--dry-run` first). It files them in
   dependency order, turns each `{#KEY}` into the issue number, creates the `blocked_by`
   edges, and keeps a map file (`records.filed.json`) that makes a rerun resume and that
-  any write-back step can read. Each issue still follows the rules above.
+  any write-back step can read. A rerun re-sends edited records but never overwrites a
+  body someone edited on GitHub (`--force` does). Each issue still follows the rules above.
 
 ## Tone for someone outside the team
 

@@ -14,21 +14,25 @@ types, unique keys, known references, no dependency cycle), then:
 1. creates the issues in dependency order, replacing each ``{#KEY}`` in a body
    with the ``#number`` that issue became (write ``{{#x}}`` for a literal ``{#x}``);
 2. updates every body whose final text differs from what was last sent: the
-   ones that referred to a key filed later, and any record edited since;
+   ones that referred to a key filed later, and any record edited since. A body
+   someone has edited on GitHub since is never overwritten: it is listed in
+   ``body_conflicts`` instead (``force=True`` overwrites);
 3. creates a GitHub ``blocked_by`` dependency edge for every ``depends_on``
    that the blocked issue does not already have.
 
 ``depends_on`` takes batch keys and existing issues (``12``, ``"#12"``,
 ``"owner/repo#12"``). Progress is written to a map file after every step, so
 an interrupted run is resumed by running it again. Each body carries a hidden
-marker for its record, so an issue created just before a crash (or a lost map)
-is found among the repository's recent issues and adopted, not filed twice.
+marker for its record (its key and the batch name), so an issue created just
+before a crash (or after a lost map) is found among the repository's recent
+issues and adopted, not filed twice.
 The map's shape is stable, for writing the links back into a source document::
 
     {"repo": "owner/repo",
      "issues": {"A": {"number": 7, "url": "...", "id": 123, "body_sha": "..."}},
      "edges": [{"blocked": "B", "blocker": "A"}],
-     "edge_errors": [{"blocked": "B", "blocker": "#12", "error": "..."}]}
+     "edge_errors": [{"blocked": "B", "blocker": "#12", "error": "..."}],
+     "body_conflicts": ["C"]}
 
 The batch knows nothing about any document format: produce the records however you like.
 """
@@ -49,8 +53,8 @@ _ESCAPED_REF = re.compile(r"\{(\{#[^{}\s]+\})\}")
 EXISTING_ISSUE = re.compile(r"^(?:(?P<repo>[\w.-]+/[\w.-]+))?#?(?P<number>\d+)$")
 #: Seconds after each write to GitHub; it throttles bursts of content creation.
 DEFAULT_PAUSE = 1.0
-#: How many of the repository's most recent issues are searched for an unrecorded one.
-ADOPT_WINDOW = 100
+#: Pages of 100 of the repository's most recent issues searched for an unrecorded one.
+ADOPT_PAGES = 3
 _LIST_FIELDS = ("depends_on", "labels", "assignees")
 
 Api = Callable[..., object]  # gh_api's signature: (endpoint, *, method=..., body=...)
@@ -75,9 +79,15 @@ def render_body(body: str, numbers: Mapping[str, int]) -> str:
     return _ESCAPED_REF.sub(r"\1", text)
 
 
-def marker(record: Mapping) -> str:
-    """Hidden line identifying the record an issue was filed from (key and title)."""
-    digest = hashlib.sha1(f"{record['key']}\0{record['title']}".encode()).hexdigest()[:12]
+def marker(record: Mapping, batch: str | None = None) -> str:
+    """Hidden line identifying the record an issue was filed from.
+
+    It hashes the key and the *batch* name, so two batches using the same keys
+    in one repository never adopt each other's issues; without a batch name the
+    title stands in for it.
+    """
+    scope = record["title"] if batch is None else batch
+    digest = hashlib.sha1(f"{record['key']}\0{scope}".encode()).hexdigest()[:12]
     return f"<!-- ge-batch:{digest} -->"
 
 
@@ -148,7 +158,7 @@ def _normalize_repo(repo: str) -> str:
 
 
 def _load_map(path: Path | None, repo: str) -> dict:
-    state = {"repo": repo, "issues": {}, "edges": [], "edge_errors": []}
+    state = {"repo": repo, "issues": {}, "edges": [], "edge_errors": [], "body_conflicts": []}
     if path and path.exists():
         state.update(json.loads(path.read_text()))
         if state["repo"].lower() != repo.lower():
@@ -159,8 +169,11 @@ def _load_map(path: Path | None, repo: str) -> dict:
 def _save_map(path: Path | None, state: Mapping) -> None:
     """Write the map atomically: a crash mid-write leaves the previous map intact."""
     if path:
-        tmp = path.with_name(path.name + ".tmp")
-        tmp.write_text(json.dumps(state, indent=2) + "\n")
+        tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+        with open(tmp, "w") as f:
+            f.write(json.dumps(state, indent=2) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
         os.replace(tmp, path)
 
 
@@ -169,9 +182,11 @@ def file_issues(
     repo: str,
     *,
     map_path: str | Path | None = None,
+    batch: str | None = None,
+    force: bool = False,
     api: Api | None = None,
     pause: float = DEFAULT_PAUSE,
-    adopt_window: int = ADOPT_WINDOW,
+    adopt_pages: int = ADOPT_PAGES,
     sleep: Callable[[float], None] = time.sleep,
     log: Callable[[str], None] = print,
 ) -> dict:
@@ -193,27 +208,32 @@ def file_issues(
         return {k: v["number"] for k, v in issues.items()}
 
     def final_body(key):
-        return render_body(records[key].get("body", ""), numbers()) + "\n\n" + marker(records[key])
+        return render_body(records[key].get("body", ""), numbers()) + "\n\n" + marker(records[key], batch)
 
     def write(endpoint, method, body):
         out = api(endpoint, method=method, body=body)
         sleep(pause)
         return out
 
-    def record_issue(key, made, sent):
-        issues[key] = {"number": made["number"], "url": made["html_url"], "id": made["id"], "body_sha": _sha(sent)}
+    def record_issue(key, issue, body_sha):
+        issues[key] = {"number": issue["number"], "url": issue["html_url"], "id": issue["id"], "body_sha": body_sha}
         _save_map(path, state)
-        log(f"{key}  #{made['number']}  {made['html_url']}")
+        log(f"{key}  #{issue['number']}  {issue['html_url']}")
 
-    # 0. adopt issues created by an earlier run that died before saving the map
-    missing = {marker(records[k]): k for k in order if k not in issues}
-    if missing and adopt_window:
-        recent = api(f"repos/{repo}/issues?state=all&sort=created&direction=desc&per_page={adopt_window}")
+    # 0. adopt issues created by an earlier run that died before saving the map;
+    # what was sent is unknown, so body_sha stays None (step 2 handles it)
+    missing = {marker(records[k], batch): k for k in order if k not in issues}
+    for page in range(1, adopt_pages + 1):
+        if not missing:
+            break
+        recent = api(f"repos/{repo}/issues?state=all&sort=created&direction=desc&per_page=100&page={page}")
         for issue in recent:
             for mark, key in list(missing.items()):
                 if mark in (issue.get("body") or "") and "pull_request" not in issue:
-                    record_issue(key, issue, issue["body"])
+                    record_issue(key, issue, None)
                     del missing[mark]
+        if len(recent) < 100:
+            break
 
     for key in order:  # 1. create
         if key in issues:
@@ -223,15 +243,32 @@ def file_issues(
         for field in ("labels", "assignees", "milestone"):
             if r.get(field):
                 payload[field] = r[field]
-        record_issue(key, write(f"repos/{repo}/issues", "POST", payload), payload["body"])
+        made = write(f"repos/{repo}/issues", "POST", payload)
+        record_issue(key, made, _sha(made.get("body") or payload["body"]))
 
-    for key in order:  # 2. bodies with forward references, or edited since they were sent
-        body = final_body(key)
-        if _sha(body) != issues[key].get("body_sha"):
-            write(f"repos/{repo}/issues/{issues[key]['number']}", "PATCH", {"body": body})
-            issues[key]["body_sha"] = _sha(body)
-            _save_map(path, state)
+    conflicts = []
+    for key in order:  # 2. bodies with forward references, or records edited since
+        body, known = final_body(key), issues[key].get("body_sha")
+        if _sha(body) == known:
+            continue
+        endpoint = f"repos/{repo}/issues/{issues[key]['number']}"
+        current = api(endpoint).get("body") or ""
+        ours = _sha(current) == known or (known is None and REF_PATTERN.search(current))
+        if _sha(current) == _sha(body):
+            issues[key]["body_sha"] = _sha(current)
+        elif ours or force:
+            made = write(endpoint, "PATCH", {"body": body})
+            issues[key]["body_sha"] = _sha((made or {}).get("body") or body)
+        else:  # someone edited it on GitHub: never overwrite silently
+            conflicts.append(key)
+            log(f"{key}: #{issues[key]['number']} was edited on GitHub; not updated (force=True overwrites)")
+        _save_map(path, state)
+    state["body_conflicts"] = conflicts
+    _save_map(path, state)
 
+    wanted = {(k, str(d)) for k in order for d in records[k].get("depends_on", ())}
+    state["edges"] = [e for e in state["edges"] if (e["blocked"], e["blocker"]) in wanted]
+    state["edge_errors"] = [e for e in state["edge_errors"] if (e["blocked"], e["blocker"]) in wanted]
     done = {(e["blocked"], e["blocker"]) for e in state["edges"]}
     for key in order:  # 3. dependency edges
         number = issues[key]["number"]
@@ -248,7 +285,7 @@ def file_issues(
                     m = EXISTING_ISSUE.match(dep)
                     blocker = api(f"repos/{m['repo'] or repo}/issues/{m['number']}")["id"]
                 if existing is None:
-                    existing = {i["id"] for i in api(endpoint)}
+                    existing = {i["id"] for i in api(f"{endpoint}?per_page=100")}
                 if blocker not in existing:
                     write(endpoint, "POST", {"issue_id": blocker})
                     existing.add(blocker)

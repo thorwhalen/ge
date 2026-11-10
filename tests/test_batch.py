@@ -26,8 +26,9 @@ class FakeApi:
             self.issues[n] = {"number": n, "id": n * 10, "html_url": f"https://x/issues/{n}", "body": body["body"]}
             return dict(self.issues[n])
         if method == "PATCH":
-            self.issues[int(path.rsplit("/", 1)[1])]["body"] = body["body"]
-            return {}
+            n = int(path.rsplit("/", 1)[1])
+            self.issues[n]["body"] = body["body"]
+            return dict(self.issues[n])
         if path.endswith("/blocked_by"):
             n = int(path.split("/")[-3])
             if method == "POST":
@@ -37,9 +38,12 @@ class FakeApi:
                 return {}
             return [{"id": i} for i in self.blocked_by.get(n, [])]
         if method == "GET" and path.endswith("/issues"):  # recent issues, newest first
-            return [dict(i) for i in sorted(self.issues.values(), key=lambda i: -i["number"])]
-        if method == "GET":  # one existing issue
-            return {"id": int(path.rsplit("/", 1)[1]) * 10}
+            page = int(endpoint.split("page=")[-1]) if "&page=" in endpoint else 1
+            ordered = sorted(self.issues.values(), key=lambda i: -i["number"])
+            return [dict(i) for i in ordered[(page - 1) * 100 : page * 100]]
+        if method == "GET":  # one issue: ours if we hold it, else an existing one
+            n = int(path.rsplit("/", 1)[1])
+            return dict(self.issues.get(n) or {"number": n, "id": n * 10, "body": ""})
         raise AssertionError((method, endpoint))
 
     def writes(self, method, suffix=""):
@@ -228,3 +232,43 @@ def test_gh_api_sends_a_json_body_on_stdin(monkeypatch):
     assert json.loads(seen["input"]) == {"labels": ["x"], "id": 3}
     with pytest.raises(ValueError):
         util.gh_api("x", params={"a": 1}, body={"b": 2})
+
+
+def test_a_body_edited_on_github_is_not_overwritten_unless_forced(tmp_path):
+    map_path = tmp_path / "m.json"
+    api, _ = _file(api=FakeApi(), map_path=map_path)
+    api.issues[102]["body"] = "- [x] ticked by a person"  # edited on GitHub
+    edited = [dict(r, body="Typo fixed, after {#B}.") if r["key"] == "C" else r for r in RECORDS]
+    _, state = _file(edited, api=api, map_path=map_path)
+    assert state["body_conflicts"] == ["C"] and api.issues[102]["body"] == "- [x] ticked by a person"
+    _, state = _file(edited, api=api, map_path=map_path, force=True)
+    assert state["body_conflicts"] == [] and _text(api, 102) == "Typo fixed, after #101."
+
+
+def test_adoption_skips_pull_requests_and_pages_through_recent_issues(tmp_path):
+    api = FakeApi()
+    _file(api=api)
+    mark = batch.marker(RECORDS[1])  # A's marker
+    for n in range(200, 330):  # 130 newer issues push A (#100) to page 2
+        api.issues[n] = {"number": n, "id": n * 10, "html_url": f"https://x/{n}", "body": ""}
+    api.issues[400] = {"number": 400, "id": 4000, "html_url": "https://x/pull/400", "body": mark, "pull_request": {}}
+    _, state = _file(api=api, map_path=tmp_path / "m.json")
+    assert state["issues"]["A"]["number"] == 100  # not the PR, and found on page 2
+    assert len(api.writes("POST", "/issues")) == 3
+
+
+def test_markers_are_scoped_by_batch_name():
+    a = {"key": "A", "title": "Parser"}
+    assert batch.marker(a, "plan-1") != batch.marker(a, "plan-2")
+    assert batch.marker(a, "plan-1") == batch.marker(dict(a, title="Renamed"), "plan-1")
+
+
+def test_edges_of_a_removed_dependency_leave_the_map(tmp_path):
+    map_path = tmp_path / "m.json"
+    api = FakeApi(edge_error="gh api failed: HTTP 404")
+    _file(api=api, map_path=map_path)
+    api.edge_error = None
+    trimmed = [dict(r, depends_on=["A"]) if r["key"] == "B" else r for r in RECORDS]
+    _, state = _file(trimmed, api=api, map_path=map_path)
+    assert state["edge_errors"] == []
+    assert {(e["blocked"], e["blocker"]) for e in state["edges"]} == {("B", "A"), ("C", "B")}

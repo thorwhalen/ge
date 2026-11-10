@@ -272,16 +272,18 @@ def file_batch(
     *,
     map_file: str = None,
     dry_run: bool = False,
-    pause: float = 1.0,
+    pause: float = None,
 ):
     """File a batch of related issues from a JSON (or YAML) list of records.
 
-    Each record: key, title, body (may refer to other records as {#KEY}),
-    and optionally labels, assignees, milestone, depends_on (batch keys or
-    existing issues: 12, '#12', 'owner/repo#12'). Files them in dependency
-    order, resolves {#KEY} to issue numbers, creates the blocked_by edges,
-    and writes a map file (default: RECORDS.filed.json) that makes a rerun
-    resume instead of filing twice. --dry-run validates and prints the order.
+    Each record: key, title, body (may refer to other records as {#KEY};
+    {{#KEY}} stays literal), and optionally labels, assignees (lists),
+    milestone (number), depends_on (a list of batch keys or existing issues:
+    12, '#12', 'owner/repo#12'). Files them in dependency order, resolves
+    {#KEY} to issue numbers, creates the blocked_by edges, and writes a map
+    file (default: RECORDS.filed.json) that makes a rerun resume, re-send
+    edited bodies, and never file twice. --dry-run validates and prints the
+    order. Pause between writes: 1 second unless --pause is given.
 
     Examples:
         ge file-batch slices.json owner/repo
@@ -289,7 +291,7 @@ def file_batch(
     """
     from pathlib import Path
 
-    from ge.batch import file_issues, load_records, validate
+    from ge.batch import DEFAULT_PAUSE, file_issues, load_records, validate
 
     recs = load_records(records)
     if dry_run:
@@ -299,10 +301,12 @@ def file_batch(
             print(f"{key}  {by_key[key]['title']}  (depends on: {deps})")
         return
     map_path = map_file or str(Path(records).with_suffix(".filed.json"))
-    state = file_issues(recs, repo, map_path=map_path, pause=pause)
+    state = file_issues(
+        recs, repo, map_path=map_path, pause=DEFAULT_PAUSE if pause is None else pause
+    )
     print(f"\n{len(state['issues'])} issues, {len(state['edges'])} edges; map: {map_path}")
-    for edge, err in state["edge_errors"].items():
-        print(f"edge failed: {edge}: {err}")
+    for e in state["edge_errors"]:
+        print(f"edge failed: {e['blocked']} blocked by {e['blocker']}: {e['error']}")
     if state["edge_errors"]:
         raise SystemExit(1)
 

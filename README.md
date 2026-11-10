@@ -171,7 +171,7 @@ ge video-frames <video>            Extract frames (scene detection by default)
 ge describe-images <img>...        Describe images via Claude API (vision)
 ge copy-images <img>...            Create montage + copy to clipboard (macOS)
 ge resolve <target>                Resolve a URL, folder, or number to structured target
-ge file-batch <records.json> <repo>  File related issues: dependency order, {#KEY} refs, blocked_by edges
+ge file-batch <records.json> <repo>  File related issues: dependency order, {#KEY} refs, blocked_by edges (resumable)
 ge install-skills                  Register skills with Claude Code (~/.claude/skills/)
 ge uninstall-skills                Remove ge skill symlinks
 ```

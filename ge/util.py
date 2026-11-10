@@ -44,9 +44,11 @@ def gh_api(
     >>> # gh_api('repos/octocat/Hello-World/issues/1')
     >>> # gh_api('repos/o/r/issues', method='POST', body={'title': 't', 'labels': ['bug']})
     """
+    if body is not None and params:
+        raise ValueError("gh_api: pass params or body, not both")
     _check_gh()
     cmd = ["gh", "api", endpoint]
-    if method != "GET":
+    if method != "GET" or body is not None:  # gh would turn a GET with input into a POST
         cmd.extend(["-X", method])
     if paginate:
         cmd.append("--paginate")
@@ -58,7 +60,8 @@ def gh_api(
         stdin = json.dumps(body)
     result = subprocess.run(cmd, capture_output=True, text=True, input=stdin)
     if result.returncode != 0:
-        raise RuntimeError(f"gh api {endpoint} failed: {result.stderr.strip()}")
+        detail = " ".join(x for x in (result.stderr.strip(), result.stdout.strip()[:500]) if x)
+        raise RuntimeError(f"gh api {endpoint} failed: {detail}")
     if raw:
         return result.stdout
     try:

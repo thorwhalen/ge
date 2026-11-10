@@ -266,6 +266,61 @@ def resolve(target: str, *, current_repo: str = None):
     print(json.dumps(result, indent=2))
 
 
+def file_batch(
+    records: str,
+    repo: str,
+    *,
+    map_file: str = None,
+    dry_run: bool = False,
+    force: bool = False,
+    pause: float = None,
+):
+    """File a batch of related issues from a JSON (or YAML) list of records.
+
+    Each record: key, title, body (may refer to other records as {#KEY};
+    {{#KEY}} stays literal), and optionally labels, assignees (lists),
+    milestone (number), depends_on (a list of batch keys or existing issues:
+    12, '#12', 'owner/repo#12'). Files them in dependency order, resolves
+    {#KEY} to issue numbers, creates the blocked_by edges, and writes a map
+    file (default: RECORDS.filed.json) that makes a rerun resume, re-send
+    edited records, and never file twice. A body edited on GitHub since it
+    was sent is not overwritten (listed, exit 1) unless --force. --dry-run
+    validates and prints the order. Pause between writes: 1 second unless
+    --pause is given.
+
+    Examples:
+        ge file-batch slices.json owner/repo
+        ge file-batch slices.yaml owner/repo --dry-run
+    """
+    from pathlib import Path
+
+    from ge.batch import DEFAULT_PAUSE, file_issues, load_records, validate
+
+    recs = load_records(records)
+    if dry_run:
+        by_key = {r["key"]: r for r in recs}
+        for key in validate(recs):
+            deps = ", ".join(map(str, by_key[key].get("depends_on", ()))) or "-"
+            print(f"{key}  {by_key[key]['title']}  (depends on: {deps})")
+        return
+    map_path = map_file or str(Path(records).with_suffix(".filed.json"))
+    state = file_issues(
+        recs,
+        repo,
+        map_path=map_path,
+        batch=Path(records).stem,
+        force=force,
+        pause=DEFAULT_PAUSE if pause is None else pause,
+    )
+    print(f"\n{len(state['issues'])} issues, {len(state['edges'])} edges; map: {map_path}")
+    for e in state["edge_errors"]:
+        print(f"edge failed: {e['blocked']} blocked by {e['blocker']}: {e['error']}")
+    for key in state["body_conflicts"]:
+        print(f"not updated (edited on GitHub; --force overwrites): {key} {state['issues'][key]['url']}")
+    if state["edge_errors"] or state["body_conflicts"]:
+        raise SystemExit(1)
+
+
 def install_skills(*, target_dir: str = None):
     """Install ge skills as symlinks in ~/.claude/skills/.
 
@@ -502,6 +557,7 @@ _cli_commands = [
     describe_images,
     copy_images,
     resolve,
+    file_batch,
     install_skills,
     uninstall_skills,
     # Memory layer

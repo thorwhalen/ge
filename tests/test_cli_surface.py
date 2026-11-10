@@ -67,6 +67,7 @@ def test_the_command_set_is_exactly_what_agents_depend_on():
         "describe-images",
         "copy-images",
         "resolve",
+        "file-batch",
         "install-skills",
         "uninstall-skills",
         "roadmap-show",

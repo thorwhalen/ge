@@ -32,10 +32,17 @@ def _check_gh():
     _gh_checked = True
 
 
-def gh_api(endpoint, *, method="GET", params=None, paginate=False, raw=False):
+def gh_api(
+    endpoint, *, method="GET", params=None, paginate=False, raw=False, body=None
+):
     """Call the GitHub REST API via gh CLI.
 
+    *params* are sent as string fields (``-f``); *body*, a JSON-serialisable
+    mapping, is sent as the request body instead, for lists and integers
+    (labels, ids).
+
     >>> # gh_api('repos/octocat/Hello-World/issues/1')
+    >>> # gh_api('repos/o/r/issues', method='POST', body={'title': 't', 'labels': ['bug']})
     """
     _check_gh()
     cmd = ["gh", "api", endpoint]
@@ -45,7 +52,11 @@ def gh_api(endpoint, *, method="GET", params=None, paginate=False, raw=False):
         cmd.append("--paginate")
     for k, v in (params or {}).items():
         cmd.extend(["-f", f"{k}={v}"])
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    stdin = None
+    if body is not None:
+        cmd.extend(["--input", "-"])
+        stdin = json.dumps(body)
+    result = subprocess.run(cmd, capture_output=True, text=True, input=stdin)
     if result.returncode != 0:
         raise RuntimeError(f"gh api {endpoint} failed: {result.stderr.strip()}")
     if raw:

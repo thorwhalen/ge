@@ -90,6 +90,13 @@ back into the body — the body is the artifact, the thread is the history.
   gh api -X POST repos/OWNER/REPO/issues/<blocked>/dependencies/blocked_by -F issue_id=$qid
   ```
 
+- **Filing several related issues at once** (slices of a plan, a design's work items):
+  write them as records (key, title, body with `{#KEY}` references, labels, `depends_on`)
+  and run `ge file-batch records.json OWNER/REPO` (`--dry-run` first). It files them in
+  dependency order, turns each `{#KEY}` into the issue number, creates the `blocked_by`
+  edges, and keeps a map file (`records.filed.json`) that makes a rerun resume and that
+  any write-back step can read. Each issue still follows the rules above.
+
 ## Tone for someone outside the team
 
 - **Informal, concrete, no hedging.** "Either one unblocks us" beats "it would be beneficial if

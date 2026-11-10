@@ -266,6 +266,47 @@ def resolve(target: str, *, current_repo: str = None):
     print(json.dumps(result, indent=2))
 
 
+def file_batch(
+    records: str,
+    repo: str,
+    *,
+    map_file: str = None,
+    dry_run: bool = False,
+    pause: float = 1.0,
+):
+    """File a batch of related issues from a JSON (or YAML) list of records.
+
+    Each record: key, title, body (may refer to other records as {#KEY}),
+    and optionally labels, assignees, milestone, depends_on (batch keys or
+    existing issues: 12, '#12', 'owner/repo#12'). Files them in dependency
+    order, resolves {#KEY} to issue numbers, creates the blocked_by edges,
+    and writes a map file (default: RECORDS.filed.json) that makes a rerun
+    resume instead of filing twice. --dry-run validates and prints the order.
+
+    Examples:
+        ge file-batch slices.json owner/repo
+        ge file-batch slices.yaml owner/repo --dry-run
+    """
+    from pathlib import Path
+
+    from ge.batch import file_issues, load_records, validate
+
+    recs = load_records(records)
+    if dry_run:
+        by_key = {r["key"]: r for r in recs}
+        for key in validate(recs):
+            deps = ", ".join(map(str, by_key[key].get("depends_on", ()))) or "-"
+            print(f"{key}  {by_key[key]['title']}  (depends on: {deps})")
+        return
+    map_path = map_file or str(Path(records).with_suffix(".filed.json"))
+    state = file_issues(recs, repo, map_path=map_path, pause=pause)
+    print(f"\n{len(state['issues'])} issues, {len(state['edges'])} edges; map: {map_path}")
+    for edge, err in state["edge_errors"].items():
+        print(f"edge failed: {edge}: {err}")
+    if state["edge_errors"]:
+        raise SystemExit(1)
+
+
 def install_skills(*, target_dir: str = None):
     """Install ge skills as symlinks in ~/.claude/skills/.
 
@@ -502,6 +543,7 @@ _cli_commands = [
     describe_images,
     copy_images,
     resolve,
+    file_batch,
     install_skills,
     uninstall_skills,
     # Memory layer

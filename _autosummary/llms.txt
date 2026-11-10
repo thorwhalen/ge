@@ -7,6 +7,7 @@
 
 - [ge](ge.html.md): ge: GitHub Engineering tools for AI agents.
 - [ge.analysis](ge.analysis.html.md): Issue and PR analysis: staleness, relevance, and state assessment.
+- [ge.batch](ge.batch.html.md): File a batch of related issues: dependency order, cross-references, &#96;blocked_by&#96; edges.
 - [ge.context](ge.context.html.md): Context assembly and rendering.
 - [ge.github](ge.github.html.md): GitHub data fetching via gh CLI.
 - [ge.media](ge.media.html.md): Media download and video frame extraction.

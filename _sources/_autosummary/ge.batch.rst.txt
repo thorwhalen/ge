@@ -1,0 +1,25 @@
+ge.batch
+========
+
+.. automodule:: ge.batch
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      REF_PATTERN
+      EXISTING_ISSUE
+      DEFAULT_PAUSE
+      ADOPT_PAGES
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      file_issues
+      load_records
+      marker
+      render_body
+      validate
+   

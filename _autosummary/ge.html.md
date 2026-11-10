@@ -59,7 +59,7 @@ ctx = ge.prepare('https://github.com/owner/repo/issues/42')
 | [`TriageEntry`](#ge.TriageEntry)(ref, verdict[, order, ...])             | A cross-repo triage backlog entry.                                                         |
 | [`Decision`](#ge.Decision)(summary[, rationale, metadata, ...])       | A logged decision (rendered as a tagged comment on an issue/PR).                           |
 
-### *class* ge.Decision(summary, rationale='', metadata=<factory>, created_at=None, url=None)
+### *class* ge.Decision(summary, rationale='', metadata=dict(), created_at=None, url=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -133,7 +133,7 @@ Return the first `todo` task in roadmap order, or None.
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TaskRecord`](ge.memory.html.md#ge.memory.TaskRecord)]
 
-### *class* ge.TaskRecord(id, title, state=TaskState.todo, metadata=<factory>)
+### *class* ge.TaskRecord(id, title, state=TaskState.todo, metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -166,7 +166,7 @@ semantics — fully-qualified refs do the heavy lifting.
 Switching to a GitHub Project backend later is a swap of this class’s
 I/O methods; the public interface stays the same.
 
-### *class* ge.TriageEntry(ref, verdict, order=0, rationale='', metadata=<factory>)
+### *class* ge.TriageEntry(ref, verdict, order=0, rationale='', metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -352,12 +352,12 @@ requires `roadmap_issue`; `decisions` requires `decisions_target`
 (the issue or PR number where decisions are logged); `triage`
 requires `triage_issue` (the tracking issue holding the JSON block).
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
-
 ```pycon
 >>> # mall = github_memory('owner/repo', roadmap_issue=1, decisions_target=1)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
 
 ### ge.install_skills(, target_dir=None)
 
@@ -491,11 +491,12 @@ left untouched.
 
 ### Modules
 
-| [`analysis`](ge.analysis.html.md#module-ge.analysis)   | Issue and PR analysis: staleness, relevance, and state assessment.   |
-|--------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| [`context`](ge.context.html.md#module-ge.context)     | Context assembly and rendering.                                      |
-| [`github`](ge.github.html.md#module-ge.github)       | GitHub data fetching via gh CLI.                                     |
-| [`media`](ge.media.html.md#module-ge.media)         | Media download and video frame extraction.                           |
-| [`memory`](ge.memory.html.md#module-ge.memory)       | GitHub-backed durable memory for autonomous agent execution.         |
-| [`run`](ge.run.html.md#module-ge.run)             | Autonomous-execution runner — Layer 3.                               |
-| [`util`](ge.util.html.md#module-ge.util)           | Internal utilities: gh CLI wrapper, subprocess helpers, URL parsing. |
+| [`analysis`](ge.analysis.html.md#module-ge.analysis)   | Issue and PR analysis: staleness, relevance, and state assessment.                      |
+|--------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`batch`](ge.batch.html.md#module-ge.batch)         | File a batch of related issues: dependency order, cross-references, `blocked_by` edges. |
+| [`context`](ge.context.html.md#module-ge.context)     | Context assembly and rendering.                                                         |
+| [`github`](ge.github.html.md#module-ge.github)       | GitHub data fetching via gh CLI.                                                        |
+| [`media`](ge.media.html.md#module-ge.media)         | Media download and video frame extraction.                                              |
+| [`memory`](ge.memory.html.md#module-ge.memory)       | GitHub-backed durable memory for autonomous agent execution.                            |
+| [`run`](ge.run.html.md#module-ge.run)             | Autonomous-execution runner — Layer 3.                                                  |
+| [`util`](ge.util.html.md#module-ge.util)           | Internal utilities: gh CLI wrapper, subprocess helpers, URL parsing.                    |

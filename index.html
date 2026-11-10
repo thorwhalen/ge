@@ -29,7 +29,8 @@
 <meta content="ge — GitHub Engineering for AI Agents | ge" property="og:title"/>
 <meta content="ge — GitHub Engineering for AI Agents | ge" name="twitter:title"/>
 <link href="_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
-<link href="_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="_static/theme.css?v=009055c6" rel="stylesheet" type="text/css"/>
+<link href="_static/sphinx_autodoc_typehints.css?v=057ac668" rel="stylesheet" type="text/css"/>
 <link href="_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
 <link href="_static/epythet.css?v=8f9630b7" rel="stylesheet" type="text/css"/>
 <link href="search.html" rel="search" title="Search"/>
@@ -83,6 +84,7 @@
 <li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="api.html">API reference<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
 <li class="toctree-l2" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="_autosummary/ge.html">ge<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ge.analysis.html">ge.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ge.batch.html">ge.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ge.context.html">ge.context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ge.github.html">ge.github</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/ge.media.html">ge.media</a></li>
@@ -322,8 +324,9 @@
 </span><span id="line-11"><span class="n">ge</span> <span class="n">describe</span><span class="o">-</span><span class="n">images</span> <span class="o">&lt;</span><span class="n">img</span><span class="o">&gt;...</span>        <span class="n">Describe</span> <span class="n">images</span> <span class="n">via</span> <span class="n">Claude</span> <span class="n">API</span> <span class="p">(</span><span class="n">vision</span><span class="p">)</span>
 </span><span id="line-12"><span class="n">ge</span> <span class="n">copy</span><span class="o">-</span><span class="n">images</span> <span class="o">&lt;</span><span class="n">img</span><span class="o">&gt;...</span>            <span class="n">Create</span> <span class="n">montage</span> <span class="o">+</span> <span class="n">copy</span> <span class="n">to</span> <span class="n">clipboard</span> <span class="p">(</span><span class="n">macOS</span><span class="p">)</span>
 </span><span id="line-13"><span class="n">ge</span> <span class="n">resolve</span> <span class="o">&lt;</span><span class="n">target</span><span class="o">&gt;</span>                <span class="n">Resolve</span> <span class="n">a</span> <span class="n">URL</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="ow">or</span> <span class="n">number</span> <span class="n">to</span> <span class="n">structured</span> <span class="n">target</span>
-</span><span id="line-14"><span class="n">ge</span> <span class="n">install</span><span class="o">-</span><span class="n">skills</span>                  <span class="n">Register</span> <span class="n">skills</span> <span class="k">with</span> <span class="n">Claude</span> <span class="n">Code</span> <span class="p">(</span><span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span><span class="p">)</span>
-</span><span id="line-15"><span class="n">ge</span> <span class="n">uninstall</span><span class="o">-</span><span class="n">skills</span>                <span class="n">Remove</span> <span class="n">ge</span> <span class="n">skill</span> <span class="n">symlinks</span>
+</span><span id="line-14"><span class="n">ge</span> <span class="n">file</span><span class="o">-</span><span class="n">batch</span> <span class="o">&lt;</span><span class="n">records</span><span class="o">.</span><span class="n">json</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">repo</span><span class="o">&gt;</span>  <span class="n">File</span> <span class="n">related</span> <span class="n">issues</span><span class="p">:</span> <span class="n">dependency</span> <span class="n">order</span><span class="p">,</span> <span class="p">{</span><span class="c1">#KEY} refs, blocked_by edges (resumable)</span>
+</span><span id="line-15"><span class="n">ge</span> <span class="n">install</span><span class="o">-</span><span class="n">skills</span>                  <span class="n">Register</span> <span class="n">skills</span> <span class="k">with</span> <span class="n">Claude</span> <span class="n">Code</span> <span class="p">(</span><span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span><span class="p">)</span>
+</span><span id="line-16"><span class="n">ge</span> <span class="n">uninstall</span><span class="o">-</span><span class="n">skills</span>                <span class="n">Remove</span> <span class="n">ge</span> <span class="n">skill</span> <span class="n">symlinks</span>
 </span></code></pre></div>
 </div>
 </section>
@@ -343,11 +346,24 @@
 </span><span id="line-12"><span class="c1"># Resolve flexible input</span>
 </span><span id="line-13"><span class="n">target</span> <span class="o">=</span> <span class="n">ge</span><span class="o">.</span><span class="n">resolve_target</span><span class="p">(</span><span class="s2">"#42"</span><span class="p">,</span> <span class="n">current_repo</span><span class="o">=</span><span class="s2">"owner/repo"</span><span class="p">)</span>
 </span><span id="line-14">
-</span><span id="line-15"><span class="c1"># Image tools</span>
-</span><span id="line-16"><span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe_images</span><span class="p">,</span> <span class="n">copy_images_to_clipboard</span>
+</span><span id="line-15"><span class="c1"># File a batch of related issues (records from any source; resumable via the map file)</span>
+</span><span id="line-16"><span class="kn">from</span><span class="w"> </span><span class="nn">ge.batch</span><span class="w"> </span><span class="kn">import</span> <span class="n">file_issues</span>
 </span><span id="line-17">
-</span><span id="line-18"><span class="n">text</span> <span class="o">=</span> <span class="n">describe_images</span><span class="p">(</span><span class="s2">"screenshot.png"</span><span class="p">,</span> <span class="s2">"error.jpg"</span><span class="p">)</span>
-</span><span id="line-19"><span class="n">path</span> <span class="o">=</span> <span class="n">copy_images_to_clipboard</span><span class="p">(</span><span class="s2">"img1.png"</span><span class="p">,</span> <span class="s2">"img2.png"</span><span class="p">)</span>
+</span><span id="line-18"><span class="n">state</span> <span class="o">=</span> <span class="n">file_issues</span><span class="p">(</span>
+</span><span id="line-19">    <span class="p">[</span>
+</span><span id="line-20">        <span class="p">{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"A"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Parser"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">:</span> <span class="s2">"First piece."</span><span class="p">},</span>
+</span><span id="line-21">        <span class="p">{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"B"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Printer"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">:</span> <span class="s2">"Uses {#A}."</span><span class="p">,</span> <span class="s2">"depends_on"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"A"</span><span class="p">]},</span>
+</span><span id="line-22">    <span class="p">],</span>
+</span><span id="line-23">    <span class="s2">"owner/repo"</span><span class="p">,</span>
+</span><span id="line-24">    <span class="n">map_path</span><span class="o">=</span><span class="s2">"filed.json"</span><span class="p">,</span>
+</span><span id="line-25"><span class="p">)</span>
+</span><span id="line-26"><span class="n">state</span><span class="p">[</span><span class="s2">"issues"</span><span class="p">][</span><span class="s2">"B"</span><span class="p">][</span><span class="s2">"number"</span><span class="p">]</span>  <span class="c1"># the issue B became; B is blocked_by A on GitHub</span>
+</span><span id="line-27">
+</span><span id="line-28"><span class="c1"># Image tools</span>
+</span><span id="line-29"><span class="kn">from</span><span class="w"> </span><span class="nn">ge.media</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe_images</span><span class="p">,</span> <span class="n">copy_images_to_clipboard</span>
+</span><span id="line-30">
+</span><span id="line-31"><span class="n">text</span> <span class="o">=</span> <span class="n">describe_images</span><span class="p">(</span><span class="s2">"screenshot.png"</span><span class="p">,</span> <span class="s2">"error.jpg"</span><span class="p">)</span>
+</span><span id="line-32"><span class="n">path</span> <span class="o">=</span> <span class="n">copy_images_to_clipboard</span><span class="p">(</span><span class="s2">"img1.png"</span><span class="p">,</span> <span class="s2">"img2.png"</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
 </section>
@@ -379,21 +395,22 @@
 </span><span id="line-8">├── util.py          # Internal helpers: gh wrapper, URL parsing, resolve_target
 </span><span id="line-9">├── memory.py        # GitHub-backed memory: RoadmapStore, DecisionLog, TriageBacklog
 </span><span id="line-10">├── run.py           # Autonomous runner: launches `claude` in a loop
-</span><span id="line-11">└── data/skills/     # Claude Code skills (symlinked by install-skills)
-</span><span id="line-12">    ├── ge/                     # Full workflow skill
-</span><span id="line-13">    ├── ge-analyze/             # Triage/staleness skill
-</span><span id="line-14">    ├── ge-context/             # Context preparation skill
-</span><span id="line-15">    ├── ge-autonomous-execution/  # Unattended-mode behaviour policy
-</span><span id="line-16">    ├── ge-roadmap-execution/     # Drive a roadmap issue end-to-end
-</span><span id="line-17">    ├── ge-cross-repo-triage/     # Multi-repo triage and resolution
-</span><span id="line-18">    └── ge-write-issue/           # Authoring issues for human readers
+</span><span id="line-11">├── batch.py         # File a batch of related issues with dependency edges
+</span><span id="line-12">└── data/skills/     # Claude Code skills (symlinked by install-skills)
+</span><span id="line-13">    ├── ge/                     # Full workflow skill
+</span><span id="line-14">    ├── ge-analyze/             # Triage/staleness skill
+</span><span id="line-15">    ├── ge-context/             # Context preparation skill
+</span><span id="line-16">    ├── ge-autonomous-execution/  # Unattended-mode behaviour policy
+</span><span id="line-17">    ├── ge-roadmap-execution/     # Drive a roadmap issue end-to-end
+</span><span id="line-18">    ├── ge-cross-repo-triage/     # Multi-repo triage and resolution
+</span><span id="line-19">    └── ge-write-issue/           # Authoring issues for human readers
 </span></code></pre></div>
 </div>
 <p class="epythet-aggregates">This documentation as a single file: <a href="ge.md">ge.md</a> (Markdown, for agents).</p>
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-14 06:08 UTC from <a href="https://github.com/thorwhalen/ge/commit/639fe26d9b2c7ff4e242690c01619d6adcfcdd36">639fe26</a> (main) · ge 0.1.18 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-10 19:30 UTC from <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f">bd4606d</a> (main) · ge 0.1.19 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -428,11 +445,11 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=9969ed3f"></script>
+<script src="_static/documentation_options.js?v=3d116926"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>
 <script src="_static/copybutton.js?v=fd10adb8"></script>
-<script defer="defer" src="_static/theme.js?v=5db23cf8"></script>
+<script defer="defer" src="_static/theme.js?v=49cc6205"></script>
 </body>
 </html>

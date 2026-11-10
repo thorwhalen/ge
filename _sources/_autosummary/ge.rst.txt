@@ -51,6 +51,7 @@
    :recursive:
 
    analysis
+   batch
    context
    github
    media

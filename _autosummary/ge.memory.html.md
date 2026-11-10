@@ -44,7 +44,7 @@ The [`github_memory()`](#ge.memory.github_memory) factory bundles these into a m
 | [`DecisionLog`](#ge.memory.DecisionLog)(repo, target_number, \*[, cache_dir]) | Append-only iterable of [`Decision`](#ge.memory.Decision) records. |
 | [`TriageBacklog`](#ge.memory.TriageBacklog)(repo, tracking_issue, \*[, ...])    | Cross-repo triage backlog.                                                                 |
 
-### *class* ge.memory.Decision(summary, rationale='', metadata=<factory>, created_at=None, url=None)
+### *class* ge.memory.Decision(summary, rationale='', metadata=dict(), created_at=None, url=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -118,7 +118,7 @@ Return the first `todo` task in roadmap order, or None.
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TaskRecord`](#ge.memory.TaskRecord)]
 
-### *class* ge.memory.TaskRecord(id, title, state=TaskState.todo, metadata=<factory>)
+### *class* ge.memory.TaskRecord(id, title, state=TaskState.todo, metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -151,7 +151,7 @@ semantics — fully-qualified refs do the heavy lifting.
 Switching to a GitHub Project backend later is a swap of this class’s
 I/O methods; the public interface stays the same.
 
-### *class* ge.memory.TriageEntry(ref, verdict, order=0, rationale='', metadata=<factory>)
+### *class* ge.memory.TriageEntry(ref, verdict, order=0, rationale='', metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -186,9 +186,9 @@ requires `roadmap_issue`; `decisions` requires `decisions_target`
 (the issue or PR number where decisions are logged); `triage`
 requires `triage_issue` (the tracking issue holding the JSON block).
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
-
 ```pycon
 >>> # mall = github_memory('owner/repo', roadmap_issue=1, decisions_target=1)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]

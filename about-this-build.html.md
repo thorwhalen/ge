@@ -2,7 +2,7 @@
 
 # About this build
 
-This documentation was built on **2026-10-14 06:08 UTC** from commit <a href="https://github.com/thorwhalen/ge/commit/639fe26d9b2c7ff4e242690c01619d6adcfcdd36"><code>639fe26</code></a> on branch <code>main</code>, for **ge 0.1.18** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-10 19:30 UTC** from commit <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f"><code>bd4606d</code></a> on branch <code>main</code>, for **ge 0.1.19** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -11,9 +11,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                      |
 |---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ge/commit/639fe26d9b2c7ff4e242690c01619d6adcfcdd36"><code>639fe26d9b2c7ff4e242690c01619d6adcfcdd36</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f"><code>bd4606dc9837ceca77bc254e1d7cf1df3cf9655f</code></a> |
 | Branch              | <code>main</code>                                                                                                                                    |
-| Tags at this commit | <code>0.1.18</code>                                                                                                                                  |
+| Tags at this commit | <code>0.1.19</code>                                                                                                                                  |
 | Working tree        | clean                                                                                                                                                |
 | Remote              | <code>https://github.com/thorwhalen/ge</code>                                                                                                        |
 
@@ -22,18 +22,18 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ge</code>                                                                 |
-| Run          | <a href="https://github.com/thorwhalen/ge/actions/runs/38520282592">38520282592</a>        |
+| Run          | <a href="https://github.com/thorwhalen/ge/actions/runs/42885566135">42885566135</a>        |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b25aaa6daab2feef0cb6077922496b2758073bb1</code> (in the history of the built commit) |
+| Event commit | <code>6b82487b319f9bda8c979b2ff08c645273ced5c2</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.17  |
-| Sphinx   | 9.1.0   |
+| epythet  | 0.2.22  |
+| Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
-| Python   | 3.12.15 |
+| Python   | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -49,14 +49,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ge/0.1.18/">0.1.18</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ge/0.1.19/">0.1.19</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ge && cd ge
-git checkout 639fe26d9b2c7ff4e242690c01619d6adcfcdd36
-pip install "epythet==0.2.17"
+git checkout bd4606dc9837ceca77bc254e1d7cf1df3cf9655f
+pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

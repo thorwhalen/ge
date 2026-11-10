@@ -51,12 +51,17 @@ Returns list of dicts with keys: url, alt, kind (‘image’, ‘video’, or �
 'image'
 ```
 
-### ge.util.gh_api(endpoint, , method='GET', params=None, paginate=False, raw=False)
+### ge.util.gh_api(endpoint, , method='GET', params=None, paginate=False, raw=False, body=None)
 
 Call the GitHub REST API via gh CLI.
 
+*params* are sent as string fields (`-f`); *body*, a JSON-serialisable
+mapping, is sent as the request body instead, for lists and integers
+(labels, ids).
+
 ```pycon
 >>> # gh_api('repos/octocat/Hello-World/issues/1')
+>>> # gh_api('repos/o/r/issues', method='POST', body={'title': 't', 'labels': ['bug']})
 ```
 
 ### ge.util.gh_auth_token()

@@ -1,4 +1,4 @@
-> built 2026-10-14 06:08 UTC from 639fe26 (main) · ge 0.1.18. Details: build_info.json
+> built 2026-11-10 19:30 UTC from bd4606d (main) · ge 0.1.19. Details: build_info.json
 
 # index.html.md
 
@@ -177,6 +177,7 @@ ge video-frames <video>            Extract frames (scene detection by default)
 ge describe-images <img>...        Describe images via Claude API (vision)
 ge copy-images <img>...            Create montage + copy to clipboard (macOS)
 ge resolve <target>                Resolve a URL, folder, or number to structured target
+ge file-batch <records.json> <repo>  File related issues: dependency order, {#KEY} refs, blocked_by edges (resumable)
 ge install-skills                  Register skills with Claude Code (~/.claude/skills/)
 ge uninstall-skills                Remove ge skill symlinks
 ```
@@ -197,6 +198,19 @@ analysis = ge.analyze_issue("owner/repo", 42)
 
 # Resolve flexible input
 target = ge.resolve_target("#42", current_repo="owner/repo")
+
+# File a batch of related issues (records from any source; resumable via the map file)
+from ge.batch import file_issues
+
+state = file_issues(
+    [
+        {"key": "A", "title": "Parser", "body": "First piece."},
+        {"key": "B", "title": "Printer", "body": "Uses {#A}.", "depends_on": ["A"]},
+    ],
+    "owner/repo",
+    map_path="filed.json",
+)
+state["issues"]["B"]["number"]  # the issue B became; B is blocked_by A on GitHub
 
 # Image tools
 from ge.media import describe_images, copy_images_to_clipboard
@@ -237,6 +251,7 @@ ge/
 ├── util.py          # Internal helpers: gh wrapper, URL parsing, resolve_target
 ├── memory.py        # GitHub-backed memory: RoadmapStore, DecisionLog, TriageBacklog
 ├── run.py           # Autonomous runner: launches `claude` in a loop
+├── batch.py         # File a batch of related issues with dependency edges
 └── data/skills/     # Claude Code skills (symlinked by install-skills)
     ├── ge/                     # Full workflow skill
     ├── ge-analyze/             # Triage/staleness skill
@@ -304,6 +319,141 @@ Returns dict mapping path -> {‘exists’: bool, ‘snippet’: str | None}.
 ```pycon
 >>> # status = check_referenced_files('owner/repo', ['src/main.py'])
 ```
+
+
+# _autosummary/ge.batch.html.md
+
+# ge.batch
+
+File a batch of related issues: dependency order, cross-references, `blocked_by` edges.
+
+A batch is a list of records, each with a `key` local to the batch:
+
+```default
+[
+  {"key": "A", "title": "Parser", "body": "First piece."},
+  {"key": "B", "title": "Printer", "body": "Uses the parser of {#A}.",
+   "labels": ["enhancement"], "depends_on": ["A", "#12"]}
+]
+```
+
+[`file_issues()`](_autosummary/ge.batch.html.md#ge.batch.file_issues) validates the whole batch before filing anything (field
+types, unique keys, known references, no dependency cycle), then:
+
+1. creates the issues in dependency order, replacing each `{#KEY}` in a body
+   with the `#number` that issue became (write `{{#x}}` for a literal `{#x}`);
+2. updates every body whose final text differs from what was last sent: the
+   ones that referred to a key filed later, and any record edited since. A body
+   someone has edited on GitHub since is never overwritten: it is listed in
+   `body_conflicts` instead (`force=True` overwrites);
+3. creates a GitHub `blocked_by` dependency edge for every `depends_on`
+   that the blocked issue does not already have.
+
+`depends_on` takes batch keys and existing issues (`12`, `"#12"`,
+`"owner/repo#12"`). Progress is written to a map file after every step, so
+an interrupted run is resumed by running it again. Each body carries a hidden
+marker for its record (its key and the batch name), so an issue created just
+before a crash (or after a lost map) is found among the repository’s recent
+issues and adopted, not filed twice.
+The map’s shape is stable, for writing the links back into a source document:
+
+```default
+{"repo": "owner/repo",
+ "issues": {"A": {"number": 7, "url": "...", "id": 123, "body_sha": "..."}},
+ "edges": [{"blocked": "B", "blocker": "A"}],
+ "edge_errors": [{"blocked": "B", "blocker": "#12", "error": "..."}],
+ "body_conflicts": ["C"]}
+```
+
+The batch knows nothing about any document format: produce the records however you like.
+
+### Module Attributes
+
+| [`REF_PATTERN`](_autosummary/ge.batch.html.md#ge.batch.REF_PATTERN)    | `{#KEY}` in a body becomes `#number` once KEY is filed; `{{#KEY}}` stays literal.   |
+|-----------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`EXISTING_ISSUE`](_autosummary/ge.batch.html.md#ge.batch.EXISTING_ISSUE) | `12`, `#12`, `owner/repo#12`.                                                       |
+| [`DEFAULT_PAUSE`](_autosummary/ge.batch.html.md#ge.batch.DEFAULT_PAUSE)  | Seconds after each write to GitHub; it throttles bursts of content creation.        |
+| [`ADOPT_PAGES`](_autosummary/ge.batch.html.md#ge.batch.ADOPT_PAGES)    | Pages of 100 of the repository's most recent issues searched for an unrecorded one. |
+
+### Functions
+
+| [`file_issues`](_autosummary/ge.batch.html.md#ge.batch.file_issues)(records, repo, \*[, map_path, ...])   | File *records* as issues in *repo* (`owner/name` or URL); return the map (see module doc).   |
+|----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| [`load_records`](_autosummary/ge.batch.html.md#ge.batch.load_records)(path)                                | Records from a `.json` file (a list), or `.yaml` / `.yml` when PyYAML is installed.          |
+| [`marker`](_autosummary/ge.batch.html.md#ge.batch.marker)(record[, batch])                           | Hidden line identifying the record an issue was filed from.                                  |
+| [`render_body`](_autosummary/ge.batch.html.md#ge.batch.render_body)(body, numbers)                        | Replace `{#KEY}` with `#number` for every key already filed.                                 |
+| [`validate`](_autosummary/ge.batch.html.md#ge.batch.validate)(records)                                 | Check a batch and return its keys in filing order; raise ValueError on any problem.          |
+
+### ge.batch.ADOPT_PAGES *= 3*
+
+Pages of 100 of the repository’s most recent issues searched for an unrecorded one.
+
+### ge.batch.DEFAULT_PAUSE *= 1.0*
+
+Seconds after each write to GitHub; it throttles bursts of content creation.
+
+### ge.batch.EXISTING_ISSUE *= re.compile('^(?:(?P<repo>[\\\\w.-]+/[\\\\w.-]+))?#?(?P<number>\\\\d+)$')*
+
+`12`, `#12`, `owner/repo#12`.
+
+* **Type:**
+  An existing issue named in `depends_on`
+
+### ge.batch.REF_PATTERN *= re.compile('(?<!\\\\{)\\\\{#([^{}\\\\s]+)\\\\}(?!\\\\})')*
+
+`{#KEY}` in a body becomes `#number` once KEY is filed; `{{#KEY}}` stays literal.
+
+### ge.batch.file_issues(records, repo, \*, map_path=None, batch=None, force=False, api=None, pause=1.0, adopt_pages=3, sleep=<built-in function sleep>, log=<built-in function print>)
+
+File *records* as issues in *repo* (`owner/name` or URL); return the map (see module doc).
+
+*api* defaults to [`ge.util.gh_api()`](_autosummary/ge.util.html.md#ge.util.gh_api); pass a fake to test.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)
+
+### ge.batch.load_records(path)
+
+Records from a `.json` file (a list), or `.yaml` / `.yml` when PyYAML is installed.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]
+
+### ge.batch.marker(record, batch=None)
+
+Hidden line identifying the record an issue was filed from.
+
+It hashes the key and the *batch* name, so two batches using the same keys
+in one repository never adopt each other’s issues; without a batch name the
+title stands in for it.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### ge.batch.render_body(body, numbers)
+
+Replace `{#KEY}` with `#number` for every key already filed.
+
+```pycon
+>>> render_body("after {#A}, before {#B}, literal {{#A}}", {"A": 7})
+'after #7, before {#B}, literal {#A}'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### ge.batch.validate(records)
+
+Check a batch and return its keys in filing order; raise ValueError on any problem.
+
+```pycon
+>>> validate([{"key": "B", "title": "b", "depends_on": ["A"]},
+...           {"key": "A", "title": "a", "body": "see {#B}"}])
+['A', 'B']
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
 # _autosummary/ge.context.html.md
@@ -585,7 +735,7 @@ ctx = ge.prepare('https://github.com/owner/repo/issues/42')
 | [`TriageEntry`](_autosummary/ge.html.md#ge.TriageEntry)(ref, verdict[, order, ...])             | A cross-repo triage backlog entry.                                                         |
 | [`Decision`](_autosummary/ge.html.md#ge.Decision)(summary[, rationale, metadata, ...])       | A logged decision (rendered as a tagged comment on an issue/PR).                           |
 
-### *class* ge.Decision(summary, rationale='', metadata=<factory>, created_at=None, url=None)
+### *class* ge.Decision(summary, rationale='', metadata=dict(), created_at=None, url=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -659,7 +809,7 @@ Return the first `todo` task in roadmap order, or None.
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TaskRecord`](_autosummary/ge.memory.html.md#ge.memory.TaskRecord)]
 
-### *class* ge.TaskRecord(id, title, state=TaskState.todo, metadata=<factory>)
+### *class* ge.TaskRecord(id, title, state=TaskState.todo, metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -692,7 +842,7 @@ semantics — fully-qualified refs do the heavy lifting.
 Switching to a GitHub Project backend later is a swap of this class’s
 I/O methods; the public interface stays the same.
 
-### *class* ge.TriageEntry(ref, verdict, order=0, rationale='', metadata=<factory>)
+### *class* ge.TriageEntry(ref, verdict, order=0, rationale='', metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -878,12 +1028,12 @@ requires `roadmap_issue`; `decisions` requires `decisions_target`
 (the issue or PR number where decisions are logged); `triage`
 requires `triage_issue` (the tracking issue holding the JSON block).
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
-
 ```pycon
 >>> # mall = github_memory('owner/repo', roadmap_issue=1, decisions_target=1)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
 
 ### ge.install_skills(, target_dir=None)
 
@@ -1017,14 +1167,15 @@ left untouched.
 
 ### Modules
 
-| [`analysis`](_autosummary/ge.analysis.html.md#module-ge.analysis)   | Issue and PR analysis: staleness, relevance, and state assessment.   |
-|--------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| [`context`](_autosummary/ge.context.html.md#module-ge.context)     | Context assembly and rendering.                                      |
-| [`github`](_autosummary/ge.github.html.md#module-ge.github)       | GitHub data fetching via gh CLI.                                     |
-| [`media`](_autosummary/ge.media.html.md#module-ge.media)         | Media download and video frame extraction.                           |
-| [`memory`](_autosummary/ge.memory.html.md#module-ge.memory)       | GitHub-backed durable memory for autonomous agent execution.         |
-| [`run`](_autosummary/ge.run.html.md#module-ge.run)             | Autonomous-execution runner — Layer 3.                               |
-| [`util`](_autosummary/ge.util.html.md#module-ge.util)           | Internal utilities: gh CLI wrapper, subprocess helpers, URL parsing. |
+| [`analysis`](_autosummary/ge.analysis.html.md#module-ge.analysis)   | Issue and PR analysis: staleness, relevance, and state assessment.                      |
+|--------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`batch`](_autosummary/ge.batch.html.md#module-ge.batch)         | File a batch of related issues: dependency order, cross-references, `blocked_by` edges. |
+| [`context`](_autosummary/ge.context.html.md#module-ge.context)     | Context assembly and rendering.                                                         |
+| [`github`](_autosummary/ge.github.html.md#module-ge.github)       | GitHub data fetching via gh CLI.                                                        |
+| [`media`](_autosummary/ge.media.html.md#module-ge.media)         | Media download and video frame extraction.                                              |
+| [`memory`](_autosummary/ge.memory.html.md#module-ge.memory)       | GitHub-backed durable memory for autonomous agent execution.                            |
+| [`run`](_autosummary/ge.run.html.md#module-ge.run)             | Autonomous-execution runner — Layer 3.                                                  |
+| [`util`](_autosummary/ge.util.html.md#module-ge.util)           | Internal utilities: gh CLI wrapper, subprocess helpers, URL parsing.                    |
 
 
 # _autosummary/ge.media.html.md
@@ -1185,7 +1336,7 @@ The [`github_memory()`](_autosummary/ge.memory.html.md#ge.memory.github_memory) 
 | [`DecisionLog`](_autosummary/ge.memory.html.md#ge.memory.DecisionLog)(repo, target_number, \*[, cache_dir]) | Append-only iterable of [`Decision`](_autosummary/ge.memory.html.md#ge.memory.Decision) records. |
 | [`TriageBacklog`](_autosummary/ge.memory.html.md#ge.memory.TriageBacklog)(repo, tracking_issue, \*[, ...])    | Cross-repo triage backlog.                                                                 |
 
-### *class* ge.memory.Decision(summary, rationale='', metadata=<factory>, created_at=None, url=None)
+### *class* ge.memory.Decision(summary, rationale='', metadata=dict(), created_at=None, url=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -1259,7 +1410,7 @@ Return the first `todo` task in roadmap order, or None.
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TaskRecord`](_autosummary/ge.memory.html.md#ge.memory.TaskRecord)]
 
-### *class* ge.memory.TaskRecord(id, title, state=TaskState.todo, metadata=<factory>)
+### *class* ge.memory.TaskRecord(id, title, state=TaskState.todo, metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -1292,7 +1443,7 @@ semantics — fully-qualified refs do the heavy lifting.
 Switching to a GitHub Project backend later is a swap of this class’s
 I/O methods; the public interface stays the same.
 
-### *class* ge.memory.TriageEntry(ref, verdict, order=0, rationale='', metadata=<factory>)
+### *class* ge.memory.TriageEntry(ref, verdict, order=0, rationale='', metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -1327,12 +1478,12 @@ requires `roadmap_issue`; `decisions` requires `decisions_target`
 (the issue or PR number where decisions are logged); `triage`
 requires `triage_issue` (the tracking issue holding the JSON block).
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
-
 ```pycon
 >>> # mall = github_memory('owner/repo', roadmap_issue=1, decisions_target=1)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
 
 
 # _autosummary/ge.run.html.md
@@ -1483,7 +1634,7 @@ exactly one roadmap step. The loop terminates when:
   * **decisions_target** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`int`](https://docs.python.org/3/builtins/functions.html#int)]) – issue/PR number to log decisions on. Defaults
     to `roadmap_issue`.
   * **max_sessions** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – safety ceiling on total iterations.
-  * **cwd** (`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – where the spawned `claude` starts, so whose `CLAUDE.md` it
+  * **cwd** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – where the spawned `claude` starts, so whose `CLAUDE.md` it
     loads. Defaults to the current directory. A cwd outside every git
     checkout (a projects root, a scratch folder) loads no package’s
     instructions: it is kept, and named in the scope’s `warnings`.
@@ -1575,12 +1726,17 @@ Returns list of dicts with keys: url, alt, kind (‘image’, ‘video’, or �
 'image'
 ```
 
-### ge.util.gh_api(endpoint, , method='GET', params=None, paginate=False, raw=False)
+### ge.util.gh_api(endpoint, , method='GET', params=None, paginate=False, raw=False, body=None)
 
 Call the GitHub REST API via gh CLI.
 
+*params* are sent as string fields (`-f`); *body*, a JSON-serialisable
+mapping, is sent as the request body instead, for lists and integers
+(labels, ids).
+
 ```pycon
 >>> # gh_api('repos/octocat/Hello-World/issues/1')
+>>> # gh_api('repos/o/r/issues', method='POST', body={'title': 't', 'labels': ['bug']})
 ```
 
 ### ge.util.gh_auth_token()
@@ -1687,7 +1843,7 @@ Replace media URLs in markdown with local file paths.
 
 # About this build
 
-This documentation was built on **2026-10-14 06:08 UTC** from commit <a href="https://github.com/thorwhalen/ge/commit/639fe26d9b2c7ff4e242690c01619d6adcfcdd36"><code>639fe26</code></a> on branch <code>main</code>, for **ge 0.1.18** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-10 19:30 UTC** from commit <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f"><code>bd4606d</code></a> on branch <code>main</code>, for **ge 0.1.19** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1696,9 +1852,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                      |
 |---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ge/commit/639fe26d9b2c7ff4e242690c01619d6adcfcdd36"><code>639fe26d9b2c7ff4e242690c01619d6adcfcdd36</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f"><code>bd4606dc9837ceca77bc254e1d7cf1df3cf9655f</code></a> |
 | Branch              | <code>main</code>                                                                                                                                    |
-| Tags at this commit | <code>0.1.18</code>                                                                                                                                  |
+| Tags at this commit | <code>0.1.19</code>                                                                                                                                  |
 | Working tree        | clean                                                                                                                                                |
 | Remote              | <code>https://github.com/thorwhalen/ge</code>                                                                                                        |
 
@@ -1707,18 +1863,18 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ge</code>                                                                 |
-| Run          | <a href="https://github.com/thorwhalen/ge/actions/runs/38520282592">38520282592</a>        |
+| Run          | <a href="https://github.com/thorwhalen/ge/actions/runs/42885566135">42885566135</a>        |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b25aaa6daab2feef0cb6077922496b2758073bb1</code> (in the history of the built commit) |
+| Event commit | <code>6b82487b319f9bda8c979b2ff08c645273ced5c2</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.17  |
-| Sphinx   | 9.1.0   |
+| epythet  | 0.2.22  |
+| Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
-| Python   | 3.12.15 |
+| Python   | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -1734,14 +1890,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ge/0.1.18/">0.1.18</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ge/0.1.19/">0.1.19</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ge && cd ge
-git checkout 639fe26d9b2c7ff4e242690c01619d6adcfcdd36
-pip install "epythet==0.2.17"
+git checkout bd4606dc9837ceca77bc254e1d7cf1df3cf9655f
+pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

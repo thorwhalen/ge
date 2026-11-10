@@ -173,6 +173,7 @@ ge video-frames <video>            Extract frames (scene detection by default)
 ge describe-images <img>...        Describe images via Claude API (vision)
 ge copy-images <img>...            Create montage + copy to clipboard (macOS)
 ge resolve <target>                Resolve a URL, folder, or number to structured target
+ge file-batch <records.json> <repo>  File related issues: dependency order, {#KEY} refs, blocked_by edges (resumable)
 ge install-skills                  Register skills with Claude Code (~/.claude/skills/)
 ge uninstall-skills                Remove ge skill symlinks
 ```
@@ -193,6 +194,19 @@ analysis = ge.analyze_issue("owner/repo", 42)
 
 # Resolve flexible input
 target = ge.resolve_target("#42", current_repo="owner/repo")
+
+# File a batch of related issues (records from any source; resumable via the map file)
+from ge.batch import file_issues
+
+state = file_issues(
+    [
+        {"key": "A", "title": "Parser", "body": "First piece."},
+        {"key": "B", "title": "Printer", "body": "Uses {#A}.", "depends_on": ["A"]},
+    ],
+    "owner/repo",
+    map_path="filed.json",
+)
+state["issues"]["B"]["number"]  # the issue B became; B is blocked_by A on GitHub
 
 # Image tools
 from ge.media import describe_images, copy_images_to_clipboard
@@ -233,6 +247,7 @@ ge/
 ├── util.py          # Internal helpers: gh wrapper, URL parsing, resolve_target
 ├── memory.py        # GitHub-backed memory: RoadmapStore, DecisionLog, TriageBacklog
 ├── run.py           # Autonomous runner: launches `claude` in a loop
+├── batch.py         # File a batch of related issues with dependency edges
 └── data/skills/     # Claude Code skills (symlinked by install-skills)
     ├── ge/                     # Full workflow skill
     ├── ge-analyze/             # Triage/staleness skill

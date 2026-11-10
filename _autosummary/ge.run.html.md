@@ -144,7 +144,7 @@ exactly one roadmap step. The loop terminates when:
   * **decisions_target** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`int`](https://docs.python.org/3/builtins/functions.html#int)]) – issue/PR number to log decisions on. Defaults
     to `roadmap_issue`.
   * **max_sessions** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – safety ceiling on total iterations.
-  * **cwd** (`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – where the spawned `claude` starts, so whose `CLAUDE.md` it
+  * **cwd** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – where the spawned `claude` starts, so whose `CLAUDE.md` it
     loads. Defaults to the current directory. A cwd outside every git
     checkout (a projects root, a scratch folder) loads no package’s
     instructions: it is kept, and named in the scope’s `warnings`.

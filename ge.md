@@ -1,4 +1,4 @@
-> built 2026-11-10 19:30 UTC from bd4606d (main) · ge 0.1.19. Details: build_info.json
+> built 2026-11-14 15:47 UTC from d9b3f78 (main) · ge 0.1.20. Details: build_info.json
 
 # index.html.md
 
@@ -1843,7 +1843,7 @@ Replace media URLs in markdown with local file paths.
 
 # About this build
 
-This documentation was built on **2026-11-10 19:30 UTC** from commit <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f"><code>bd4606d</code></a> on branch <code>main</code>, for **ge 0.1.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-14 15:47 UTC** from commit <a href="https://github.com/thorwhalen/ge/commit/d9b3f78d157bf48473a0857383bbe015e6520a8b"><code>d9b3f78</code></a> on branch <code>main</code>, for **ge 0.1.20** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1852,9 +1852,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                      |
 |---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f"><code>bd4606dc9837ceca77bc254e1d7cf1df3cf9655f</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/ge/commit/d9b3f78d157bf48473a0857383bbe015e6520a8b"><code>d9b3f78d157bf48473a0857383bbe015e6520a8b</code></a> |
 | Branch              | <code>main</code>                                                                                                                                    |
-| Tags at this commit | <code>0.1.19</code>                                                                                                                                  |
+| Tags at this commit | <code>0.1.20</code>                                                                                                                                  |
 | Working tree        | clean                                                                                                                                                |
 | Remote              | <code>https://github.com/thorwhalen/ge</code>                                                                                                        |
 
@@ -1863,9 +1863,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/ge</code>                                                                 |
-| Run          | <a href="https://github.com/thorwhalen/ge/actions/runs/42885566135">42885566135</a>        |
+| Run          | <a href="https://github.com/thorwhalen/ge/actions/runs/43611879922">43611879922</a>        |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>6b82487b319f9bda8c979b2ff08c645273ced5c2</code> (in the history of the built commit) |
+| Event commit | <code>608b187447ce5c9711e58aa58b4aa2237a58d693</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1890,13 +1890,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ge/0.1.19/">0.1.19</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ge/0.1.20/">0.1.20</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/ge && cd ge
-git checkout bd4606dc9837ceca77bc254e1d7cf1df3cf9655f
+git checkout d9b3f78d157bf48473a0857383bbe015e6520a8b
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -111,7 +111,7 @@
 <div id="content" role="main">
 
 <section id="ge-github-engineering-for-ai-agents">
-<h1>ge — GitHub Engineering for AI Agents<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ge-github-engineering-for-ai-agents">¶</a></h1>
+<span id="ge--github-engineering-for-ai-agents"></span><h1>ge — GitHub Engineering for AI Agents<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#ge-github-engineering-for-ai-agents">¶</a></h1>
 <p>Tools and skills that let AI coding agents work on GitHub issues, PRs, and discussions intelligently.</p>
 <p>Most GitHub engineering <em>can</em> be done from an AI agent console with <code class="docutils literal notranslate"><span class="pre">gh</span></code> and Python. But some tasks — fetching an issue with all its comments, downloading screenshots, extracting video frames, checking if the issue is stale or already fixed — burn tokens every time, with a different improvised solution each time. <code class="docutils literal notranslate"><span class="pre">ge</span></code> crystallizes these into deterministic tools with CLI and Python interfaces. More importantly, it wraps them into <strong>AI skills</strong> that agents can use directly, so you just say “work on issue #42” and the agent knows exactly what to do.</p>
 <p>So that’s the order here: skills first (the intended interface), then the tools underneath (for when you want direct control).</p>
@@ -120,7 +120,7 @@
 </span></code></pre></div>
 </div>
 <section id="skills-the-main-interface">
-<h2>Skills — the main interface<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#skills-the-main-interface" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#skills-the-main-interface'">¶</a></h2>
+<span id="skills--the-main-interface"></span><h2>Skills — the main interface<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#skills-the-main-interface" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#skills-the-main-interface'">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ge</span></code> ships Claude Code skills that teach the agent how to work on GitHub issues. After installing the package, register them globally:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">ge<span class="w"> </span>install-skills
 </span></code></pre></div>
@@ -276,7 +276,7 @@
 </section>
 </section>
 <section id="tools-what-the-skills-use-under-the-hood">
-<h2>Tools — what the skills use under the hood<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#tools-what-the-skills-use-under-the-hood" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#tools-what-the-skills-use-under-the-hood'">¶</a></h2>
+<span id="tools--what-the-skills-use-under-the-hood"></span><h2>Tools — what the skills use under the hood<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#tools-what-the-skills-use-under-the-hood" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#tools-what-the-skills-use-under-the-hood'">¶</a></h2>
 <p>Everything below is what the skills orchestrate automatically. You can use any of it directly via CLI or Python.</p>
 <section id="what-ge-prepare-does">
 <h3>What <code class="docutils literal notranslate"><span class="pre">ge</span> <span class="pre">prepare</span></code> does<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#what-ge-prepare-does" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#what-ge-prepare-does'">¶</a></h3>
@@ -410,7 +410,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-10 19:30 UTC from <a href="https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f">bd4606d</a> (main) · ge 0.1.19 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-14 15:47 UTC from <a href="https://github.com/thorwhalen/ge/commit/d9b3f78d157bf48473a0857383bbe015e6520a8b">d9b3f78</a> (main) · ge 0.1.20 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -445,7 +445,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=3d116926"></script>
+<script src="_static/documentation_options.js?v=17aaaefc"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

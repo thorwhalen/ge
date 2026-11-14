@@ -1,34 +1,34 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-10T19:30:45Z",
+  "built_at": "2026-11-14T15:47:11Z",
   "package": {
     "name": "ge",
-    "version": "0.1.19",
+    "version": "0.1.20",
     "display_name": "ge",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "bd4606dc9837ceca77bc254e1d7cf1df3cf9655f",
-    "short_commit": "bd4606d",
+    "commit": "d9b3f78d157bf48473a0857383bbe015e6520a8b",
+    "short_commit": "d9b3f78",
     "branch": "main",
     "tags": [
-      "0.1.19"
+      "0.1.20"
     ],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/ge",
-    "commit_url": "https://github.com/thorwhalen/ge/commit/bd4606dc9837ceca77bc254e1d7cf1df3cf9655f",
+    "commit_url": "https://github.com/thorwhalen/ge/commit/d9b3f78d157bf48473a0857383bbe015e6520a8b",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/ge",
-    "sha": "6b82487b319f9bda8c979b2ff08c645273ced5c2",
+    "sha": "608b187447ce5c9711e58aa58b4aa2237a58d693",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "42885566135",
-    "run_url": "https://github.com/thorwhalen/ge/actions/runs/42885566135",
+    "run_id": "43611879922",
+    "run_url": "https://github.com/thorwhalen/ge/actions/runs/43611879922",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -62,11 +62,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.19",
+    "latest": "0.1.20",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/ge && cd ge\ngit checkout bd4606dc9837ceca77bc254e1d7cf1df3cf9655f\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/ge && cd ge\ngit checkout d9b3f78d157bf48473a0857383bbe015e6520a8b\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,

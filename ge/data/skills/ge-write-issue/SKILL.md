@@ -116,6 +116,9 @@ back into the body — the body is the artifact, the thread is the history.
 - Every figure names its snapshot, version, or date. A number without one is not checkable.
 - No absolute local paths, hostnames, machine names, tokens, or personal email addresses.
   Issues outlive the context that made them safe.
+- A to-do for the repo's owner as its developer or operator (a token, a credential, an OAuth
+  consent, an account, billing) never goes in a public tracker, even when it is about that
+  repo: the `needs-human` skill says where it goes instead.
 - Read it as the recipient: stop after two sentences and ask whether you would know what to do.
 - If it is going to a client, **show it to the user before posting** unless they have said
   otherwise for this batch.
